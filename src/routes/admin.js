@@ -9,6 +9,11 @@ const { login, refresh, logout, loginValidation } = require('../controllers/auth
 const {
   listAdmin, getById, create, update, remove, uploadImage, articleValidation,
 } = require('../controllers/articlesController');
+const {
+  listAdmin: listReviewsAdmin, getById: getReviewById,
+  create: createReview, update: updateReview, remove: removeReview, reviewValidation,
+} = require('../controllers/reviewsController');
+const { getAll: getAllSettings, upsert: upsertSetting } = require('../controllers/settingsController');
 
 router.use(cookieParser());
 
@@ -33,5 +38,16 @@ router.post('/articles', requireAuth, adminCrudLimiter, articleValidation, creat
 router.put('/articles/:id', requireAuth, adminCrudLimiter, articleValidation, update);
 router.delete('/articles/:id', requireAuth, adminCrudLimiter, remove);
 router.post('/articles/upload', requireAuth, adminCrudLimiter, upload.single('image'), uploadImage);
+
+// ─── Reviews (admin) ──────────────────────────────────────────────────────────
+router.get('/reviews', requireAuth, listReviewsAdmin);
+router.get('/reviews/:id', requireAuth, getReviewById);
+router.post('/reviews', requireAuth, adminCrudLimiter, reviewValidation, createReview);
+router.put('/reviews/:id', requireAuth, adminCrudLimiter, reviewValidation, updateReview);
+router.delete('/reviews/:id', requireAuth, adminCrudLimiter, removeReview);
+
+// ─── Settings (admin) ─────────────────────────────────────────────────────────
+router.get('/settings', requireAuth, getAllSettings);
+router.put('/settings/:key', requireAuth, adminCrudLimiter, upsertSetting);
 
 module.exports = router;

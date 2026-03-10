@@ -6,11 +6,11 @@ import Reviews from '../components/Reviews.jsx';
 
 const GALLERY_IMAGES = [
   { src: '/img/plateau-petits-fours-canapes-roules-traiteur-roanne.jpg', alt: 'Plateau de petits fours et canapés — Traiteur Maison Cherblanc Roanne' },
-  { src: '/img/plateau-charcuterie-fromages-traiteur-maison-cherblanc-roanne.jpg', alt: 'Plateau charcuterie et fromages artisanaux — Maison Cherblanc' },
+  { src: '/img/service-cocktail-exterieur-charcuterie-traiteur-roanne.jpg', alt: 'Service cocktail extérieur charcuterie — Traiteur Maison Cherblanc Roanne' },
   { src: '/img/tour-macarons-dessert-reception-mariage-traiteur-roanne.jpg', alt: 'Tour de macarons pour réception mariage — Traiteur Roanne' },
-  { src: '/img/salle-reception-mariage-dressage-traiteur-roanne-loire.jpg', alt: 'Salle de réception mariage dressée — Traiteur Loire Rhône-Alpes' },
-  { src: '/img/equipe-traiteur-maison-cherblanc-roanne-service-evenement.jpg', alt: 'Équipe Maison Cherblanc en service événement Roanne' },
-  { src: '/img/grande-table-buffet-traiteur-evenement-roanne-loire.jpg', alt: 'Grande table buffet pour événement — Traiteur Roanne Loire' },
+  { src: '/img/table-cocktail-aperitif-mariage-traiteur-maison-cherblanc.jpg', alt: 'Table cocktail apéritif mariage — Traiteur Maison Cherblanc' },
+  { src: '/img/preparation-buffet-traiteur-maison-cherblanc-roanne.jpg', alt: 'Préparation buffet en cuisine — Maison Cherblanc Roanne' },
+  { src: '/img/buffet-cocktail-exterieur-reception-traiteur-roanne-loire.jpg', alt: 'Buffet cocktail extérieur réception — Traiteur Roanne Loire' },
 ];
 
 const SCHEMA_HOME = {
@@ -133,26 +133,29 @@ export default function Home() {
               </div>
             </ScrollReveal>
             <ScrollReveal direction="right">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-2)' }}>
-                <div className="aspect-ratio aspect-ratio--4-3" style={{ gridRow: 'span 2' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '220px 220px', gap: 'var(--space-2)' }}>
+                <div style={{ gridRow: 'span 2', overflow: 'hidden' }}>
                   <img
-                    src="/img/equipe-traiteur-maison-cherblanc-roanne-service-evenement.jpg"
-                    alt="L'équipe Maison Cherblanc en service pour un événement à Roanne"
+                    src="/img/fumage-artisanal-viande-boucherie-maison-cherblanc-roanne.jpg"
+                    alt="Fumage artisanal des viandes — Maison Cherblanc Roanne"
                     loading="lazy"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
                 </div>
-                <div className="aspect-ratio aspect-ratio--1-1">
-                  <img
-                    src="/img/plateau-charcuterie-fromages-traiteur-maison-cherblanc-roanne.jpg"
-                    alt="Plateau charcuterie et fromages artisanaux Maison Cherblanc"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="aspect-ratio aspect-ratio--1-1">
+                <div style={{ overflow: 'hidden' }}>
                   <img
                     src="/img/jambon-fume-artisanal-boucherie-cherblanc-roanne.jpg"
                     alt="Jambon fumé artisanal boucherie Cherblanc Roanne"
                     loading="lazy"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                </div>
+                <div style={{ overflow: 'hidden' }}>
+                  <img
+                    src="/img/aperitif-charcuterie-artisanale-traiteur-maison-cherblanc-roanne.jpg"
+                    alt="Apéritif charcuterie artisanale Maison Cherblanc Roanne"
+                    loading="lazy"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
                 </div>
               </div>
@@ -202,22 +205,22 @@ export default function Home() {
                 icon: '💒',
                 title: 'Mariage clé en main',
                 text: 'Du vin d\'honneur au dessert, nous prenons en charge l\'intégralité de votre restauration de mariage avec élégance et professionnalisme.',
-                img: '/img/table-maries-decoration-mariage-traiteur-maison-cherblanc-roanne.jpg',
-                alt: 'Table des mariés décorée mariage traiteur Maison Cherblanc Roanne',
+                img: '/img/salle-reception-mariage-dressage-traiteur-roanne-loire.jpg',
+                alt: 'Salle de réception mariage dressée — Traiteur Maison Cherblanc Roanne',
               },
               {
                 icon: '🎂',
                 title: 'Pièces montées & Desserts',
                 text: 'Croquembouche, pièce montée aux fruits, tour de macarons… Des desserts qui marquent les esprits et subliment votre table.',
-                img: '/img/croquembouche-mariage-traiteur-maison-cherblanc-roanne.jpg',
-                alt: 'Croquembouche mariage traiteur Maison Cherblanc Roanne',
+                img: '/img/gateau-mariage-framboises-personnalise-traiteur-roanne.jpg',
+                alt: 'Gâteau mariage framboises personnalisé traiteur Roanne',
               },
               {
                 icon: '🏢',
                 title: 'Événements associatifs',
                 text: 'Repas annuels, fêtes de village, séminaires d\'entreprise… Nous adaptons nos prestations à tous les formats et tous les budgets.',
-                img: '/img/salle-reception-mariage-dressage-traiteur-roanne-loire.jpg',
-                alt: 'Salle de réception dressée pour événement associatif traiteur Roanne Loire',
+                img: '/img/grande-table-buffet-traiteur-evenement-roanne-loire.jpg',
+                alt: 'Grande table buffet pour événement associatif — Traiteur Roanne Loire',
               },
             ].map(({ icon, title, text, img, alt }, i) => (
               <ScrollReveal key={title} delay={i * 80}>

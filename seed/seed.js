@@ -65,6 +65,27 @@ async function seed() {
     ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
   `);
 
+  await conn.execute(`
+    CREATE TABLE IF NOT EXISTS reviews (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      author_name VARCHAR(200) NOT NULL,
+      rating TINYINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+      content TEXT NOT NULL,
+      review_date DATE NOT NULL,
+      published TINYINT(1) NOT NULL DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_published (published, review_date)
+    ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+  `);
+
+  await conn.execute(`
+    CREATE TABLE IF NOT EXISTS settings (
+      key_name VARCHAR(100) PRIMARY KEY,
+      value TEXT,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+  `);
+
   console.log('Tables créées');
 
   // ─── Admin ─────────────────────────────────────────────────────────────────

@@ -25,7 +25,7 @@ export default function About() {
         }}
       />
 
-      <div style={{ paddingTop: '72px' }} />
+      <div style={{ paddingTop: '80px' }} />
 
       {/* ─── Header ────────────────────────────────────────────── */}
       <header className="page-header">
@@ -128,8 +128,8 @@ export default function About() {
               <div className="card">
                 <div className="card__image">
                   <img
-                    src="/img/equipe-traiteur-maison-cherblanc-roanne-service-evenement.jpg"
-                    alt="L'équipe Maison Cherblanc en tenue de service lors d'un événement à Roanne"
+                    src="/img/fumoir-mobile-cuisson-jambons-traiteur-evenement-roanne.jpg"
+                    alt="Fumoir mobile cuisson de jambons — Maison Cherblanc traiteur événement Roanne"
                     loading="lazy"
                   />
                 </div>

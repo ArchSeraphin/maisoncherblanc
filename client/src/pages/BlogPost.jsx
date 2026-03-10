@@ -73,7 +73,7 @@ export default function BlogPost() {
         schema={schema}
       />
 
-      <div style={{ paddingTop: '72px' }} />
+      <div style={{ paddingTop: '80px' }} />
 
       {article.image_url && (
         <div style={{ height: 'clamp(250px, 40vw, 480px)', overflow: 'hidden', position: 'relative' }}>

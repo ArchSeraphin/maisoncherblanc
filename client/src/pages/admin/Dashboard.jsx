@@ -59,6 +59,10 @@ export default function Dashboard() {
           <h1 className="admin-header__title">Maison Cherblanc — Admin</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+          <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+            <Link to="/admin/reviews" className="btn btn--outline-light btn--sm">Avis clients</Link>
+            <Link to="/admin/analytics" className="btn btn--outline-light btn--sm">Analytics</Link>
+          </div>
           {admin && (
             <span style={{ color: 'var(--color-secondary)', fontSize: 'var(--text-sm)' }}>
               {admin.email}

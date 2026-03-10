@@ -10,7 +10,7 @@ export default function NotFound() {
         noindex={true}
       />
 
-      <div style={{ paddingTop: '72px' }} />
+      <div style={{ paddingTop: '80px' }} />
 
       <section style={{ minHeight: 'calc(100vh - 72px)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-warm)' }}>
         <div style={{ textAlign: 'center', padding: 'var(--space-8)' }}>

@@ -15,6 +15,10 @@ import NotFound from './pages/NotFound.jsx';
 import Login from './pages/admin/Login.jsx';
 import Dashboard from './pages/admin/Dashboard.jsx';
 import ArticlesEditor from './pages/admin/ArticlesEditor.jsx';
+import ReviewsList from './pages/admin/ReviewsList.jsx';
+import ReviewsEditor from './pages/admin/ReviewsEditor.jsx';
+import Analytics from './pages/admin/Analytics.jsx';
+import FloatCTA from './components/FloatCTA.jsx';
 
 // Schéma LocalBusiness global
 const LOCAL_BUSINESS_SCHEMA = {
@@ -66,6 +70,7 @@ function PublicLayout({ children }) {
       <Navbar />
       <main id="main-content">{children}</main>
       <Footer />
+      <FloatCTA />
     </>
   );
 }
@@ -75,6 +80,23 @@ function AdminLayout({ children }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    fetch('/api/settings/ga_id')
+      .then(r => r.json())
+      .then(({ value }) => {
+        if (!value) return;
+        const script = document.createElement('script');
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${value}`;
+        script.async = true;
+        document.head.appendChild(script);
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function() { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', value);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <HelmetProvider>
       <AuthProvider>
@@ -100,6 +122,11 @@ export default function App() {
             <Route path="/admin/dashboard" element={<AdminLayout><Dashboard /></AdminLayout>} />
             <Route path="/admin/articles" element={<AdminLayout><ArticlesEditor /></AdminLayout>} />
             <Route path="/admin/articles/:id" element={<AdminLayout><ArticlesEditor /></AdminLayout>} />
+
+            <Route path="/admin/reviews" element={<AdminLayout><ReviewsList /></AdminLayout>} />
+            <Route path="/admin/reviews/new" element={<AdminLayout><ReviewsEditor /></AdminLayout>} />
+            <Route path="/admin/reviews/:id" element={<AdminLayout><ReviewsEditor /></AdminLayout>} />
+            <Route path="/admin/analytics" element={<AdminLayout><Analytics /></AdminLayout>} />
 
             {/* 404 */}
             <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />

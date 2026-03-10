@@ -803,7 +803,7 @@ input, textarea, select { font-family: inherit; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 72px;
+  height: 80px;
   gap: var(--space-6);
 }
 
@@ -814,7 +814,7 @@ input, textarea, select { font-family: inherit; }
 }
 
 .navbar__logo img {
-  height: 48px;
+  height: 64px;
   width: auto;
 }
 
@@ -912,9 +912,10 @@ input, textarea, select { font-family: inherit; }
 /* Menu mobile */
 .navbar__mobile {
   position: fixed;
-  top: 72px;
+  top: 80px;
   left: 0;
   right: 0;
+  z-index: 999;
   background: rgba(22, 13, 3, 0.98);
   backdrop-filter: blur(12px);
   padding: var(--space-6);
@@ -926,6 +927,8 @@ input, textarea, select { font-family: inherit; }
   pointer-events: none;
   transition: transform var(--transition), opacity var(--transition);
   border-top: 1px solid rgba(255,255,255,0.1);
+  max-height: calc(100svh - 80px);
+  overflow-y: auto;
 }
 
 .navbar__mobile.open {

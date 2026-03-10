@@ -99,7 +99,7 @@ export default function Services() {
         }}
       />
 
-      <div style={{ paddingTop: '72px' }} />
+      <div style={{ paddingTop: '80px' }} />
 
       <header className="page-header">
         <div className="container">

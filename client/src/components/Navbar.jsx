@@ -50,7 +50,7 @@ export default function Navbar() {
               <img
                 src="/logo/logo-beige.png"
                 alt="Logo Maison Cherblanc"
-                style={{ height: '56px', width: 'auto' }}
+                style={{ height: '64px', width: 'auto' }}
               />
             </Link>
 

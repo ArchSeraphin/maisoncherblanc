@@ -105,15 +105,6 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* CTA flottant mobile */}
-      <div className="cta-float" role="complementary" aria-label="Contact rapide">
-        <a href="tel:+33477711611" className="cta-float__btn cta-float__btn--call">
-          📞 Appeler
-        </a>
-        <Link to="/contact" className="cta-float__btn cta-float__btn--contact">
-          ✉️ Devis
-        </Link>
-      </div>
     </footer>
   );
 }
