@@ -91,7 +91,7 @@ export default function About() {
               <h2 className="section-title" id="valeurs-title">Nos valeurs</h2>
             </div>
           </ScrollReveal>
-          <div className="features-grid">
+          <div className="features-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
             {[
               { icon: '🌿', title: 'Terroir & Authenticité', text: 'Nous sélectionnons nos produits auprès de producteurs locaux de confiance. La qualité commence à la source.' },
               { icon: '✂️', title: 'Artisanat & Savoir-faire', text: 'Chaque pièce est travaillée manuellement dans notre atelier. Fumage, découpe, assemblage — rien n\'est laissé au hasard.' },

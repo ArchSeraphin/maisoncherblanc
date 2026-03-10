@@ -13,8 +13,6 @@ export default function Footer() {
               src="/logo/logo-beige.png"
               alt="Logo Maison Cherblanc"
               className="footer__brand-logo"
-              width="56"
-              height="56"
               loading="lazy"
             />
             <p className="footer__brand-desc">
@@ -73,12 +71,14 @@ export default function Footer() {
             <h3 className="footer__col-title">Contact</h3>
             <div className="footer__contact-item">
               <span className="footer__contact-icon" aria-hidden="true">📍</span>
-              <span>Roanne, Loire (42)<br />Rhône-Alpes</span>
+              <a href="https://maps.google.com/?q=55+Rue+Mulsant+42300+Roanne" className="footer__link" target="_blank" rel="noopener noreferrer">
+                55 Rue Mulsant<br />42300 Roanne
+              </a>
             </div>
             <div className="footer__contact-item">
               <span className="footer__contact-icon" aria-hidden="true">📞</span>
-              <a href="tel:+33000000000" className="footer__link">
-                04 77 XX XX XX
+              <a href="tel:+33477711611" className="footer__link">
+                04 77 71 16 11
               </a>
             </div>
             <div className="footer__contact-item">
@@ -107,7 +107,7 @@ export default function Footer() {
 
       {/* CTA flottant mobile */}
       <div className="cta-float" role="complementary" aria-label="Contact rapide">
-        <a href="tel:+33000000000" className="cta-float__btn cta-float__btn--call">
+        <a href="tel:+33477711611" className="cta-float__btn cta-float__btn--call">
           📞 Appeler
         </a>
         <Link to="/contact" className="cta-float__btn cta-float__btn--contact">

@@ -23,10 +23,11 @@ const LOCAL_BUSINESS_SCHEMA = {
   name: 'Maison Cherblanc',
   description: 'Traiteur artisanal, boucherie et charcuterie à Roanne. Spécialiste des mariages, cocktails dinatoires et événements en Loire et Rhône-Alpes.',
   url: 'https://maisoncherblanc.fr',
-  telephone: '+33000000000',
+  telephone: '+33477711611',
   email: 'contact@maisoncherblanc.fr',
   address: {
     '@type': 'PostalAddress',
+    streetAddress: '55 Rue Mulsant',
     addressLocality: 'Roanne',
     addressRegion: 'Rhône-Alpes',
     addressCountry: 'FR',

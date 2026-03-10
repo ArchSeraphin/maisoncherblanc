@@ -120,7 +120,7 @@ export default function Services() {
                 id={id}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: i % 2 === 0 ? '1fr 1fr' : '1fr 1fr',
+                  gridTemplateColumns: i % 2 === 0 ? '3fr 2fr' : '2fr 3fr',
                   gap: 'clamp(2rem, 5vw, 5rem)',
                   alignItems: 'center',
                   marginBottom: 'clamp(3rem, 8vw, 6rem)',
@@ -128,7 +128,7 @@ export default function Services() {
                   borderBottom: '1px solid var(--color-border-light)',
                 }}
               >
-                <div style={{ order: i % 2 === 0 ? 0 : 1 }} className="aspect-ratio aspect-ratio--16-9">
+                <div style={{ order: i % 2 === 0 ? 0 : 1 }} className="aspect-ratio aspect-ratio--4-3">
                   <img src={img} alt={alt} loading="lazy" />
                 </div>
                 <div style={{ order: i % 2 === 0 ? 1 : 0 }}>

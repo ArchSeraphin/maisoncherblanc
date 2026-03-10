@@ -89,8 +89,8 @@ export default function Contact() {
                 </p>
 
                 {[
-                  { icon: '📍', label: 'Adresse', value: 'Roanne, Loire (42) — Rhône-Alpes', href: null },
-                  { icon: '📞', label: 'Téléphone', value: '04 77 XX XX XX', href: 'tel:+33000000000' },
+                  { icon: '📍', label: 'Adresse', value: '55 Rue Mulsant, 42300 Roanne', href: 'https://maps.google.com/?q=55+Rue+Mulsant+42300+Roanne' },
+                  { icon: '📞', label: 'Téléphone', value: '04 77 71 16 11', href: 'tel:+33477711611' },
                   { icon: '✉️', label: 'Email', value: 'contact@maisoncherblanc.fr', href: 'mailto:contact@maisoncherblanc.fr' },
                   { icon: '🕐', label: 'Horaires', value: 'Lundi–Samedi : 9h–18h', href: null },
                 ].map(({ icon, label, value, href }) => (
@@ -101,9 +101,12 @@ export default function Contact() {
                     <div>
                       <div style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--text-xs)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: 'var(--space-1)' }}>{label}</div>
                       {href ? (
-                        <a href={href} style={{ color: 'var(--color-primary)', fontWeight: 500, transition: 'color var(--transition)' }}
+                        <a
+                          href={href}
+                          style={{ color: 'var(--color-primary)', fontWeight: 500, transition: 'color var(--transition)' }}
                           onMouseEnter={e => e.target.style.color = 'var(--color-accent)'}
                           onMouseLeave={e => e.target.style.color = 'var(--color-primary)'}
+                          {...(href.startsWith('https://maps') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                         >{value}</a>
                       ) : (
                         <span style={{ color: 'var(--color-text)' }}>{value}</span>

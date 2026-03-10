@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import SEO from '../components/SEO.jsx';
 import ScrollReveal from '../components/ScrollReveal.jsx';
+import Reviews from '../components/Reviews.jsx';
 
 const GALLERY_IMAGES = [
   { src: '/img/plateau-petits-fours-canapes-roules-traiteur-roanne.jpg', alt: 'Plateau de petits fours et canapés — Traiteur Maison Cherblanc Roanne' },
@@ -50,9 +51,9 @@ export default function Home() {
       <section className="hero" aria-label="Présentation Maison Cherblanc">
         <div
           className="hero__bg"
-          style={{ backgroundImage: "url('/img/buffet-cocktail-traiteur-roanne-maison-cherblanc.jpg')" }}
+          style={{ backgroundImage: "url('/img/table-maries-decoration-mariage-traiteur-maison-cherblanc-roanne.jpg')" }}
           role="img"
-          aria-label="Buffet cocktail traiteur Maison Cherblanc Roanne"
+          aria-label="Réception mariage élégante dressée par Maison Cherblanc Roanne"
         />
         <div className="hero__overlay" />
         <div className="container">
@@ -292,21 +293,19 @@ export default function Home() {
             </div>
           </ScrollReveal>
 
-          <div className="gallery-grid">
+          <div className="gallery-masonry">
             {GALLERY_IMAGES.map(({ src, alt }, i) => (
-              <ScrollReveal key={src} delay={i * 60}>
-                <button
-                  className="gallery-item"
-                  onClick={() => openLightbox(i)}
-                  aria-label={`Voir en grand : ${alt}`}
-                  style={{ border: 'none', background: 'none', padding: 0, width: '100%' }}
-                >
-                  <img src={src} alt={alt} loading="lazy" />
-                  <div className="gallery-item__overlay">
-                    <span style={{ fontSize: '2rem', color: 'white' }}>🔍</span>
-                  </div>
-                </button>
-              </ScrollReveal>
+              <button
+                key={src}
+                className="gallery-masonry__item"
+                onClick={() => openLightbox(i)}
+                aria-label={`Voir en grand : ${alt}`}
+              >
+                <img src={src} alt={alt} loading="lazy" />
+                <div className="gallery-item__overlay">
+                  <span style={{ fontSize: '2rem', color: 'white' }}>🔍</span>
+                </div>
+              </button>
             ))}
           </div>
         </div>
@@ -327,6 +326,9 @@ export default function Home() {
         </div>
       )}
 
+      {/* ─── Avis Google ───────────────────────────────────────── */}
+      <Reviews />
+
       {/* ─── CTA Final ─────────────────────────────────────────── */}
       <section className="section section--dark" aria-labelledby="cta-title">
         <div className="container text-center">
@@ -343,8 +345,8 @@ export default function Home() {
               <Link to="/contact" className="btn btn--primary btn--lg">
                 Demander un devis
               </Link>
-              <a href="tel:+33000000000" className="btn btn--outline-light btn--lg">
-                📞 04 77 XX XX XX
+              <a href="tel:+33477711611" className="btn btn--outline-light btn--lg">
+                📞 04 77 71 16 11
               </a>
             </div>
           </ScrollReveal>

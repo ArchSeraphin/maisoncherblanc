@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 
 const NAV_LINKS = [
   { to: '/', label: 'Accueil', end: true },
@@ -12,6 +12,10 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { pathname } = useLocation();
+
+  // Transparent uniquement sur la home (hero dark derrière)
+  const isHome = pathname === '/';
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -30,17 +34,23 @@ export default function Navbar() {
 
   const closeMenu = () => setMenuOpen(false);
 
+  // Toujours fond sombre sauf home non-scrollée
+  const isDark = !isHome || scrolled;
+
   return (
     <>
-      <nav className={`navbar ${scrolled ? 'navbar--scrolled' : 'navbar--transparent'}`} role="navigation" aria-label="Navigation principale">
+      <nav
+        className={`navbar ${isDark ? 'navbar--scrolled' : 'navbar--transparent'}`}
+        role="navigation"
+        aria-label="Navigation principale"
+      >
         <div className="container">
           <div className="navbar__inner">
             <Link to="/" className="navbar__logo" onClick={closeMenu} aria-label="Maison Cherblanc — Accueil">
               <img
                 src="/logo/logo-beige.png"
                 alt="Logo Maison Cherblanc"
-                width="48"
-                height="48"
+                style={{ height: '56px', width: 'auto' }}
               />
             </Link>
 
@@ -57,10 +67,7 @@ export default function Navbar() {
               ))}
             </nav>
 
-            <Link to="/contact" className="navbar__cta" style={{ display: 'none' }} aria-hidden="true">
-              Devis gratuit
-            </Link>
-            <Link to="/contact" className="navbar__cta d-none-mobile">
+            <Link to="/contact" className="navbar__cta">
               Devis gratuit
             </Link>
 

@@ -3,6 +3,7 @@ const router = express.Router();
 const { contactLimiter } = require('../middleware/rateLimiter');
 const { sendContact, contactValidation } = require('../controllers/contactController');
 const { listPublic, getBySlug } = require('../controllers/articlesController');
+const { getReviews } = require('../controllers/reviewsController');
 
 // ─── Contact ──────────────────────────────────────────────────────────────────
 router.post('/contact', contactLimiter, contactValidation, sendContact);
@@ -10,5 +11,8 @@ router.post('/contact', contactLimiter, contactValidation, sendContact);
 // ─── Articles publics ─────────────────────────────────────────────────────────
 router.get('/articles', listPublic);
 router.get('/articles/:slug', getBySlug);
+
+// ─── Google Reviews (cache 24h) ───────────────────────────────────────────────
+router.get('/reviews', getReviews);
 
 module.exports = router;
