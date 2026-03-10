@@ -1,0 +1,54 @@
+# Bloquer l'accès direct aux fichiers sensibles
+<FilesMatch "^\.env|\.env\..*$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "\.(log|sql|sqlite|db|md|sh)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "^(package\.json|package-lock\.json|Makefile|\.htaccess)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Bloquer les répertoires sensibles
+RedirectMatch 403 ^/(node_modules|\.git|src|scripts|seed)(\/|$)
+
+# Forcer HTTPS
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Redirect www → sans www
+RewriteCond %{HTTP_HOST} ^www\.maisoncherblanc\.fr [NC]
+RewriteRule ^(.*)$ https://maisoncherblanc.fr/$1 [L,R=301]
+
+# SPA fallback - toutes les routes vers index.html (géré par Passenger)
+# (Passenger gère le routing Node.js, pas besoin de règles supplémentaires)
+
+# Headers de sécurité
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Compression Gzip
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json
+    AddOutputFilterByType DEFLATE image/svg+xml application/xml text/xml
+</IfModule>
+
+# Cache navigateur
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
