@@ -257,7 +257,7 @@ export default function Home() {
       <section
         style={{
           position: 'relative',
-          height: 'clamp(300px, 50vw, 600px)',
+          height: 'clamp(350px, 55vw, 650px)',
           overflow: 'hidden',
         }}
         aria-hidden="true"
@@ -265,10 +265,13 @@ export default function Home() {
         <img
           src="/img/chef-traiteur-fumoir-mobile-maison-cherblanc-roanne.jpg"
           alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+          style={{ position: 'absolute', inset: '-5%', width: '110%', height: '110%', objectFit: 'cover', filter: 'saturate(0.85)' }}
           loading="lazy"
         />
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(22,13,3,0.55)' }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to bottom, rgba(22,13,3,0.5) 0%, rgba(22,13,3,0.65) 50%, rgba(22,13,3,0.5) 100%)',
+        }} />
         <div
           style={{
             position: 'absolute', inset: 0,
@@ -276,13 +279,16 @@ export default function Home() {
             textAlign: 'center', color: 'white', padding: 'var(--space-8)',
           }}
         >
-          <div>
-            <p className="section-label" style={{ color: 'var(--color-accent)' }}>Notre engagement</p>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-4xl)', fontWeight: 600, lineHeight: 1.2, maxWidth: '700px' }}>
-              "Le goût authentique du terroir,<br />
-              <em style={{ color: 'var(--color-secondary)' }}>l'excellence du service artisanal"</em>
-            </h2>
-          </div>
+          <ScrollReveal>
+            <div>
+              <p className="section-label" style={{ color: 'var(--color-accent)' }}>Notre engagement</p>
+              <div style={{ width: '40px', height: '1px', background: 'var(--color-accent)', margin: '0 auto var(--space-6)' }} />
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-4xl)', fontWeight: 500, lineHeight: 1.15, maxWidth: '700px', letterSpacing: '-0.01em' }}>
+                Le goût authentique du terroir,<br />
+                <em style={{ color: 'var(--color-secondary)', fontStyle: 'italic' }}>l'excellence du service artisanal</em>
+              </h2>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -306,7 +312,7 @@ export default function Home() {
               >
                 <img src={src} alt={alt} loading="lazy" />
                 <div className="gallery-item__overlay">
-                  <span style={{ fontSize: '2rem', color: 'white' }}>🔍</span>
+                  <span style={{ fontFamily: 'var(--font-ui)', fontSize: '0.65rem', color: 'white', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Voir</span>
                 </div>
               </button>
             ))}

@@ -40,7 +40,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`navbar ${isDark ? 'navbar--scrolled' : 'navbar--transparent'}`}
+        className={`navbar ${isDark ? 'navbar--scrolled' : 'navbar--transparent'}${scrolled ? ' navbar--compact' : ''}`}
         role="navigation"
         aria-label="Navigation principale"
       >
