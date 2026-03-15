@@ -2,6 +2,39 @@ import { Link } from 'react-router-dom';
 import SEO from '../components/SEO.jsx';
 import ScrollReveal from '../components/ScrollReveal.jsx';
 
+const IconLeaf = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/>
+    <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+  </svg>
+);
+const IconScissors = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+    <line x1="20" y1="4" x2="8.12" y2="15.88"/>
+    <line x1="14.47" y1="14.48" x2="20" y2="20"/>
+    <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+  </svg>
+);
+const IconLightbulb = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+    <path d="M9 18h6"/><path d="M10 22h4"/>
+  </svg>
+);
+const IconHeart = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+  </svg>
+);
+
+const ABOUT_VALUES = [
+  { icon: <IconLeaf />, title: 'Terroir & Authenticité', text: 'Nous sélectionnons nos produits auprès de producteurs locaux de confiance. La qualité commence à la source.' },
+  { icon: <IconScissors />, title: 'Artisanat & Savoir-faire', text: 'Chaque pièce est travaillée manuellement dans notre atelier. Fumage, découpe, assemblage — rien n\'est laissé au hasard.' },
+  { icon: <IconLightbulb />, title: 'Créativité & Sur-mesure', text: 'Votre événement est unique. Nos prestations le sont aussi. Nous adaptons chaque menu à vos goûts et votre budget.' },
+  { icon: <IconHeart />, title: 'Proximité & Chaleur', text: 'Une relation directe avec nos clients, une écoute attentive et un suivi personnalisé du premier contact jusqu\'au jour J.' },
+];
+
 export default function About() {
   return (
     <>
@@ -92,12 +125,7 @@ export default function About() {
             </div>
           </ScrollReveal>
           <div className="features-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
-            {[
-              { icon: '🌿', title: 'Terroir & Authenticité', text: 'Nous sélectionnons nos produits auprès de producteurs locaux de confiance. La qualité commence à la source.' },
-              { icon: '✂️', title: 'Artisanat & Savoir-faire', text: 'Chaque pièce est travaillée manuellement dans notre atelier. Fumage, découpe, assemblage — rien n\'est laissé au hasard.' },
-              { icon: '💡', title: 'Créativité & Sur-mesure', text: 'Votre événement est unique. Nos prestations le sont aussi. Nous adaptons chaque menu à vos goûts et votre budget.' },
-              { icon: '🤝', title: 'Proximité & Chaleur', text: 'Une relation directe avec nos clients, une écoute attentive et un suivi personnalisé du premier contact jusqu\'au jour J.' },
-            ].map(({ icon, title, text }, i) => (
+            {ABOUT_VALUES.map(({ icon, title, text }, i) => (
               <ScrollReveal key={title} delay={i * 100}>
                 <div className="feature-item">
                   <div className="feature-item__icon">{icon}</div>

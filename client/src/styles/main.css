@@ -207,15 +207,30 @@ input, textarea, select { font-family: inherit; }
 }
 
 .section-label {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
   font-family: var(--font-ui);
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 600;
-  letter-spacing: 0.25em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--color-accent);
   margin-bottom: var(--space-5);
-  position: relative;
+}
+
+.section-label::before {
+  content: '';
+  flex-shrink: 0;
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+}
+
+/* No leading ornament in centered contexts */
+.section-header--center .section-label::before,
+.text-center .section-label::before {
+  display: none;
 }
 
 .section-title {
@@ -489,16 +504,16 @@ input, textarea, select { font-family: inherit; }
 .btn:hover::after { height: 100%; }
 
 .btn--primary {
-  background: var(--color-accent);
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-gold) 100%);
   color: var(--color-primary);
-  border-color: var(--color-accent);
+  border-color: transparent;
 }
 
 .btn--primary:hover {
-  background: var(--color-gold);
-  border-color: var(--color-gold);
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-accent-dark) 100%);
+  border-color: transparent;
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(200,164,122,0.3);
+  box-shadow: 0 8px 28px rgba(184,150,78,0.38);
 }
 
 .btn--dark {
@@ -577,9 +592,9 @@ input, textarea, select { font-family: inherit; }
 }
 
 .card:hover {
-  box-shadow: 0 20px 60px rgba(22,13,3,0.12);
-  transform: translateY(-6px);
-  border-color: transparent;
+  box-shadow: 0 20px 48px rgba(22,13,3,0.1), 0 4px 12px rgba(22,13,3,0.05);
+  transform: translateY(-4px);
+  border-color: var(--color-border);
 }
 
 .card__image {
@@ -680,7 +695,11 @@ input, textarea, select { font-family: inherit; }
   font-family: var(--font-display);
   font-size: var(--text-4xl);
   font-weight: 700;
-  color: var(--color-accent);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #e8c080 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: var(--color-accent); /* fallback */
   line-height: 1;
   margin-bottom: var(--space-3);
 }
@@ -746,9 +765,16 @@ input, textarea, select { font-family: inherit; }
 }
 
 .feature-item__icon {
-  font-size: 2rem;
-  margin-bottom: var(--space-4);
-  line-height: 1;
+  width: 40px;
+  height: 40px;
+  margin-bottom: var(--space-5);
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.feature-item__icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .feature-item__title {
@@ -817,7 +843,7 @@ input, textarea, select { font-family: inherit; }
   width: 110%;
   height: 110%;
   background: url('/img/preparation-buffet-traiteur-maison-cherblanc-roanne.jpg') center/cover;
-  opacity: 0.12;
+  opacity: 0.18;
   animation: heroKenBurns 30s ease-in-out infinite alternate;
 }
 
@@ -893,6 +919,14 @@ input, textarea, select { font-family: inherit; }
   min-height: 48px;
   appearance: none;
   -webkit-appearance: none;
+}
+
+.form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b5a44' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-4) center;
+  background-size: 16px;
+  padding-right: 2.5rem;
 }
 
 .form-input:focus,
@@ -1251,6 +1285,36 @@ input, textarea, select { font-family: inherit; }
 
 .footer__legal-link:hover {
   color: var(--color-accent);
+}
+
+/* ─── Icônes SVG composants ─────────────────────────────── */
+.contact-icon-box {
+  width: 48px;
+  height: 48px;
+  background: var(--color-bg-warm);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-accent);
+  transition: all var(--transition);
+}
+
+.contact-icon-box svg {
+  width: 20px;
+  height: 20px;
+}
+
+.footer__social svg {
+  width: 16px;
+  height: 16px;
+}
+
+.cta-float__btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 /* ─── CTA flottant mobile ────────────────────────────────── */

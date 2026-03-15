@@ -114,7 +114,7 @@ export default function Services() {
 
       <section className="section">
         <div className="container">
-          {SERVICES.map(({ id, title, icon, img, alt, description, details }, i) => (
+          {SERVICES.map(({ id, title, img, alt, description, details }, i) => (
             <ScrollReveal key={id}>
               <article
                 id={id}
@@ -132,7 +132,6 @@ export default function Services() {
                   <img src={img} alt={alt} loading="lazy" />
                 </div>
                 <div style={{ order: i % 2 === 0 ? 1 : 0 }}>
-                  <div style={{ fontSize: '2.5rem', marginBottom: 'var(--space-4)' }} aria-hidden="true">{icon}</div>
                   <p className="section-label">Prestation</p>
                   <h2 className="section-title" style={{ fontSize: 'var(--text-3xl)' }}>{title}</h2>
                   <p style={{ color: 'var(--color-text-muted)', lineHeight: 1.8, marginBottom: 'var(--space-6)' }}>{description}</p>
