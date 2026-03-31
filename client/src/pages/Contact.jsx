@@ -129,9 +129,7 @@ export default function Contact() {
                       {href ? (
                         <a
                           href={href}
-                          style={{ color: 'var(--color-primary)', fontWeight: 500, transition: 'color var(--transition)' }}
-                          onMouseEnter={e => e.target.style.color = 'var(--color-accent)'}
-                          onMouseLeave={e => e.target.style.color = 'var(--color-primary)'}
+                          className="contact-link"
                           {...(href.startsWith('https://maps') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                         >{value}</a>
                       ) : (

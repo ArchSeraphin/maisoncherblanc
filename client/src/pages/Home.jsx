@@ -264,14 +264,11 @@ export default function Home() {
             {FEATURES.map(({ icon, title, text, img, alt }, i) => (
               <ScrollReveal key={title} delay={i * 80}>
                 <article className="feature-item">
-                  <div style={{ aspectRatio: '16/9', overflow: 'hidden', marginBottom: 'var(--space-4)' }}>
+                  <div className="service-img-wrap">
                     <img
                       src={img}
                       alt={alt}
                       loading="lazy"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }}
-                      onMouseEnter={e => e.target.style.transform = 'scale(1.05)'}
-                      onMouseLeave={e => e.target.style.transform = 'scale(1)'}
                     />
                   </div>
                   <div className="feature-item__icon" aria-hidden="true">{icon}</div>
@@ -362,15 +359,27 @@ export default function Home() {
       {/* Lightbox */}
       {lightbox !== null && (
         <div className="lightbox" role="dialog" aria-modal="true" aria-label="Galerie photo" onClick={() => setLightbox(null)}>
-          <button className="lightbox__close" aria-label="Fermer" onClick={() => setLightbox(null)}>✕</button>
-          <button className="lightbox__nav lightbox__nav--prev" onClick={e => { e.stopPropagation(); prevImg(); }} aria-label="Image précédente">‹</button>
+          <button className="lightbox__close" aria-label="Fermer" onClick={() => setLightbox(null)}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12"/>
+            </svg>
+          </button>
+          <button className="lightbox__nav lightbox__nav--prev" onClick={e => { e.stopPropagation(); prevImg(); }} aria-label="Image précédente">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="m15 18-6-6 6-6"/>
+            </svg>
+          </button>
           <img
             className="lightbox__img"
             src={GALLERY_IMAGES[lightbox].src}
             alt={GALLERY_IMAGES[lightbox].alt}
             onClick={e => e.stopPropagation()}
           />
-          <button className="lightbox__nav lightbox__nav--next" onClick={e => { e.stopPropagation(); nextImg(); }} aria-label="Image suivante">›</button>
+          <button className="lightbox__nav lightbox__nav--next" onClick={e => { e.stopPropagation(); nextImg(); }} aria-label="Image suivante">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </button>
         </div>
       )}
 

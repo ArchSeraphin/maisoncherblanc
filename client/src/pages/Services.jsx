@@ -2,6 +2,12 @@ import { Link } from 'react-router-dom';
 import SEO from '../components/SEO.jsx';
 import ScrollReveal from '../components/ScrollReveal.jsx';
 
+const IconCheck = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+);
+
 const SERVICES = [
   {
     id: 'cocktail',
@@ -135,10 +141,10 @@ export default function Services() {
                   <p className="section-label">Prestation</p>
                   <h2 className="section-title" style={{ fontSize: 'var(--text-3xl)' }}>{title}</h2>
                   <p style={{ color: 'var(--color-text-muted)', lineHeight: 1.8, marginBottom: 'var(--space-6)' }}>{description}</p>
-                  <ul style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', marginBottom: 'var(--space-8)' }}>
+                  <ul style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', marginBottom: 'var(--space-8)' }}>
                     {details.map(d => (
-                      <li key={d} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
-                        <span style={{ color: 'var(--color-accent)', flexShrink: 0 }}>✓</span>
+                      <li key={d} className="service-check">
+                        <span className="service-check__icon"><IconCheck /></span>
                         {d}
                       </li>
                     ))}
