@@ -66,7 +66,7 @@
   {
     "fichier": "chef-traiteur-fumoir-mobile-maison-cherblanc-roanne.jpg",
     "alt": "Cuisinier en tablier rouge surveillant la cuisson de jambons à la broche sur une rôtissoire mobile, en plein air",
-    "emplacement": "accueil-savoir-faire",
+    "emplacement": null,
     "realisation": "broche-barbecue",
     "legende": "Cuisson à la broche en plein air",
     "provisoire": false
@@ -122,7 +122,7 @@
   {
     "fichier": "fumage-artisanal-viande-boucherie-maison-cherblanc-roanne.jpg",
     "alt": "Grosse pièce de viande roulée et dorée, en cuisson à la broche devant les brûleurs d’une rôtissoire",
-    "emplacement": null,
+    "emplacement": "boucherie-fumoir",
     "realisation": "broche-barbecue",
     "legende": "Pièce de viande à la broche",
     "provisoire": false
@@ -330,7 +330,7 @@
   {
     "fichier": "service-cocktail-exterieur-charcuterie-traiteur-roanne.jpg",
     "alt": "Table de buffet en extérieur : plateaux de jambon cru entourés de verrines, mini burgers, brioches garnies et pyramide de macarons",
-    "emplacement": "accueil-hero-traiteur",
+    "emplacement": null,
     "realisation": "buffet",
     "legende": "Buffet apéritif en extérieur",
     "provisoire": false

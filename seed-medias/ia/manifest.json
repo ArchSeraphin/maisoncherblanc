@@ -42,7 +42,7 @@
   {
     "fichier": "fumoir-jambons-fumes-artisanal-boucherie-maison-cherblanc-roanne.jpg",
     "alt": "Jambons et saucisses suspendus à des crochets dans un séchoir en bois traversé par un rai de lumière",
-    "emplacement": "boucherie-fumoir",
+    "emplacement": null,
     "realisation": null,
     "legende": null,
     "provisoire": true
@@ -74,7 +74,7 @@
   {
     "fichier": "planche-couteau-de-boucher-savoir-faire-boucherie-maison-cherblanc-roanne.jpg",
     "alt": "Nature morte : billot en chêne, couteau à désosser, fusil à aiguiser, herbes fraîches, sel et balance ancienne en laiton",
-    "emplacement": "accueil-savoir-faire",
+    "emplacement": null,
     "realisation": null,
     "legende": null,
     "provisoire": true
@@ -90,7 +90,7 @@
   {
     "fichier": "carte-traiteur-verrines-petits-fours-charcuterie-fine-traiteur-roanne.jpg",
     "alt": "Vue de dessus d'une sélection traiteur : verrines salées, petits fours sur plateau en laiton et assiette de charcuterie fine",
-    "emplacement": "carte-hero",
+    "emplacement": "accueil-savoir-faire",
     "realisation": null,
     "legende": null,
     "provisoire": true
