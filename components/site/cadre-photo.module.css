@@ -1,0 +1,16 @@
+/* Emplacement sans photo : aplat sable, monogramme en filigrane, grain léger. */
+.vide {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 42%, rgb(248 243 234 / 0.7), rgb(248 243 234 / 0) 60%),
+    var(--sable);
+}
+
+.monogramme {
+  width: clamp(56px, 18%, 96px);
+  height: auto;
+  opacity: 0.32;
+}

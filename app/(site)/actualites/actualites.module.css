@@ -1,0 +1,87 @@
+.zone {
+  padding-top: 0;
+  padding-bottom: var(--section);
+}
+
+.liste {
+  display: grid;
+  border-top: 1px solid var(--trait-fort);
+}
+
+.article {
+  border-bottom: 1px solid var(--trait);
+}
+
+/* Toute la carte est cliquable via le lien du titre (pseudo-élément étendu). */
+.carte {
+  position: relative;
+  display: grid;
+  gap: 1.5rem clamp(2rem, 4vw, 3.5rem);
+  padding-block: clamp(1.75rem, 3.5vw, 2.5rem);
+  align-items: center;
+}
+
+@media (min-width: 800px) {
+  .carte:has(.image) {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+  }
+}
+
+.texte {
+  max-width: 44rem;
+}
+
+.titre {
+  margin-bottom: 0.75rem;
+}
+
+.lien::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.lien:focus-visible {
+  outline: none;
+}
+
+.carte:has(.lien:focus-visible) {
+  outline: 2px solid var(--cuivre-fonce);
+  outline-offset: 4px;
+  border-radius: var(--r-xs);
+}
+
+.carte:hover .titre {
+  color: var(--cuivre-texte);
+}
+
+.carte:hover img {
+  transform: scale(1.03);
+}
+
+.chapo {
+  color: var(--encre-douce);
+  margin-bottom: 1rem;
+}
+
+.lire {
+  font-size: 0.9rem;
+}
+
+.carte:hover .lire svg {
+  transform: translateX(4px);
+}
+
+.vide {
+  display: grid;
+  gap: 1.25rem;
+  justify-items: center;
+  max-width: 44rem;
+  margin-inline: auto;
+  padding-block: clamp(2rem, 5vw, 4rem);
+}
+
+.videActions {
+  justify-content: center;
+  margin-top: 0.5rem;
+}

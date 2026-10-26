@@ -1,0 +1,191 @@
+.grille {
+  display: grid;
+  gap: clamp(3rem, 6vw, 5rem);
+  align-items: start;
+}
+
+@media (min-width: 1000px) {
+  .grille {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+}
+
+.infos {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 3.5rem);
+}
+
+.coordonnees {
+  margin: 1.5rem 0 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.coordonnees > div {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dotted var(--trait-fort);
+}
+
+.coordonnees dt {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cuivre-texte);
+  padding-top: 0.2rem;
+}
+
+.coordonnees dd {
+  margin: 0;
+  font-size: 1.05rem;
+  overflow-wrap: anywhere;
+}
+
+.coordonnees address {
+  font-style: normal;
+}
+
+.reseaux {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+}
+
+@media (max-width: 420px) {
+  .coordonnees > div {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+}
+
+.horaires {
+  background: var(--creme);
+  text-align: center;
+}
+
+.horaires h2 {
+  margin-bottom: 1.25rem;
+}
+
+.horaires table,
+.horaires > div {
+  text-align: left;
+}
+
+.formulaire {
+  padding: clamp(1.5rem, 4vw, 3rem);
+  background: var(--creme);
+  border: 1px solid var(--trait);
+  border-radius: var(--r-m);
+  box-shadow: var(--ombre-s);
+  scroll-margin-top: calc(var(--hauteur-entete) + 1rem);
+}
+
+.formulaire h2 {
+  margin-bottom: 1.5rem;
+}
+
+/* --- Accès --- */
+.acces {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 4rem);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .acces {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  }
+}
+
+.accesTexte {
+  margin-top: 1.25rem;
+  color: var(--encre-douce);
+}
+
+.accesLiens {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+/* Plan dessiné (aucune carte tierce chargée) : quadrillage de rues stylisé, repère monogramme. */
+.plan {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1.25rem;
+  min-height: 340px;
+  padding: 2.5rem 1.5rem;
+  border-radius: var(--r-l);
+  overflow: hidden;
+  color: var(--sur-olive);
+  text-align: center;
+  background-color: var(--olive);
+  background-image:
+    linear-gradient(28deg, transparent 47.5%, rgb(228 203 143 / 0.22) 48%, rgb(228 203 143 / 0.22) 52%, transparent 52.5%),
+    linear-gradient(-62deg, transparent 49%, rgb(243 235 220 / 0.1) 49.4%, rgb(243 235 220 / 0.1) 50.6%, transparent 51%),
+    repeating-linear-gradient(0deg, transparent 0 46px, rgb(243 235 220 / 0.06) 46px 47px),
+    repeating-linear-gradient(90deg, transparent 0 46px, rgb(243 235 220 / 0.06) 46px 47px);
+  transition: box-shadow var(--transition);
+}
+
+.plan:hover {
+  box-shadow: var(--ombre-l);
+}
+
+.plan:hover .planLien svg {
+  transform: translateX(4px);
+}
+
+.planBoussole {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.4rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--trait-clair);
+  border-radius: 50%;
+  font-family: var(--display);
+  font-size: 0.9rem;
+  color: var(--or);
+}
+
+.planRepere {
+  padding: 0.9rem;
+  border: 1px solid var(--or);
+  border-radius: 50%;
+  background: var(--olive-profond);
+  box-shadow: 0 0 0 10px rgb(228 203 143 / 0.12);
+  width: 96px;
+  height: 96px;
+}
+
+.planAdresse {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--sur-olive-doux);
+}
+
+.planRue {
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  color: var(--sur-olive);
+}
+
+.planLien {
+  color: var(--or);
+}
+
+/* Petits écrans : le titre descend sous la courbe de l'arche. */
+@media (max-width: 599px) {
+  .horaires {
+    padding-top: 5rem;
+  }
+}

@@ -1,0 +1,95 @@
+.grille {
+  display: grid;
+  gap: clamp(2rem, 4vw, 3rem);
+}
+
+.entete {
+  max-width: 30rem;
+}
+
+.liste {
+  border-top: 1px solid var(--trait-fort);
+}
+
+.question {
+  border-bottom: 1px solid var(--trait);
+}
+
+.resume {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.35rem 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.resume::-webkit-details-marker {
+  display: none;
+}
+
+.intitule {
+  font-size: clamp(1.15rem, 1.8vw, 1.35rem);
+  line-height: 1.3;
+  font-weight: 400;
+  transition: color var(--transition);
+}
+
+.resume:hover .intitule {
+  color: var(--cuivre-texte);
+}
+
+/* Signe plus / moins dessiné (deux traits), qui pivote à l'ouverture. */
+.signe {
+  position: relative;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--cuivre);
+}
+
+.signe::before,
+.signe::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform var(--transition);
+}
+
+.signe::after {
+  transform: rotate(90deg);
+}
+
+.question[open] .signe::after {
+  transform: rotate(0deg);
+}
+
+.reponse {
+  padding: 0 0 1.5rem;
+  max-width: var(--mesure);
+  color: var(--encre-douce);
+}
+
+.reponse a {
+  color: var(--encre);
+  text-decoration: underline;
+  text-decoration-color: var(--cuivre);
+  text-underline-offset: 3px;
+}
+
+@media (min-width: 960px) {
+  .grille {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    align-items: start;
+  }
+
+  .entete {
+    position: sticky;
+    top: calc(var(--hauteur-entete) + 2rem);
+  }
+}

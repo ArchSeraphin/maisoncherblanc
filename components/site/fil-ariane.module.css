@@ -1,0 +1,36 @@
+.fil {
+  font-size: 0.82rem;
+  color: var(--encre-tres-douce);
+  margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0;
+}
+
+.element {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.element a {
+  color: var(--encre-douce);
+}
+
+.element a:hover {
+  color: var(--encre);
+}
+
+.element [aria-current="page"] {
+  color: var(--encre);
+}
+
+.separateur {
+  margin-inline: 0.55rem;
+  color: var(--cuivre);
+}

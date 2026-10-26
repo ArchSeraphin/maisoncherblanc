@@ -1,0 +1,157 @@
+.grille {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+}
+
+/* Sommaire collant discret : colonne à gauche en grand écran, bandeau défilant en mobile. */
+.sommaire {
+  position: sticky;
+  top: calc(var(--hauteur-entete) + 0.25rem);
+  z-index: 5;
+  align-self: start;
+  min-width: 0;
+}
+
+.sommaireTitre {
+  margin: 0 0 0.9rem;
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--cuivre-texte);
+}
+
+.sommaire ol {
+  display: grid;
+  gap: 0.15rem;
+  border-left: 1px solid var(--trait-fort);
+}
+
+.sommaire a {
+  display: block;
+  padding: 0.4rem 0 0.4rem 1rem;
+  margin-left: -1px;
+  border-left: 1px solid transparent;
+  font-size: 0.95rem;
+  color: var(--encre-douce);
+  transition:
+    color var(--transition),
+    border-color var(--transition);
+}
+
+.sommaire a:hover,
+.sommaire a:focus-visible {
+  color: var(--encre);
+  border-left-color: var(--cuivre);
+}
+
+.carte {
+  min-width: 0;
+}
+
+.infos {
+  margin-top: clamp(3.5rem, 7vw, 5rem);
+  scroll-margin-top: calc(var(--hauteur-entete) + 4.5rem);
+}
+
+.commander {
+  padding: clamp(1.5rem, 3.5vw, 2.5rem);
+  border: 1px solid var(--cuivre);
+  border-radius: var(--r-s);
+  background: var(--creme);
+}
+
+.commander h2 {
+  margin-bottom: 1rem;
+}
+
+.commander ul {
+  display: grid;
+  gap: 0.55rem;
+  color: var(--encre-douce);
+}
+
+.commander li {
+  position: relative;
+  padding-left: 1.1rem;
+}
+
+.commander li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  background: var(--cuivre);
+  transform: rotate(45deg);
+}
+
+.commander strong {
+  color: var(--encre);
+}
+
+.noteBas {
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 1000px) {
+  .grille {
+    grid-template-columns: minmax(180px, 2fr) minmax(0, 9fr);
+    gap: clamp(3rem, 5vw, 5rem);
+  }
+
+  .sommaire {
+    top: calc(var(--hauteur-entete) + 2rem);
+  }
+}
+
+@media (max-width: 999px) {
+  .sommaire {
+    margin-inline: calc(var(--gouttiere) * -1);
+    padding: 0.6rem var(--gouttiere);
+    background: rgb(248 243 234 / 0.94);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--trait);
+  }
+
+  .sommaireTitre {
+    display: none;
+  }
+
+  .sommaire ol {
+    display: flex;
+    gap: 0.4rem;
+    border-left: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sommaire ol::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sommaire li {
+    flex: none;
+  }
+
+  .sommaire a {
+    padding: 0.4rem 0.85rem;
+    margin: 0;
+    border: 1px solid var(--trait-fort);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .sommaire a:hover,
+  .sommaire a:focus-visible {
+    border-color: var(--cuivre);
+  }
+}
+
+.zone {
+  padding-top: clamp(1.5rem, 5vw, 4rem);
+}

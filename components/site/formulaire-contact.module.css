@@ -1,0 +1,174 @@
+.formulaire {
+  display: grid;
+  gap: 1.35rem;
+}
+
+.retour:focus {
+  outline: none;
+}
+
+.alerte {
+  margin: 0;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid #8f2f21;
+  border-left-width: 3px;
+  border-radius: var(--r-s);
+  background: rgb(143 47 33 / 0.05);
+  color: var(--encre);
+  font-size: 0.95rem;
+}
+
+.alerte a {
+  text-decoration: underline;
+}
+
+.obligatoires {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--encre-tres-douce);
+}
+
+.types {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.types legend {
+  padding: 0;
+  margin-bottom: 0.6rem;
+}
+
+.choix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Pastilles de choix (radio natif conservé pour le clavier et les lecteurs d'écran). */
+.option {
+  position: relative;
+  display: inline-flex;
+}
+
+.option input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.option span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.55rem 1.15rem;
+  border: 1px solid var(--trait-fort);
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  background: var(--lin);
+  transition:
+    background var(--transition),
+    color var(--transition),
+    border-color var(--transition);
+}
+
+.option:hover span {
+  border-color: var(--encre);
+}
+
+.option input:checked + span {
+  background: var(--olive);
+  border-color: var(--olive);
+  color: var(--sur-olive);
+}
+
+.option input:focus-visible + span {
+  outline: 2px solid var(--cuivre-fonce);
+  outline-offset: 3px;
+}
+
+.rangee {
+  display: grid;
+  gap: 1.35rem;
+}
+
+@media (min-width: 640px) {
+  .rangee {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.aide {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--encre-tres-douce);
+}
+
+.avertissement {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-left: 2px solid var(--cuivre);
+  background: rgb(163 112 42 / 0.08);
+  font-size: 0.88rem;
+}
+
+.avertissement a {
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.piege {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.envoi {
+  display: grid;
+  gap: 0.9rem;
+  justify-items: start;
+  margin-top: 0.5rem;
+}
+
+.envoi button[disabled] {
+  opacity: 0.75;
+  cursor: progress;
+}
+
+.rgpd {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--encre-tres-douce);
+  max-width: 52ch;
+}
+
+.confirmation {
+  padding: clamp(1.5rem, 3.5vw, 2.25rem);
+  border: 1px solid var(--cuivre);
+  border-radius: var(--r-s);
+  background: var(--creme);
+}
+
+.confirmation:focus {
+  outline: none;
+}
+
+.confirmationTitre {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  margin-bottom: 0.75rem;
+  color: var(--encre);
+}
+
+.confirmation p:not(.confirmationTitre) {
+  color: var(--encre-douce);
+}

@@ -1,0 +1,39 @@
+.entete {
+  margin-bottom: clamp(2.5rem, 5vw, 3.5rem);
+}
+
+.liste {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+}
+
+.figure {
+  margin: 0;
+  height: 100%;
+  display: grid;
+  align-content: space-between;
+  gap: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--cuivre);
+}
+
+.citation {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.2rem;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.auteur {
+  display: grid;
+  gap: 0.15rem;
+  font-weight: 600;
+}
+
+.meta {
+  font-weight: 400;
+  font-size: 0.875rem;
+  color: var(--encre-tres-douce);
+}

@@ -1,0 +1,92 @@
+.entete {
+  padding-block: clamp(1.5rem, 3vw, 2.5rem) clamp(3.5rem, 7vw, 6rem);
+}
+
+.grille {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 5rem);
+  align-items: center;
+}
+
+.texte {
+  min-width: 0;
+}
+
+.titre {
+  max-width: 15ch;
+}
+
+.chapo {
+  margin-top: clamp(1.25rem, 2.4vw, 1.75rem);
+}
+
+.chapo p {
+  margin: 0;
+}
+
+.actions {
+  margin-top: clamp(1.75rem, 3vw, 2.25rem);
+}
+
+.pied {
+  margin-top: 1rem;
+}
+
+.visuel {
+  position: relative;
+  justify-self: end;
+  width: min(100%, 520px);
+}
+
+.cadre {
+  aspect-ratio: 4 / 5;
+  box-shadow: var(--ombre-l);
+}
+
+/* Arche tracée en filet cuivre, décalée derrière la photo (rappel des cartes de fêtes). */
+.filet {
+  position: absolute;
+  inset: 1.1rem -1.1rem -1.1rem 1.1rem;
+  border: 1px solid var(--cuivre);
+  border-radius: var(--arche);
+  opacity: 0.55;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.visuel {
+  isolation: isolate;
+}
+
+.sobre .titre {
+  max-width: 20ch;
+}
+
+.sobre .texte {
+  max-width: 52rem;
+}
+
+@media (min-width: 960px) {
+  .grille {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
+
+  .sobre .grille {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 959px) {
+  .visuel {
+    justify-self: center;
+    width: min(100% - 1.25rem, 440px);
+  }
+
+  .cadre {
+    aspect-ratio: 5 / 6;
+  }
+
+  .filet {
+    inset: 0.75rem -0.75rem -0.75rem 0.75rem;
+  }
+}

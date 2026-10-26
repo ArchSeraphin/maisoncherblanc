@@ -1,0 +1,30 @@
+.appel {
+  padding-block: clamp(4rem, 9vw, 7rem);
+  border-bottom: 1px solid var(--trait-clair);
+}
+
+.grille {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 1.25rem;
+}
+
+.monogramme {
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+}
+
+.titre {
+  max-width: 18ch;
+}
+
+.texte {
+  max-width: 54ch;
+  margin: 0;
+}
+
+.actions {
+  justify-content: center;
+  margin-top: 0.75rem;
+}

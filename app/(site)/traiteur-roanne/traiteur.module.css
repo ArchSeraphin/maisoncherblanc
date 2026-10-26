@@ -1,0 +1,45 @@
+@media (min-width: 1100px) {
+  .quatre {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.prix {
+  display: grid;
+  gap: 0;
+}
+
+@media (min-width: 1000px) {
+  .prix {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(3rem, 6vw, 5rem);
+    align-items: start;
+  }
+}
+
+.occasions {
+  display: grid;
+  gap: 1.5rem clamp(3rem, 6vw, 5rem);
+}
+
+@media (min-width: 900px) {
+  .occasions {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  }
+}
+
+.boucher {
+  max-width: 52rem;
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 0;
+}
+
+.boucher h2 {
+  margin-bottom: 1.5rem;
+}
+
+.boucher .chapo {
+  margin-bottom: 2rem;
+}

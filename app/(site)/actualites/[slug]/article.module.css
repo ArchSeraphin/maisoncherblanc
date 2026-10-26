@@ -1,0 +1,59 @@
+.article {
+  padding-bottom: var(--section);
+}
+
+.entete {
+  padding-top: clamp(1.5rem, 3vw, 2.5rem);
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.titre {
+  max-width: 22ch;
+}
+
+.chapo {
+  margin-top: 1.5rem;
+  font-family: var(--display);
+  font-size: clamp(1.2rem, 2vw, 1.4rem);
+  font-weight: 340;
+  color: var(--encre);
+}
+
+.couverture {
+  max-width: 1100px;
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+.filet {
+  margin: 0 0 clamp(2rem, 4vw, 3rem);
+}
+
+.corps :global(.prose) {
+  margin-inline: auto;
+}
+
+.fin {
+  margin-top: clamp(3rem, 6vw, 4.5rem);
+  display: grid;
+  gap: 1.5rem;
+}
+
+.finBloc {
+  padding: clamp(1.5rem, 3.5vw, 2.5rem);
+  border: 1px solid var(--cuivre);
+  border-radius: var(--r-s);
+  background: var(--lin);
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+}
+
+.finBloc p {
+  margin: 0;
+  color: var(--encre-douce);
+}
+
+.retour {
+  justify-self: start;
+  font-weight: 600;
+}

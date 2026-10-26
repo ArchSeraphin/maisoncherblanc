@@ -1,0 +1,35 @@
+.bande {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.liste {
+  display: grid;
+  gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 900px) {
+  .liste {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.figure {
+  margin: 0;
+}
+
+.figure :global(.cadre) {
+  aspect-ratio: 1;
+}
+
+.legende {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--encre-tres-douce);
+}
+
+.lien {
+  justify-self: start;
+}

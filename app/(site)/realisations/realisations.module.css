@@ -1,0 +1,65 @@
+.zone {
+  padding-top: 0;
+}
+
+.filtres {
+  margin-bottom: clamp(1.75rem, 3.5vw, 2.5rem);
+}
+
+.filtres ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filtre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.5rem 1.1rem;
+  border: 1px solid var(--trait-fort);
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--encre-douce);
+  transition:
+    background var(--transition),
+    color var(--transition),
+    border-color var(--transition);
+}
+
+.filtre:hover {
+  color: var(--encre);
+  border-color: var(--encre);
+}
+
+.filtre[aria-current="page"] {
+  background: var(--olive);
+  border-color: var(--olive);
+  color: var(--sur-olive);
+}
+
+.nombre {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--encre-tres-douce);
+}
+
+.filtre[aria-current="page"] .nombre {
+  color: var(--or);
+}
+
+.vide {
+  display: grid;
+  gap: 1.5rem;
+  justify-items: center;
+  padding-block: clamp(3rem, 6vw, 5rem);
+}
+
+.renvoi {
+  margin: clamp(2rem, 4vw, 3rem) auto 0;
+  max-width: var(--mesure);
+  text-align: center;
+  color: var(--encre-douce);
+}

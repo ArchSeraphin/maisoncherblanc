@@ -1,0 +1,53 @@
+.histoire {
+  display: grid;
+  gap: 1.5rem clamp(3rem, 6vw, 5rem);
+}
+
+@media (min-width: 900px) {
+  .histoire {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+}
+
+.histoireTexte p {
+  color: var(--encre-douce);
+  max-width: var(--mesure);
+}
+
+/* Lettrine Fraunces, cuivre (rappel des cartes imprimées). */
+.lettrine::first-letter {
+  float: left;
+  font-family: var(--display);
+  font-size: 4.2em;
+  font-weight: 340;
+  line-height: 0.82;
+  margin: 0.08em 0.12em 0 0;
+  color: var(--cuivre);
+}
+
+.metiers {
+  display: grid;
+  gap: 1.25rem;
+  justify-items: center;
+}
+
+.metiersTexte {
+  margin: 0.5rem 0 0;
+  font-family: var(--display);
+  font-size: clamp(1.2rem, 2vw, 1.45rem);
+  font-weight: 340;
+  line-height: 1.55;
+  color: var(--sur-olive);
+}
+
+@media (min-width: 700px) {
+  .engagements {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .engagements {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

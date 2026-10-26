@@ -1,0 +1,334 @@
+/* =========================================================================
+   Compositions partagées des pages publiques (lot A).
+   Importé par les pages : `import s from "@/components/site/sections.module.css"`.
+   ========================================================================= */
+
+/* --- En-tête de section : surtitre, H2, intro --- */
+.tete {
+  max-width: 44rem;
+  margin-bottom: clamp(2.25rem, 4.5vw, 3.5rem);
+}
+
+.tete > p:not(:global(.surtitre)) {
+  margin-top: 1.25rem;
+  color: var(--encre-douce);
+}
+
+.teteCentre {
+  margin-inline: auto;
+  text-align: center;
+}
+
+/* --- Texte + image côte à côte (asymétrique) --- */
+.duo {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 5rem);
+  align-items: center;
+}
+
+.duoTexte {
+  min-width: 0;
+  max-width: 36rem;
+}
+
+.duoTexte > :global(.titre-l),
+.duoTexte > :global(.titre-m) {
+  margin-bottom: 1.25rem;
+}
+
+.duoTexte > p {
+  color: var(--encre-douce);
+}
+
+:global(.fond-olive) .duoTexte > p,
+:global(.fond-olive-profond) .duoTexte > p {
+  color: var(--sur-olive-doux);
+}
+
+.duoActions {
+  margin-top: 2rem;
+}
+
+.duoImage {
+  min-width: 0;
+  width: 100%;
+  max-width: 560px;
+}
+
+@media (min-width: 900px) {
+  .duo {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  }
+
+  .duoInverse {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  }
+
+  .duoInverse .duoImage {
+    order: -1;
+    justify-self: start;
+  }
+
+  .duo:not(.duoInverse) .duoImage {
+    justify-self: end;
+  }
+}
+
+/* --- Rubriques H3 en liste éditoriale (texte + petite photo) --- */
+.rubriques {
+  display: grid;
+  gap: clamp(3rem, 6vw, 5rem);
+}
+
+.rubrique {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 3rem);
+  align-items: start;
+  padding-top: clamp(2rem, 4vw, 3rem);
+  border-top: 1px solid var(--trait);
+}
+
+.rubrique h3 {
+  margin-bottom: 1rem;
+}
+
+.rubrique p {
+  color: var(--encre-douce);
+}
+
+.rubriqueImage {
+  width: 100%;
+  max-width: 420px;
+}
+
+@media (min-width: 900px) {
+  .rubrique {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+  }
+
+  .rubrique:nth-child(even) {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+  }
+
+  .rubrique:nth-child(even) .rubriqueImage {
+    order: -1;
+  }
+
+  .rubrique:nth-child(odd) .rubriqueImage {
+    justify-self: end;
+  }
+}
+
+/* --- Prestations (photo + titre + texte + lien), sans boîte --- */
+.prestations {
+  display: grid;
+  gap: clamp(2.5rem, 4vw, 2.5rem) clamp(1.25rem, 2.6vw, 2.25rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+}
+
+.prestation {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+}
+
+.prestation h3 {
+  font-size: clamp(1.4rem, 2vw, 1.65rem);
+}
+
+.prestation p {
+  margin: 0;
+  color: var(--encre-douce);
+}
+
+.prestationLien {
+  margin-top: 0.25rem;
+}
+
+/* --- Étapes (vraie séquence : numéros) --- */
+.etapes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: clamp(1.75rem, 3vw, 2.5rem);
+  counter-reset: etape;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+}
+
+.etape {
+  counter-increment: etape;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--trait-fort);
+}
+
+.etape::before {
+  content: counter(etape);
+  display: block;
+  font-family: var(--display);
+  font-size: 2.6rem;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--cuivre);
+  margin-bottom: 1rem;
+  font-variant-numeric: lining-nums;
+}
+
+.etape h3 {
+  font-size: 1.25rem;
+  line-height: 1.25;
+  margin-bottom: 0.6rem;
+}
+
+.etape p {
+  margin: 0;
+  color: var(--encre-douce);
+  font-size: 0.98rem;
+}
+
+:global(.fond-olive) .etape {
+  border-top-color: var(--trait-clair);
+}
+
+:global(.fond-olive) .etape::before {
+  color: var(--or);
+}
+
+:global(.fond-olive) .etape p {
+  color: var(--sur-olive-doux);
+}
+
+/* --- Liste de prix à points de conduite (repères) --- */
+.prix {
+  max-width: 46rem;
+}
+
+.prix li {
+  border-bottom: 1px solid rgb(42 43 36 / 0.06);
+}
+
+.prixNote {
+  margin-top: 1.5rem;
+  font-size: 0.95rem;
+  color: var(--encre-douce);
+  max-width: 46rem;
+}
+
+/* --- À voir aussi (maillage interne) --- */
+.voirAussi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  border-top: 1px solid var(--trait-fort);
+}
+
+.voirAussi a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.5rem;
+  padding: 1.1rem 0.25rem;
+  border-bottom: 1px solid var(--trait);
+  font-family: var(--display);
+  font-size: 1.15rem;
+  line-height: 1.3;
+  transition: color var(--transition);
+}
+
+.voirAussi a svg {
+  flex: none;
+  color: var(--cuivre);
+  transition: transform var(--transition);
+}
+
+.voirAussi a:hover {
+  color: var(--cuivre-texte);
+}
+
+.voirAussi a:hover svg {
+  transform: translateX(4px);
+}
+
+@media (min-width: 700px) {
+  .voirAussi li:not(:last-child) a {
+    margin-right: clamp(1rem, 2vw, 2rem);
+  }
+}
+
+/* --- Trois formats / points (paragraphes à intitulé en gras) --- */
+.points {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+
+.point {
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--cuivre);
+}
+
+.point h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.6rem;
+}
+
+.point p {
+  margin: 0;
+  color: var(--encre-douce);
+}
+
+:global(.fond-olive) .point p {
+  color: var(--sur-olive-doux);
+}
+
+:global(.fond-olive) .point {
+  border-left-color: var(--or);
+}
+
+/* --- Bloc texte sur mesure de lecture --- */
+.texte p {
+  color: var(--encre-douce);
+}
+
+.lienTexte {
+  color: var(--encre);
+  text-decoration: underline;
+  text-decoration-color: var(--cuivre);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--transition);
+}
+
+.lienTexte:hover {
+  text-decoration-color: var(--encre);
+}
+
+/* --- Encadré (infos de commande, exemple chiffré) --- */
+.encadre {
+  padding: clamp(1.5rem, 3.5vw, 2.5rem);
+  border: 1px solid var(--trait-fort);
+  border-radius: var(--r-m);
+  background: var(--lin);
+}
+
+.encadre h2,
+.encadre h3 {
+  margin-bottom: 1rem;
+}
+
+.encadre ul {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.encadre p:last-child {
+  margin-bottom: 0;
+}
+
+.voirAussiTitre {
+  margin-bottom: 1.5rem;
+}
+
+.prix :global(.ligne-carte) {
+  align-items: last baseline;
+}

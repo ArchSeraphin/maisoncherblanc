@@ -1,0 +1,23 @@
+/* Pages légales : colonne de lecture, intertitres reliés par un filet. */
+.page {
+  padding-bottom: var(--section);
+}
+
+.page :global(.prose) {
+  max-width: none;
+}
+
+.page :global(.prose) h2 {
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--trait);
+  margin-top: 2.25rem;
+}
+
+.page :global(.prose) h2:first-child {
+  margin-top: 0;
+}
+
+.maj {
+  font-size: 0.9rem;
+  color: var(--encre-tres-douce);
+}
