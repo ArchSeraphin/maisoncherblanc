@@ -15,7 +15,7 @@ export const EMPLACEMENTS = [
   { cle: "accueil-maison", libelle: "Accueil : bloc « La maison »", page: "/", ratio: "4/3" },
   { cle: "boucherie-hero", libelle: "Boucherie : grande image d’en-tête", page: "/boucherie-roanne", ratio: "16/9" },
   { cle: "boucherie-viandes", libelle: "Boucherie : les viandes", page: "/boucherie-roanne", ratio: "4/3" },
-  { cle: "boucherie-charcuterie", libelle: "Boucherie : la charcuterie maison", page: "/boucherie-roanne", ratio: "4/3" },
+  { cle: "boucherie-charcuterie", libelle: "Boucherie : la charcuterie", page: "/boucherie-roanne", ratio: "4/3" },
   { cle: "boucherie-fumoir", libelle: "Boucherie : salaisons et jambons", page: "/boucherie-roanne", ratio: "4/3" },
   { cle: "boucherie-volailles", libelle: "Boucherie : les volailles", page: "/boucherie-roanne", ratio: "4/3" },
   { cle: "traiteur-hero", libelle: "Traiteur : grande image d’en-tête", page: "/traiteur-roanne", ratio: "16/9" },
