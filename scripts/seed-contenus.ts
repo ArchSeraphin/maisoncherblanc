@@ -5,10 +5,12 @@
  *    dates échelonnées sur les trois semaines précédant le 26/10/2026 (heure de
  *    Paris), couverture prise parmi les médias importés (clé `source`), title
  *    et meta SEO de COPY.md, liens internes « à placer à l'intégration » posés
- *    dans le Markdown. IDEMPOTENT PAR SLUG : un article déjà présent (même
- *    modifié ou dépublié dans le BO) n'est jamais recréé ni écrasé.
+ *    dans le Markdown. JOURNALISÉ (`article:<slug>`, lib/seed-journal.ts) :
+ *    créé une seule fois ; modifié, dépublié ou SUPPRIMÉ dans le BO, il n'est
+ *    jamais recréé ni écrasé.
  * 2. Emplacement `contact-boutique` : aucune photo réelle de la boutique
- *    n'existe (COPY.md, question n° 25). Rempli, s'il est vide, par une nature
+ *    n'existe (COPY.md, question n° 25). Rempli une seule fois (journal
+ *    `emplacement:contact-boutique`), s'il est vide, par une nature
  *    morte du savoir-faire (billot, couteau, balance), visuel provisoire qui ne
  *    se fait pas passer pour la boutique ; à remplacer par une photo de la façade.
  *    Les emplacements `broche-hero` et `maison-hero` sont remplis par
@@ -331,12 +333,19 @@ export async function amorcerContenus(): Promise<BilanContenus> {
   const { creerArticle, slugArticleDisponible } = await import("../lib/articles");
   const { lireMediaParSource } = await import("../lib/media");
   const { isoDepuisHeureParis } = await import("../lib/dates");
-  const { remplirEmplacementSiVide } = await import("../lib/emplacements");
+  const { definirEmplacement, lireIdsEmplacements } = await import("../lib/emplacements");
+  const { estJournalise, journaliser } = await import("../lib/seed-journal");
 
   const bilan: BilanContenus = { articlesCrees: 0, articlesExistants: 0, emplacements: [] };
 
   for (const a of ARTICLES_LANCEMENT) {
+    const cle = `article:${a.slug}`;
+    if (estJournalise(cle)) {
+      bilan.articlesExistants++;
+      continue;
+    }
     if (!slugArticleDisponible(a.slug)) {
+      journaliser(cle);
       bilan.articlesExistants++;
       continue;
     }
@@ -356,11 +365,19 @@ export async function amorcerContenus(): Promise<BilanContenus> {
       description_seo: a.description_seo,
     });
     if (cree.slug !== a.slug) throw new Error(`Slug modifié à la création : ${a.slug} -> ${cree.slug}`);
+    journaliser(cle, cree.id);
     bilan.articlesCrees++;
   }
 
+  const cleContact = "emplacement:contact-boutique";
   const nature = lireMediaParSource(SOURCE_CONTACT_BOUTIQUE);
-  if (nature && remplirEmplacementSiVide("contact-boutique", nature.id)) bilan.emplacements.push("contact-boutique");
+  if (nature && !estJournalise(cleContact)) {
+    if (!lireIdsEmplacements()["contact-boutique"]) {
+      definirEmplacement("contact-boutique", nature.id);
+      journaliser(cleContact, nature.id);
+      bilan.emplacements.push("contact-boutique");
+    } else journaliser(cleContact, null);
+  }
 
   return bilan;
 }

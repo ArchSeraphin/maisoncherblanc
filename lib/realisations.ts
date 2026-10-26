@@ -5,7 +5,7 @@
 
 import { bool, stmt, transaction } from "./db";
 import { echangerDansListe } from "./ordre";
-import { lireMedias, supprimerMediaSiOrphelin, versImage, type StatutMedia } from "./media";
+import { lireMedias, supprimerMediaSiOrphelinHorsSeed, versImage, type StatutMedia } from "./media";
 import type { ImageMedia } from "./media-url";
 
 export const CATEGORIES_REALISATION = ["mariage", "cocktail", "buffet", "broche-barbecue", "plateaux", "boucherie"] as const;
@@ -121,12 +121,13 @@ export function modifierRealisation(
 
 /**
  * Supprime la réalisation. Le média et ses fichiers sont supprimés aussi
- * s'il ne sert plus ailleurs (emplacement, menu, article). Renvoie la ligne.
+ * s'il ne sert plus ailleurs (emplacement, menu, article) et ne vient pas du
+ * seed (photo de départ : gardée dans la médiathèque). Renvoie la ligne.
  */
 export function supprimerRealisation(id: number): Realisation | null {
   const l = stmt("DELETE FROM realisations WHERE id = ? RETURNING *").get(id) as Ligne | undefined;
   if (!l) return null;
-  supprimerMediaSiOrphelin(l.media_id);
+  supprimerMediaSiOrphelinHorsSeed(l.media_id);
   return versRealisation(l);
 }
 

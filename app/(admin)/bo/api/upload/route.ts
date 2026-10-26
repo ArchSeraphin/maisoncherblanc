@@ -14,13 +14,15 @@
  *
  * Réponse : { ok, items: [{ nom, ok, mediaId?, statut?, realisationId?, erreur? }] }.
  * Images traitées en arrière-plan : suivre `statut` via GET /${ADMIN_PATH}/api/media/<id>.
+ * L'ancien fichier remplacé est supprimé s'il ne sert plus, SAUF s'il vient du seed
+ * (`supprimerMediaSiOrphelinHorsSeed`, lib/media.ts).
  * Sécurité : `lireUtilisateur()` + 401 (jamais de redirection d'un fetch), contrôle d'origine.
  */
 
 import { lireUtilisateur } from "@/lib/auth";
 import { definirEmplacement, estCleEmplacement, lireIdsEmplacements } from "@/lib/emplacements";
 import { memeOrigine } from "@/lib/http";
-import { supprimerMediaEtFichiers, supprimerMediaSiOrphelin } from "@/lib/media";
+import { supprimerMediaEtFichiers, supprimerMediaSiOrphelinHorsSeed } from "@/lib/media";
 import { enregistrerFichier } from "@/lib/media-pipeline";
 import { definirCouvertureMenu, definirPdfMenu, lireMenu } from "@/lib/menus";
 import { creerRealisation, estCategorieRealisation } from "@/lib/realisations";
@@ -84,11 +86,11 @@ export async function POST(req: Request) {
       } else if (usage === "emplacement" && estCleEmplacement(cle)) {
         const ancien = lireIdsEmplacements()[cle];
         definirEmplacement(cle, r.media.id);
-        if (ancien && ancien !== r.media.id) supprimerMediaSiOrphelin(ancien);
+        if (ancien && ancien !== r.media.id) supprimerMediaSiOrphelinHorsSeed(ancien);
       } else if (usage === "menu-pdf") {
-        supprimerMediaSiOrphelin(definirPdfMenu(menuId, r.media.id));
+        supprimerMediaSiOrphelinHorsSeed(definirPdfMenu(menuId, r.media.id));
       } else if (usage === "menu-couverture") {
-        supprimerMediaSiOrphelin(definirCouvertureMenu(menuId, r.media.id));
+        supprimerMediaSiOrphelinHorsSeed(definirCouvertureMenu(menuId, r.media.id));
       }
     } catch (err) {
       console.error("[upload] rattachement impossible :", err);

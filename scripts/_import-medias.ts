@@ -8,10 +8,18 @@
  *
  * IDEMPOTENT : chaque fichier porte une clé `source` = "<dossier>/<fichier>" ;
  * un fichier déjà importé n'est pas recréé (son alt est seulement mis à jour
- * s'il était vide). Une réalisation n'est créée qu'une fois par média. Un
- * emplacement n'est rempli que s'il est vide, ou s'il porte un visuel
- * PROVISOIRE et que le nouveau est une vraie photo (jamais l'inverse) : les
- * choix faits ensuite dans le backoffice sont respectés.
+ * s'il était vide). Un média importé (`source` non nul) n'est jamais supprimé
+ * par le backoffice : le retrouver par `source` suffit.
+ *
+ * JOURNAL (lib/seed-journal.ts) : les choix faits ensuite dans le backoffice
+ * sont respectés.
+ * - `realisation:<source>` : la réalisation n'est créée qu'à la première
+ *   importation ; supprimée dans le BO, elle ne revient pas.
+ * - `emplacement:<cle>` : rempli une seule fois (s'il est vide, ou s'il porte
+ *   un visuel PROVISOIRE et que le nouveau est une vraie photo). Ensuite, il
+ *   n'est plus touché, sauf pour remplacer le visuel provisoire QUE LE SEED Y
+ *   A MIS (toujours en place) par une vraie photo. Vidé ou changé dans le BO :
+ *   plus jamais réécrit.
  */
 
 import fs from "node:fs";
@@ -30,27 +38,41 @@ export type BilanImport = { crees: number; existants: number; realisations: numb
 
 const ANCIENNES_CATEGORIES: Record<string, string> = { "broche-fumoir": "broche-barbecue" };
 
-export async function importerManifeste(racine: string, dossier: string): Promise<BilanImport> {
-  const bilan: BilanImport = { crees: 0, existants: 0, realisations: 0, emplacements: 0, erreurs: 0 };
+/** Entrées d'un manifest.json (`null` s'il est absent ou illisible). */
+export function lireManifeste(racine: string, dossier: string): EntreeManifest[] | null {
   const cheminManifeste = path.join(racine, dossier, "manifest.json");
-  if (!fs.existsSync(cheminManifeste)) return bilan;
-  let entrees: EntreeManifest[];
+  if (!fs.existsSync(cheminManifeste)) return null;
+  let entrees: unknown;
   try {
-    entrees = JSON.parse(fs.readFileSync(cheminManifeste, "utf8")) as EntreeManifest[];
+    entrees = JSON.parse(fs.readFileSync(cheminManifeste, "utf8"));
   } catch (err) {
     console.error(`  ${dossier}/manifest.json illisible : ${(err as Error).message}`);
+    return null;
+  }
+  if (!Array.isArray(entrees)) throw new Error(`${dossier}/manifest.json doit être un tableau.`);
+  return (entrees as EntreeManifest[]).filter((e) => e && typeof e.fichier === "string");
+}
+
+export function categorieManifeste(e: EntreeManifest): string | null {
+  return e.realisation ? (ANCIENNES_CATEGORIES[e.realisation] ?? e.realisation) : null;
+}
+
+export async function importerManifeste(racine: string, dossier: string): Promise<BilanImport> {
+  const bilan: BilanImport = { crees: 0, existants: 0, realisations: 0, emplacements: 0, erreurs: 0 };
+  if (!fs.existsSync(path.join(racine, dossier, "manifest.json"))) return bilan;
+  const entrees = lireManifeste(racine, dossier);
+  if (!entrees) {
     bilan.erreurs++;
     return bilan;
   }
-  if (!Array.isArray(entrees)) throw new Error(`${dossier}/manifest.json doit être un tableau.`);
 
   const { enregistrerFichier } = await import("../lib/media-pipeline");
   const { lireMedia, lireMediaParSource, modifierAltMedia } = await import("../lib/media");
   const { creerRealisation, estCategorieRealisation, realisationDuMedia } = await import("../lib/realisations");
   const { definirEmplacement, estCleEmplacement, lireIdsEmplacements } = await import("../lib/emplacements");
+  const { estJournalise, journaliser, majRefJournal, refJournal } = await import("../lib/seed-journal");
 
   for (const e of entrees) {
-    if (!e || typeof e.fichier !== "string") continue;
     const source = `${dossier}/${e.fichier}`;
     const abs = path.join(racine, dossier, e.fichier);
     let media = lireMediaParSource(source);
@@ -81,12 +103,17 @@ export async function importerManifeste(racine: string, dossier: string): Promis
       bilan.crees++;
     }
 
-    const categorie = e.realisation ? (ANCIENNES_CATEGORIES[e.realisation] ?? e.realisation) : null;
-    if (categorie) {
+    const categorie = categorieManifeste(e);
+    const cleRealisation = `realisation:${source}`;
+    if (categorie && !estJournalise(cleRealisation)) {
       if (!estCategorieRealisation(categorie)) console.warn(`  catégorie inconnue « ${e.realisation} » : ${source}`);
-      else if (!realisationDuMedia(media.id)) {
-        creerRealisation({ media_id: media.id, categorie, legende: e.legende ?? "" });
-        bilan.realisations++;
+      else {
+        let r = realisationDuMedia(media.id);
+        if (!r) {
+          r = creerRealisation({ media_id: media.id, categorie, legende: e.legende ?? "" });
+          bilan.realisations++;
+        }
+        journaliser(cleRealisation, r.id);
       }
     }
 
@@ -94,11 +121,20 @@ export async function importerManifeste(racine: string, dossier: string): Promis
       if (!estCleEmplacement(e.emplacement)) {
         console.warn(`  emplacement inconnu « ${e.emplacement} » : ${source}`);
       } else {
-        const actuel = lireIdsEmplacements()[e.emplacement];
+        const cleEmplacement = `emplacement:${e.emplacement}`;
+        const actuel = lireIdsEmplacements()[e.emplacement] ?? null;
         const actuelMedia = actuel ? lireMedia(actuel) : null;
-        const remplacer = !actuelMedia || (actuelMedia.provisoire && !media.provisoire && actuelMedia.id !== media.id);
-        if (remplacer) {
+        const ameliore = !!actuelMedia && actuelMedia.provisoire && !media.provisoire && actuelMedia.id !== media.id;
+        if (!estJournalise(cleEmplacement)) {
+          if (!actuelMedia || ameliore) {
+            definirEmplacement(e.emplacement, media.id);
+            bilan.emplacements++;
+            journaliser(cleEmplacement, media.id);
+          } else journaliser(cleEmplacement, null); // déjà choisi dans le BO : jamais remplacé
+        } else if (ameliore && refJournal(cleEmplacement) === actuelMedia.id) {
+          // Le visuel provisoire posé par le seed est toujours là : une vraie photo le remplace.
           definirEmplacement(e.emplacement, media.id);
+          majRefJournal(cleEmplacement, media.id);
           bilan.emplacements++;
         }
       }

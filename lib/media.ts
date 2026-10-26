@@ -8,6 +8,12 @@
  *
  * La base cascade les LIGNES (realisations, jobs ; menus et articles passent à
  * NULL), pas les FICHIERS : utiliser `supprimerMediaEtFichiers()`.
+ *
+ * RÈGLE UNIQUE de nettoyage après une action du backoffice :
+ * `supprimerMediaSiOrphelinHorsSeed()`. Un média importé par le seed (`source`
+ * non nul : photos réelles, visuels de départ, PDF d'origine) n'est JAMAIS
+ * supprimé : il reste dans la médiathèque pour resservir, et le seed le
+ * retrouve par sa clé `source` sans le réimporter.
  */
 
 import fs from "node:fs";
@@ -100,11 +106,21 @@ export function versImage(m: Media | null | undefined): ImageMedia | null {
   };
 }
 
+/** Image du sélecteur de photo du BO : avec la catégorie de sa réalisation (filtre), `null` si aucune. */
+export type ImageMediatheque = ImageMedia & { categorie: string | null };
+
 /** Images prêtes de la médiathèque, des plus récentes aux plus anciennes (sélecteur de photo du BO). */
-export function listerImagesPretes(limite = 300): ImageMedia[] {
+export function listerImagesPretes(limite = 300): ImageMediatheque[] {
+  const categories = new Map(
+    (stmt("SELECT media_id, categorie FROM realisations ORDER BY id DESC").all() as { media_id: number; categorie: string }[]).map((r) => [
+      r.media_id,
+      r.categorie,
+    ]),
+  );
   return listerMedias({ type: "image", statut: "ready", limite })
     .map(versImage)
-    .filter((i): i is ImageMedia => i !== null);
+    .filter((i): i is ImageMedia => i !== null)
+    .map((i) => ({ ...i, categorie: categories.get(i.id) ?? null }));
 }
 
 export function lireImage(id: number | null | undefined): ImageMedia | null {
@@ -337,10 +353,22 @@ export function mediaReference(mediaId: number): boolean {
   return n > 0 || idsEmplacements().has(mediaId);
 }
 
-/** Supprime le média et ses fichiers s'il n'est plus référencé nulle part. */
-export function supprimerMediaSiOrphelin(mediaId: number | null | undefined): boolean {
-  if (!mediaId || mediaReference(mediaId)) return false;
-  return supprimerMediaEtFichiers(mediaId) !== null;
+/** Vrai si le média vient du seed (`source` non nul) : jamais supprimé. */
+export function estMediaDuSeed(m: Pick<Media, "source"> | null | undefined): boolean {
+  return !!m?.source;
+}
+
+/**
+ * Supprime le média et ses fichiers s'il n'est plus référencé nulle part ET
+ * s'il ne vient pas du seed. À utiliser partout après un remplacement ou une
+ * suppression dans le backoffice (réalisation, emplacement, PDF, couverture).
+ * Renvoie `true` si le média a été supprimé.
+ */
+export function supprimerMediaSiOrphelinHorsSeed(mediaId: number | null | undefined): boolean {
+  if (!mediaId) return false;
+  const m = lireMedia(mediaId);
+  if (!m || estMediaDuSeed(m) || mediaReference(m.id)) return false;
+  return supprimerMediaEtFichiers(m.id) !== null;
 }
 
 /**

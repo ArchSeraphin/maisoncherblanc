@@ -6,7 +6,7 @@ import { refresh } from "next/cache";
 import { requireUser } from "@/lib/auth";
 import { definirEmplacement, estCleEmplacement, lireIdsEmplacements } from "@/lib/emplacements";
 import { champTexte, type EtatAction } from "@/lib/formulaire";
-import { definirProvisoire, lireMedia, mediaReference, modifierAltMedia, supprimerMediaEtFichiers } from "@/lib/media";
+import { definirProvisoire, estMediaDuSeed, lireMedia, mediaReference, modifierAltMedia, supprimerMediaSiOrphelinHorsSeed } from "@/lib/media";
 import { nettoyerMedia } from "./nettoyage";
 import { booleen, idsValides } from "./schemas";
 
@@ -57,13 +57,14 @@ export async function definirEmplacementAction(cle: string, mediaId: number | nu
   return { ok: true, message: mediaId ? "Photo mise en place sur la page." : "Photo retirée de la page." };
 }
 
-/** Supprime un média seulement s'il ne sert nulle part (sinon message explicite). */
+/** Supprime un média seulement s'il ne sert nulle part et ne vient pas du seed (sinon message explicite). */
 export async function supprimerMediaAction(mediaId: number): Promise<EtatAction> {
   await requireUser();
   const m = media(mediaId);
   if (!m) return { ok: false, message: "Fichier introuvable." };
   if (mediaReference(m.id)) return { ok: false, message: "Ce fichier est utilisé sur le site : retirez-le d’abord de la page qui l’affiche." };
-  supprimerMediaEtFichiers(m.id);
+  if (estMediaDuSeed(m)) return { ok: false, message: "C’est une photo de départ du site : elle reste dans vos photos pour pouvoir resservir." };
+  if (!supprimerMediaSiOrphelinHorsSeed(m.id)) return { ok: false, message: "Ce fichier n’a pas pu être supprimé. Rechargez la page." };
   refresh();
   return { ok: true, message: "Fichier supprimé." };
 }
