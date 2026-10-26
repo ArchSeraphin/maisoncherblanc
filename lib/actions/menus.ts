@@ -1,18 +1,19 @@
 "use server";
 
 /**
- * Server Actions « Carte & menus » du backoffice.
+ * Server Actions « Carte & menus » du backoffice.
  *
- * Règles : `requireUser()` en PREMIÈRE ligne ; l'ID ciblé est lié côté serveur
- * (`action.bind(null, id)`) et son existence vérifiée ; entrées lues par
- * lib/formulaire ; `refresh()` ré-affiche la page courante du BO (le site public
- * est en force-dynamic : rien à invalider).
+ * Règles : `requireUser()` en PREMIÈRE ligne ; les IDs ciblés sont liés
+ * (`action.bind(null, menuId, platId)`), revalidés par zod (ils transitent par
+ * le navigateur) puis leur APPARTENANCE est vérifiée : un plat doit appartenir
+ * au menu édité, une section aussi. Entrées lues par lib/formulaire ; `refresh()`
+ * ré-affiche la page du BO (le site public est en force-dynamic : rien à invalider).
  */
 
 import { refresh } from "next/cache";
 import { requireUser } from "@/lib/auth";
-import { champBooleen, champChoix, champListeIds, champMultiligne, champTexte, type EtatAction } from "@/lib/formulaire";
-import { supprimerMediaSiOrphelin } from "@/lib/media";
+import { champBooleen, champChoix, champId, champMultiligne, champTexte, type EtatAction } from "@/lib/formulaire";
+import { lireMedia } from "@/lib/media";
 import {
   BADGES,
   creerMenu,
@@ -23,20 +24,20 @@ import {
   definirPdfMenu,
   definirPlatVisible,
   definirSectionVisible,
-  deplacerMenu,
   deplacerPlat,
   deplacerSection,
   dupliquerMenu,
   lireMenu,
   lirePlat,
   lireSection,
+  menuDuPlat,
   modifierMenu,
   modifierPlat,
-  modifierPrixPlat,
   modifierSection,
-  ordonnerMenus,
   ordonnerPlats,
   ordonnerSections,
+  remplacerCarteTraiteur,
+  SLUG_CARTE_TRAITEUR,
   supprimerMenu,
   supprimerPlat,
   supprimerSection,
@@ -44,16 +45,37 @@ import {
   validerMenu,
   validerPlat,
   validerSection,
+  type EntreePlat,
 } from "@/lib/menus";
 import { normaliserPrix } from "@/lib/prix";
+import { nettoyerMedia } from "./nettoyage";
+import { booleen, idsValides, listeIds, sens as lireSens } from "./schemas";
 
-type Sens = "haut" | "bas";
-const INTROUVABLE: EtatAction = { ok: false, message: "Élément introuvable (déjà supprimé ?)." };
+const INTROUVABLE: EtatAction = { ok: false, message: "Élément introuvable : il a peut-être déjà été supprimé. Rechargez la page." };
+
+/** Section appartenant bien au menu édité, ou `null`. */
+function sectionDuMenu(menuId: unknown, sectionId: unknown) {
+  const ids = idsValides(menuId, sectionId);
+  if (!ids) return null;
+  const s = lireSection(ids[1]);
+  return s && s.menu_id === ids[0] ? s : null;
+}
+
+/** Plat appartenant bien au menu édité, ou `null`. */
+function platDuMenu(menuId: unknown, platId: unknown) {
+  const ids = idsValides(menuId, platId);
+  if (!ids || menuDuPlat(ids[1]) !== ids[0]) return null;
+  return lirePlat(ids[1]);
+}
+
+function menuExistant(menuId: unknown) {
+  const ids = idsValides(menuId);
+  return ids ? lireMenu(ids[0]) : null;
+}
 
 function lireChampsMenu(fd: FormData) {
   return {
     titre: champTexte(fd, "titre", 200),
-    slug: champTexte(fd, "slug", 120),
     type: champChoix(fd, "type", TYPES_MENU, "saison"),
     sous_titre: champTexte(fd, "sous_titre", 300),
     intro: champMultiligne(fd, "intro", 2000),
@@ -69,218 +91,292 @@ function lireChampsMenu(fd: FormData) {
 
 // --- Menus -----------------------------------------------------------------
 
+/** Nouveau menu (`titre`, `type`) : créé MASQUÉ, à compléter avant de l'afficher. */
 export async function creerMenuAction(_prec: EtatAction, fd: FormData): Promise<EtatAction> {
   await requireUser();
-  const champs = lireChampsMenu(fd);
+  const champs = { ...lireChampsMenu(fd), visible: false };
   const v = validerMenu(champs);
   if (!v.ok) return { ok: false, erreurs: v.erreurs as Record<string, string>, valeurs: { titre: champs.titre } };
-  const menu = creerMenu(v.donnees);
+  const menu = creerMenu({ ...v.donnees, visible: false });
   refresh();
-  return { ok: true, message: "Menu créé.", id: menu.id };
+  return { ok: true, message: "Menu créé. Ajoutez maintenant ses sections et ses plats.", id: menu.id };
 }
 
 export async function modifierMenuAction(menuId: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
   await requireUser();
-  if (!lireMenu(menuId)) return INTROUVABLE;
+  const cur = menuExistant(menuId);
+  if (!cur) return INTROUVABLE;
   const champs = lireChampsMenu(fd);
+  // La carte en ligne reste une carte permanente (sinon la page /carte-traiteur disparaîtrait).
+  if (cur.slug === SLUG_CARTE_TRAITEUR) champs.type = "permanent";
   const v = validerMenu(champs);
-  if (!v.ok) return { ok: false, erreurs: v.erreurs as Record<string, string> };
+  if (!v.ok) return { ok: false, message: "Certains champs sont à corriger.", erreurs: v.erreurs as Record<string, string> };
   try {
-    modifierMenu(menuId, { ...v.donnees, slug: v.donnees.slug ?? undefined });
+    modifierMenu(cur.id, { ...v.donnees, slug: undefined });
   } catch (err) {
-    return { ok: false, erreurs: { slug: err instanceof Error ? err.message : "Adresse invalide." } };
+    return { ok: false, message: err instanceof Error ? err.message : "Enregistrement impossible." };
   }
   refresh();
-  return { ok: true, message: "Menu enregistré." };
+  return { ok: true, message: "Informations du menu enregistrées." };
 }
 
 export async function basculerMenuVisibleAction(menuId: number, visible: boolean): Promise<EtatAction> {
   await requireUser();
-  if (!lireMenu(menuId)) return INTROUVABLE;
-  definirMenuVisible(menuId, visible);
+  const m = menuExistant(menuId);
+  const v = booleen(visible);
+  if (!m || v === null) return INTROUVABLE;
+  definirMenuVisible(m.id, v);
   refresh();
-  return { ok: true, message: visible ? "Menu affiché sur le site." : "Menu masqué du site." };
+  return { ok: true, message: v ? "Menu affiché sur le site." : "Menu masqué du site." };
 }
 
-/** Supprime le menu (sections et plats) et ses fichiers PDF/couverture s'ils ne servent plus. */
+/** Supprime le menu (sections et plats) et ses fichiers PDF/couverture s'ils ne servent plus. La carte en ligne est protégée. */
 export async function supprimerMenuAction(menuId: number): Promise<EtatAction> {
   await requireUser();
-  const m = supprimerMenu(menuId);
+  const cur = menuExistant(menuId);
+  if (!cur) return INTROUVABLE;
+  if (cur.slug === SLUG_CARTE_TRAITEUR)
+    return { ok: false, message: "C’est la carte affichée sur le site : elle ne peut pas être supprimée. Masquez-la si besoin." };
+  const m = supprimerMenu(cur.id);
   if (!m) return INTROUVABLE;
-  supprimerMediaSiOrphelin(m.pdf_media_id);
-  supprimerMediaSiOrphelin(m.couverture_media_id);
+  nettoyerMedia(m.pdf_media_id);
+  nettoyerMedia(m.couverture_media_id);
   refresh();
-  return { ok: true, message: "Menu supprimé." };
+  return { ok: true, message: `Menu « ${m.titre} » supprimé.` };
 }
 
-/** Duplique (pour l'année suivante). Le double est masqué, à relire avant publication. */
+/** Duplique (pour l'année suivante, champ `titre`). Le double est masqué, sans PDF ni dates : à relire avant de l'afficher. */
 export async function dupliquerMenuAction(menuId: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
   await requireUser();
-  const copie = dupliquerMenu(menuId, { titre: champTexte(fd, "titre", 200) || undefined });
+  const m = menuExistant(menuId);
+  if (!m) return INTROUVABLE;
+  const titre = champTexte(fd, "titre", 200);
+  if (!titre) return { ok: false, erreurs: { titre: "Donnez un titre au nouveau menu." } };
+  const copie = dupliquerMenu(m.id, { titre });
   if (!copie) return INTROUVABLE;
   refresh();
-  return { ok: true, message: "Menu dupliqué (masqué tant que vous ne l’affichez pas).", id: copie.id };
+  return { ok: true, message: `Menu dupliqué : « ${copie.titre} » (masqué tant que vous ne l’affichez pas).`, id: copie.id };
 }
 
-export async function deplacerMenuAction(menuId: number, sens: Sens): Promise<void> {
+/** Met en ligne ce menu permanent comme carte traiteur ; l'ancienne carte est gardée, masquée. */
+export async function remplacerCarteTraiteurAction(menuId: number): Promise<EtatAction> {
   await requireUser();
-  deplacerMenu(menuId, sens === "haut" ? "haut" : "bas");
+  const m = menuExistant(menuId);
+  if (!m) return INTROUVABLE;
+  if (m.type !== "permanent") return { ok: false, message: "Seule une carte permanente peut remplacer la carte traiteur." };
+  const r = remplacerCarteTraiteur(m.id);
+  if (!r) return { ok: false, message: "Cette carte est déjà celle du site." };
   refresh();
-}
-
-export async function ordonnerMenusAction(ids: number[]): Promise<void> {
-  await requireUser();
-  ordonnerMenus(Array.isArray(ids) ? ids.filter((i) => Number.isInteger(i) && i > 0) : []);
-  refresh();
+  return {
+    ok: true,
+    message: r.ancienne
+      ? `« ${r.nouvelle.titre} » est maintenant la carte du site. « ${r.ancienne.titre} » est gardée, masquée.`
+      : "Carte mise en ligne.",
+  };
 }
 
 /** Retire le PDF du menu (le fichier est supprimé s'il ne sert plus). L'envoi passe par /api/upload. */
 export async function retirerPdfMenuAction(menuId: number): Promise<EtatAction> {
   await requireUser();
-  if (!lireMenu(menuId)) return INTROUVABLE;
-  supprimerMediaSiOrphelin(definirPdfMenu(menuId, null));
+  const m = menuExistant(menuId);
+  if (!m) return INTROUVABLE;
+  nettoyerMedia(definirPdfMenu(m.id, null));
   refresh();
   return { ok: true, message: "PDF retiré." };
 }
 
+/** Photo de couverture choisie dans la médiathèque. L'envoi d'une nouvelle photo passe par /api/upload. */
+export async function definirCouvertureMenuAction(menuId: number, mediaId: number): Promise<EtatAction> {
+  await requireUser();
+  const m = menuExistant(menuId);
+  const ids = idsValides(mediaId);
+  if (!m || !ids) return INTROUVABLE;
+  const media = lireMedia(ids[0]);
+  if (!media || media.type !== "image" || media.statut !== "ready") return { ok: false, message: "Photo introuvable." };
+  nettoyerMedia(definirCouvertureMenu(m.id, media.id));
+  refresh();
+  return { ok: true, message: "Photo de couverture enregistrée." };
+}
+
 export async function retirerCouvertureMenuAction(menuId: number): Promise<EtatAction> {
   await requireUser();
-  if (!lireMenu(menuId)) return INTROUVABLE;
-  supprimerMediaSiOrphelin(definirCouvertureMenu(menuId, null));
+  const m = menuExistant(menuId);
+  if (!m) return INTROUVABLE;
+  nettoyerMedia(definirCouvertureMenu(m.id, null));
   refresh();
-  return { ok: true, message: "Photo retirée." };
+  return { ok: true, message: "Photo de couverture retirée." };
 }
 
 // --- Sections --------------------------------------------------------------
 
 export async function creerSectionAction(menuId: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
   await requireUser();
-  if (!lireMenu(menuId)) return INTROUVABLE;
-  const v = validerSection({ titre: champTexte(fd, "titre", 200), note: champTexte(fd, "note", 300), mise_en_avant: champBooleen(fd, "mise_en_avant") });
-  if (!v.ok) return { ok: false, erreurs: v.erreurs as Record<string, string> };
-  const s = creerSection(menuId, v.donnees);
-  refresh();
-  return { ok: true, message: "Section ajoutée.", id: s.id };
-}
-
-export async function modifierSectionAction(sectionId: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
-  await requireUser();
-  if (!lireSection(sectionId)) return INTROUVABLE;
+  const m = menuExistant(menuId);
+  if (!m) return INTROUVABLE;
   const v = validerSection({
     titre: champTexte(fd, "titre", 200),
     note: champTexte(fd, "note", 300),
     mise_en_avant: champBooleen(fd, "mise_en_avant"),
-    visible: champBooleen(fd, "visible"),
   });
   if (!v.ok) return { ok: false, erreurs: v.erreurs as Record<string, string> };
-  modifierSection(sectionId, v.donnees);
+  const s = creerSection(m.id, v.donnees);
+  refresh();
+  return { ok: true, message: `Section « ${s.titre} » ajoutée.`, id: s.id };
+}
+
+/** Titre, note, formule encadrée. La visibilité se change par `basculerSectionVisibleAction`. */
+export async function modifierSectionAction(menuId: number, sectionId: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
+  await requireUser();
+  const s = sectionDuMenu(menuId, sectionId);
+  if (!s) return INTROUVABLE;
+  const v = validerSection({
+    titre: champTexte(fd, "titre", 200),
+    note: champTexte(fd, "note", 300),
+    mise_en_avant: champBooleen(fd, "mise_en_avant"),
+    visible: s.visible,
+  });
+  if (!v.ok) return { ok: false, erreurs: v.erreurs as Record<string, string> };
+  modifierSection(s.id, { ...v.donnees, visible: s.visible });
   refresh();
   return { ok: true, message: "Section enregistrée." };
 }
 
-export async function basculerSectionVisibleAction(sectionId: number, visible: boolean): Promise<EtatAction> {
+export async function basculerSectionVisibleAction(menuId: number, sectionId: number, visible: boolean): Promise<EtatAction> {
   await requireUser();
-  if (!lireSection(sectionId)) return INTROUVABLE;
-  definirSectionVisible(sectionId, visible);
+  const s = sectionDuMenu(menuId, sectionId);
+  const v = booleen(visible);
+  if (!s || v === null) return INTROUVABLE;
+  definirSectionVisible(s.id, v);
   refresh();
-  return { ok: true, message: visible ? "Section affichée." : "Section masquée." };
+  return { ok: true, message: v ? `Section « ${s.titre} » affichée.` : `Section « ${s.titre} » masquée du site.` };
 }
 
-export async function supprimerSectionAction(sectionId: number): Promise<EtatAction> {
+export async function supprimerSectionAction(menuId: number, sectionId: number): Promise<EtatAction> {
   await requireUser();
-  if (!supprimerSection(sectionId)) return INTROUVABLE;
+  const s = sectionDuMenu(menuId, sectionId);
+  if (!s || !supprimerSection(s.id)) return INTROUVABLE;
   refresh();
-  return { ok: true, message: "Section supprimée." };
+  return { ok: true, message: `Section « ${s.titre} » supprimée.` };
 }
 
-export async function deplacerSectionAction(sectionId: number, sens: Sens): Promise<void> {
+export async function deplacerSectionAction(menuId: number, sectionId: number, sens: "haut" | "bas"): Promise<EtatAction> {
   await requireUser();
-  deplacerSection(sectionId, sens === "haut" ? "haut" : "bas");
+  const s = sectionDuMenu(menuId, sectionId);
+  const sn = lireSens(sens);
+  if (!s || !sn) return INTROUVABLE;
+  deplacerSection(s.id, sn);
   refresh();
+  return { ok: true, message: "Ordre enregistré." };
 }
 
 /** Ordre des sections d'un menu (glisser-déposer). IDs étrangers au menu ignorés. */
-export async function ordonnerSectionsAction(menuId: number, ids: number[]): Promise<void> {
+export async function ordonnerSectionsAction(menuId: number, ids: number[]): Promise<EtatAction> {
   await requireUser();
-  ordonnerSections(menuId, Array.isArray(ids) ? ids : []);
+  const m = menuExistant(menuId);
+  const liste = listeIds(ids);
+  if (!m || !liste) return INTROUVABLE;
+  ordonnerSections(m.id, liste);
   refresh();
+  return { ok: true, message: "Ordre des sections enregistré." };
 }
 
 // --- Plats -----------------------------------------------------------------
 
-function lireChampsPlat(fd: FormData) {
+/** Champs présents dans le formulaire seulement (un champ absent garde sa valeur). */
+function fusionnerPlat(fd: FormData, base: EntreePlat): Record<keyof EntreePlat, unknown> {
   return {
-    nom: champTexte(fd, "nom", 200),
-    description: champMultiligne(fd, "description", 1500),
-    prix: champTexte(fd, "prix", 60),
-    unite: champTexte(fd, "unite", 40),
-    badge: champChoix(fd, "badge", ["", ...BADGES] as const, "") || null,
-    visible: fd.has("visible") ? champBooleen(fd, "visible") : true,
+    nom: fd.has("nom") ? champTexte(fd, "nom", 200) : base.nom,
+    description: fd.has("description") ? champMultiligne(fd, "description", 1500) : base.description,
+    prix: fd.has("prix") ? champTexte(fd, "prix", 60) : base.prix,
+    unite: fd.has("unite") ? champTexte(fd, "unite", 40) : base.unite,
+    badge: fd.has("badge") ? champChoix(fd, "badge", ["", ...BADGES] as const, "") || null : base.badge,
+    visible: base.visible,
   };
 }
 
-export async function creerPlatAction(sectionId: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
+export async function creerPlatAction(menuId: number, sectionId: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
   await requireUser();
-  if (!lireSection(sectionId)) return INTROUVABLE;
-  const champs = lireChampsPlat(fd);
-  const v = validerPlat(champs);
-  if (!v.ok) return { ok: false, erreurs: v.erreurs as Record<string, string>, valeurs: { nom: champs.nom, prix: champs.prix } };
-  const p = creerPlat(sectionId, v.donnees);
-  refresh();
-  return { ok: true, message: "Plat ajouté.", id: p.id };
-}
-
-export async function modifierPlatAction(platId: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
-  await requireUser();
-  if (!lirePlat(platId)) return INTROUVABLE;
-  const v = validerPlat(lireChampsPlat(fd));
+  const s = sectionDuMenu(menuId, sectionId);
+  if (!s) return INTROUVABLE;
+  const v = validerPlat(fusionnerPlat(fd, { nom: "", description: "", prix: "", unite: "", badge: null, visible: true }));
   if (!v.ok) return { ok: false, erreurs: v.erreurs as Record<string, string> };
-  modifierPlat(platId, v.donnees);
+  const p = creerPlat(s.id, v.donnees);
   refresh();
-  return { ok: true, message: "Plat enregistré." };
+  return { ok: true, message: `« ${p.nom} » ajouté${p.prix ? ` à ${p.prix}` : ""}.`, id: p.id };
 }
 
-/** Raccourci « Changer un prix » (champ `prix`, normalisé : « 3,2 » devient « 3,20 € »). */
-export async function modifierPrixAction(platId: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
+export async function modifierPlatAction(menuId: number, platId: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
   await requireUser();
-  if (!lirePlat(platId)) return INTROUVABLE;
+  const cur = platDuMenu(menuId, platId);
+  if (!cur) return INTROUVABLE;
+  const v = validerPlat(fusionnerPlat(fd, cur));
+  if (!v.ok) return { ok: false, erreurs: v.erreurs as Record<string, string> };
+  modifierPlat(cur.id, { ...v.donnees, visible: cur.visible });
+  refresh();
+  const d = v.donnees;
+  const seulPrix = d.prix !== cur.prix && d.nom === cur.nom && d.unite === cur.unite && d.description === cur.description && d.badge === cur.badge;
+  if (seulPrix) return { ok: true, message: d.prix ? `Prix enregistré : ${d.prix}` : "Prix retiré." };
+  return { ok: true, message: `« ${d.nom} » enregistré.` };
+}
+
+/** Raccourci « Changer un prix » (champ `prix`, normalisé : « 3,2 » devient « 3,20 € »). */
+export async function modifierPrixAction(menuId: number, platId: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
+  await requireUser();
+  const cur = platDuMenu(menuId, platId);
+  if (!cur) return INTROUVABLE;
   const prix = normaliserPrix(champTexte(fd, "prix", 60));
-  modifierPrixPlat(platId, prix);
+  modifierPlat(cur.id, { prix });
   refresh();
   return { ok: true, message: prix ? `Prix enregistré : ${prix}` : "Prix retiré." };
 }
 
-export async function basculerPlatVisibleAction(platId: number, visible: boolean): Promise<EtatAction> {
+export async function basculerPlatVisibleAction(menuId: number, platId: number, visible: boolean): Promise<EtatAction> {
   await requireUser();
-  if (!lirePlat(platId)) return INTROUVABLE;
-  definirPlatVisible(platId, visible);
+  const p = platDuMenu(menuId, platId);
+  const v = booleen(visible);
+  if (!p || v === null) return INTROUVABLE;
+  definirPlatVisible(p.id, v);
   refresh();
-  return { ok: true, message: visible ? "Plat affiché." : "Plat masqué du site." };
+  return { ok: true, message: v ? `« ${p.nom} » affiché sur le site.` : `« ${p.nom} » masqué du site.` };
 }
 
-export async function supprimerPlatAction(platId: number): Promise<EtatAction> {
+export async function supprimerPlatAction(menuId: number, platId: number): Promise<EtatAction> {
   await requireUser();
-  if (!supprimerPlat(platId)) return INTROUVABLE;
+  const p = platDuMenu(menuId, platId);
+  if (!p || !supprimerPlat(p.id)) return INTROUVABLE;
   refresh();
-  return { ok: true, message: "Plat supprimé." };
+  return { ok: true, message: `« ${p.nom} » supprimé.` };
 }
 
-export async function deplacerPlatAction(platId: number, sens: Sens): Promise<void> {
+export async function deplacerPlatAction(menuId: number, platId: number, sens: "haut" | "bas"): Promise<EtatAction> {
   await requireUser();
-  deplacerPlat(platId, sens === "haut" ? "haut" : "bas");
+  const p = platDuMenu(menuId, platId);
+  const sn = lireSens(sens);
+  if (!p || !sn) return INTROUVABLE;
+  deplacerPlat(p.id, sn);
   refresh();
+  return { ok: true, message: "Ordre enregistré." };
 }
 
 /** Ordre des plats d'une section (glisser-déposer). IDs étrangers à la section ignorés. */
-export async function ordonnerPlatsAction(sectionId: number, ids: number[]): Promise<void> {
+export async function ordonnerPlatsAction(menuId: number, sectionId: number, ids: number[]): Promise<EtatAction> {
   await requireUser();
-  ordonnerPlats(sectionId, Array.isArray(ids) ? ids : []);
+  const s = sectionDuMenu(menuId, sectionId);
+  const liste = listeIds(ids);
+  if (!s || !liste) return INTROUVABLE;
+  ordonnerPlats(s.id, liste);
   refresh();
+  return { ok: true, message: "Ordre des plats enregistré." };
 }
 
-/** Variante formulaire de l'ordre (champ caché `ordre` = JSON ou "1,2,3"). */
-export async function ordonnerPlatsFormAction(sectionId: number, fd: FormData): Promise<void> {
+/** Déplace un plat dans une autre section du même menu (champ `section_id`), placé en fin. */
+export async function changerSectionPlatAction(menuId: number, platId: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
   await requireUser();
-  ordonnerPlats(sectionId, champListeIds(fd, "ordre"));
+  const p = platDuMenu(menuId, platId);
+  const cible = sectionDuMenu(menuId, champId(fd, "section_id"));
+  if (!p || !cible) return INTROUVABLE;
+  if (cible.id === p.section_id) return { ok: true, message: "Le plat est déjà dans cette section." };
+  modifierPlat(p.id, { section_id: cible.id });
   refresh();
+  return { ok: true, message: `« ${p.nom} » déplacé dans « ${cible.titre} ».` };
 }

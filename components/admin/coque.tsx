@@ -2,7 +2,7 @@
 
 /**
  * Coquille du backoffice : navigation latérale (bureau) ou tiroir (mobile),
- * déconnexion, lien « Voir le site » (rel="noreferrer"). Le chemin secret
+ * déconnexion, lien « Voir le site » (rel="noreferrer"). Le chemin secret
  * arrive par le contexte (layout admin).
  */
 
@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { useCheminAdmin } from "./contexte-admin";
 import { Icone } from "./icones";
 import { NAVIGATION_ADMIN } from "./navigation";
+import { FournisseurRetours } from "./retours";
 
 type Props = {
   utilisateur: { name: string; email: string };
@@ -95,44 +96,52 @@ export function CoqueAdmin({ utilisateur, actionDeconnexion, pastilles = {}, chi
   );
 
   return (
-    <div className="bo-coque">
-      <a href="#bo-contenu" className="bo-evitement">
-        Aller au contenu
-      </a>
-      <header className="bo-barre-mobile">
-        {marque}
-        <button type="button" className="bo-bouton bo-bouton-secondaire" aria-expanded={ouvert} aria-controls="bo-tiroir" onClick={() => setOuvert(true)}>
-          <Icone nom="menu" taille={18} />
-          Menu
-          {pastilles["/messages"] ? <span className="bo-pastille">{pastilles["/messages"]}</span> : null}
-        </button>
-      </header>
+    <FournisseurRetours>
+      <div className="bo-coque">
+        <a href="#bo-contenu" className="bo-evitement">
+          Aller au contenu
+        </a>
+        <header className="bo-barre-mobile">
+          {marque}
+          <button
+            type="button"
+            className="bo-bouton bo-bouton-secondaire"
+            aria-expanded={ouvert}
+            aria-controls="bo-tiroir"
+            onClick={() => setOuvert(true)}
+          >
+            <Icone nom="menu" taille={18} />
+            Menu
+            {pastilles["/messages"] ? <span className="bo-pastille">{pastilles["/messages"]}</span> : null}
+          </button>
+        </header>
 
-      {ouvert ? (
-        <div className="bo-tiroir-fond">
-          <button type="button" className="bo-tiroir-voile" aria-label="Fermer le menu" onClick={() => setOuvert(false)} />
-          <div id="bo-tiroir" role="dialog" aria-modal="true" aria-label="Menu du backoffice" className="bo-tiroir">
-            <div className="bo-tiroir-tete">
-              {marque}
-              <button type="button" className="bo-bouton-icone" aria-label="Fermer le menu" onClick={() => setOuvert(false)} autoFocus>
-                <Icone nom="fermer" />
-              </button>
+        {ouvert ? (
+          <div className="bo-tiroir-fond">
+            <button type="button" className="bo-tiroir-voile" aria-label="Fermer le menu" onClick={() => setOuvert(false)} />
+            <div id="bo-tiroir" role="dialog" aria-modal="true" aria-label="Menu du backoffice" className="bo-tiroir">
+              <div className="bo-tiroir-tete">
+                {marque}
+                <button type="button" className="bo-bouton-icone" aria-label="Fermer le menu" onClick={() => setOuvert(false)} autoFocus>
+                  <Icone nom="fermer" />
+                </button>
+              </div>
+              {nav}
             </div>
+          </div>
+        ) : null}
+
+        <aside className="bo-laterale">
+          <div className="bo-laterale-interieur">
+            {marque}
             {nav}
           </div>
-        </div>
-      ) : null}
+        </aside>
 
-      <aside className="bo-laterale">
-        <div className="bo-laterale-interieur">
-          {marque}
-          {nav}
-        </div>
-      </aside>
-
-      <main id="bo-contenu" tabIndex={-1} className="bo-principal">
-        <div className="bo-largeur">{children}</div>
-      </main>
-    </div>
+        <main id="bo-contenu" tabIndex={-1} className="bo-principal">
+          <div className="bo-largeur">{children}</div>
+        </main>
+      </div>
+    </FournisseurRetours>
   );
 }

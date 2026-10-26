@@ -100,6 +100,13 @@ export function versImage(m: Media | null | undefined): ImageMedia | null {
   };
 }
 
+/** Images prêtes de la médiathèque, des plus récentes aux plus anciennes (sélecteur de photo du BO). */
+export function listerImagesPretes(limite = 300): ImageMedia[] {
+  return listerMedias({ type: "image", statut: "ready", limite })
+    .map(versImage)
+    .filter((i): i is ImageMedia => i !== null);
+}
+
 export function lireImage(id: number | null | undefined): ImageMedia | null {
   return id ? versImage(lireMedia(id)) : null;
 }

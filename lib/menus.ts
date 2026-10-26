@@ -338,6 +338,29 @@ export function dupliquerMenu(id: number, opts: { titre?: string; slug?: string 
   });
 }
 
+/**
+ * Met en ligne un menu permanent comme carte traiteur (page /carte-traiteur),
+ * par exemple la carte 2028 préparée par duplication de la carte 2027.
+ * L'ancienne carte est conservée, masquée, sous une adresse tirée de son titre
+ * (« carte-traiteur-2027 »). Transaction : jamais deux cartes ni aucune.
+ */
+export function remplacerCarteTraiteur(id: number): { nouvelle: Menu; ancienne: Menu | null } | null {
+  const cible = lireMenu(id);
+  if (!cible || cible.type !== "permanent" || cible.slug === SLUG_CARTE_TRAITEUR) return null;
+  return transaction(() => {
+    const ancienne = lireMenuParSlug(SLUG_CARTE_TRAITEUR);
+    const maj = maintenantIso();
+    if (ancienne) {
+      // Adresse provisoire pour libérer « carte-traiteur » avant de calculer la définitive.
+      stmt("UPDATE menus SET slug = ?, visible = 0, updated_at = ? WHERE id = ?").run(`archive-${ancienne.id}-${Date.now()}`, maj, ancienne.id);
+      const base = slugifier(ancienne.titre) === SLUG_CARTE_TRAITEUR ? `${ancienne.titre} ancienne` : ancienne.titre;
+      stmt("UPDATE menus SET slug = ? WHERE id = ?").run(slugMenuUnique(base, ancienne.id), ancienne.id);
+    }
+    stmt("UPDATE menus SET slug = ?, visible = 1, updated_at = ? WHERE id = ?").run(SLUG_CARTE_TRAITEUR, maj, id);
+    return { nouvelle: lireMenu(id)!, ancienne: ancienne ? lireMenu(ancienne.id) : null };
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Lecture complète (pages publiques et BO)
 // ---------------------------------------------------------------------------

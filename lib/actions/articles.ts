@@ -1,15 +1,20 @@
 "use server";
 
-/** Server Actions « Actualités ». La couverture s'envoie par /api/upload (purpose=media) puis son ID est passé ici. */
+/** Server Actions « Actualités ». La couverture s'envoie par /api/upload (usage=media) puis son ID est passé ici. */
 
 import { refresh } from "next/cache";
-import { redirect } from "next/navigation";
-import { creerArticle, definirStatutArticle, lireArticle, modifierArticle, supprimerArticle, validerArticle } from "@/lib/articles";
+import { creerArticle, definirStatutArticle, etatArticle, lireArticle, modifierArticle, supprimerArticle, validerArticle } from "@/lib/articles";
 import { requireUser } from "@/lib/auth";
-import { lienAdmin } from "@/lib/chemin-admin";
-import { isoDepuisHeureParis } from "@/lib/dates";
+import { formaterHorodatage, isoDepuisHeureParis } from "@/lib/dates";
 import { champChoix, champId, champTexte, type EtatAction } from "@/lib/formulaire";
-import { lireMedia, supprimerMediaSiOrphelin } from "@/lib/media";
+import { lireMedia } from "@/lib/media";
+import { nettoyerMedia } from "./nettoyage";
+import { idsValides } from "./schemas";
+
+function article(id: unknown) {
+  const ids = idsValides(id);
+  return ids ? lireArticle(ids[0]) : null;
+}
 
 /**
  * Champs : `titre`, `slug` (optionnel), `chapo`, `corps` (Markdown restreint),
@@ -37,35 +42,51 @@ export async function creerArticleAction(_prec: EtatAction, fd: FormData): Promi
   await requireUser();
   const champs = lireChamps(fd);
   const v = validerArticle(champs);
-  if (!v.ok) return { ok: false, erreurs: v.erreurs as Record<string, string>, valeurs: { titre: champs.titre, chapo: champs.chapo, corps: champs.corps } };
+  if (!v.ok)
+    return {
+      ok: false,
+      message: "Certains champs sont à corriger.",
+      erreurs: v.erreurs as Record<string, string>,
+      valeurs: { titre: champs.titre, chapo: champs.chapo, corps: champs.corps },
+    };
   const a = creerArticle(v.donnees);
-  redirect(lienAdmin(`/actualites/${a.id}`));
+  refresh();
+  return { ok: true, message: messageEnregistrement(a), id: a.id };
+}
+
+function messageEnregistrement(a: { statut: "brouillon" | "publie"; publie_le: string | null }): string {
+  const etat = etatArticle(a);
+  if (etat === "publie") return "Actualité publiée : elle est en ligne.";
+  if (etat === "programme") return `Actualité programmée : elle sera en ligne le ${formaterHorodatage(a.publie_le!)}.`;
+  return "Brouillon enregistré (non visible sur le site).";
 }
 
 export async function modifierArticleAction(id: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
   await requireUser();
-  const cur = lireArticle(id);
+  const cur = article(id);
   if (!cur) return { ok: false, message: "Actualité introuvable." };
-  const v = validerArticle(lireChamps(fd), id);
-  if (!v.ok) return { ok: false, erreurs: v.erreurs as Record<string, string> };
-  modifierArticle(id, v.donnees);
-  if (cur.couverture_media_id && cur.couverture_media_id !== v.donnees.couverture_media_id) supprimerMediaSiOrphelin(cur.couverture_media_id);
+  const v = validerArticle(lireChamps(fd), cur.id);
+  if (!v.ok) return { ok: false, message: "Certains champs sont à corriger.", erreurs: v.erreurs as Record<string, string> };
+  const a = modifierArticle(cur.id, v.donnees);
+  if (cur.couverture_media_id && cur.couverture_media_id !== v.donnees.couverture_media_id) nettoyerMedia(cur.couverture_media_id);
   refresh();
-  return { ok: true, message: v.donnees.statut === "publie" ? "Actualité enregistrée et publiée." : "Brouillon enregistré." };
+  return { ok: true, message: a ? messageEnregistrement(a) : "Actualité enregistrée." };
 }
 
 export async function definirStatutArticleAction(id: number, statut: "brouillon" | "publie"): Promise<EtatAction> {
   await requireUser();
-  if (!definirStatutArticle(id, statut === "publie" ? "publie" : "brouillon")) return { ok: false, message: "Actualité introuvable." };
+  const cur = article(id);
+  if (!cur || !definirStatutArticle(cur.id, statut === "publie" ? "publie" : "brouillon")) return { ok: false, message: "Actualité introuvable." };
   refresh();
   return { ok: true, message: statut === "publie" ? "Actualité publiée." : "Actualité repassée en brouillon." };
 }
 
 export async function supprimerArticleAction(id: number): Promise<EtatAction> {
   await requireUser();
-  const a = supprimerArticle(id);
+  const cur = article(id);
+  const a = cur ? supprimerArticle(cur.id) : null;
   if (!a) return { ok: false, message: "Actualité introuvable." };
-  supprimerMediaSiOrphelin(a.couverture_media_id);
+  nettoyerMedia(a.couverture_media_id);
   refresh();
-  return { ok: true, message: "Actualité supprimée." };
+  return { ok: true, message: `Actualité « ${a.titre} » supprimée.` };
 }

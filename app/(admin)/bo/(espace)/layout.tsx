@@ -11,7 +11,11 @@ import { compterMessagesNonLus } from "@/lib/messages";
 export default async function LayoutEspace({ children }: LayoutProps<"/bo">) {
   const u = await requireUser();
   return (
-    <CoqueAdmin utilisateur={{ name: u.name, email: u.email }} actionDeconnexion={actionDeconnexion} pastilles={{ "/messages": compterMessagesNonLus() }}>
+    <CoqueAdmin
+      utilisateur={{ name: u.name, email: u.email }}
+      actionDeconnexion={actionDeconnexion}
+      pastilles={{ "/messages": compterMessagesNonLus() }}
+    >
       {children}
     </CoqueAdmin>
   );

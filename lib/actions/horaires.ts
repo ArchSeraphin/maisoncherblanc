@@ -1,6 +1,6 @@
 "use server";
 
-/** Server Actions « Horaires » : semaine type, horaires exceptionnels, bandeau d'annonce. */
+/** Server Actions « Horaires » : semaine type, horaires exceptionnels, bandeau d'annonce. */
 
 import { refresh } from "next/cache";
 import { requireUser } from "@/lib/auth";
@@ -14,12 +14,18 @@ import {
   validerHoraireExceptionnel,
 } from "@/lib/horaires-exceptionnels";
 import { ecrireReglage, validerAnnonce, validerHoraires } from "@/lib/reglages";
+import { idsValides } from "./schemas";
+
+function horaire(id: unknown) {
+  const ids = idsValides(id);
+  return ids ? lireHoraireExceptionnel(ids[0]) : null;
+}
 
 /** Semaine type : champ caché `horaires` = JSON { lundi: [{ouverture, fermeture}], ... }. */
 export async function enregistrerHorairesAction(_prec: EtatAction, fd: FormData): Promise<EtatAction> {
   await requireUser();
   const v = validerHoraires(champJson<unknown>(fd, "horaires", {}));
-  if (!v.ok) return { ok: false, message: "Certains horaires sont à corriger.", erreurs: v.erreurs as Record<string, string> };
+  if (!v.ok) return { ok: false, message: "Certains horaires sont à corriger (voir en rouge).", erreurs: v.erreurs as Record<string, string> };
   ecrireReglage("horaires", v.donnees);
   refresh();
   return { ok: true, message: "Horaires enregistrés." };
@@ -47,16 +53,17 @@ export async function creerHoraireExceptionnelAction(_prec: EtatAction, fd: Form
     return { ok: false, erreurs: { date: "Cette date a déjà un horaire exceptionnel : modifiez-le dans la liste." } };
   const h = enregistrerHoraireExceptionnel(v.donnees);
   refresh();
-  return { ok: true, message: "Date ajoutée.", id: h.id };
+  return { ok: true, message: h.plages && h.plages.length === 0 ? "Fermeture ajoutée." : "Date ajoutée.", id: h.id };
 }
 
 export async function modifierHoraireExceptionnelAction(id: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
   await requireUser();
-  if (!lireHoraireExceptionnel(id)) return { ok: false, message: "Date introuvable." };
+  const cur = horaire(id);
+  if (!cur) return { ok: false, message: "Date introuvable." };
   const v = validerHoraireExceptionnel(lireChampsExceptionnel(fd));
   if (!v.ok) return { ok: false, erreurs: v.erreurs as Record<string, string> };
   try {
-    modifierHoraireExceptionnel(id, v.donnees);
+    modifierHoraireExceptionnel(cur.id, v.donnees);
   } catch (err) {
     return { ok: false, erreurs: { date: err instanceof Error ? err.message : "Date invalide." } };
   }
@@ -66,7 +73,8 @@ export async function modifierHoraireExceptionnelAction(id: number, _prec: EtatA
 
 export async function supprimerHoraireExceptionnelAction(id: number): Promise<EtatAction> {
   await requireUser();
-  if (!supprimerHoraireExceptionnel(id)) return { ok: false, message: "Date introuvable." };
+  const cur = horaire(id);
+  if (!cur || !supprimerHoraireExceptionnel(cur.id)) return { ok: false, message: "Date introuvable." };
   refresh();
   return { ok: true, message: "Date supprimée." };
 }
