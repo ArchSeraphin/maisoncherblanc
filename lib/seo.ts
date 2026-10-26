@@ -1,29 +1,42 @@
 /**
  * SEO : metadata par page et builders JSON-LD (schema.org).
  *
- * - `construireMetadata()` : titre (modèle « %s | Maison Cherblanc, Roanne »
- *   posé par le layout racine), description, canonical, Open Graph, Twitter,
- *   `noindex` automatique si NOINDEX=1. À appeler dans `generateMetadata()`
- *   (jamais `export const metadata`, figé au build).
+ * - `construireMetadata()` : title, description, canonical ABSOLU (SITE_URL),
+ *   Open Graph, Twitter, robots (`noindex` automatique si NOINDEX=1), locale
+ *   fr_FR. Les pages fixes n'ont qu'à passer `chemin` : title et description
+ *   exacts viennent de `siteConfig.seo.pages` (docs/COPY.md section 18).
+ *   À appeler dans `generateMetadata()` (jamais `export const metadata`, figé au build).
  * - Builders JSON-LD purs (données en paramètre), à sérialiser avec
  *   `<JsonLd donnees={...} />` (components/ui/json-ld.tsx) qui échappe `<`.
+ *   Quel builder sur quelle page : docs/FONDATION.md section 14.
  *
- * Aucune donnée inventée : pas de `geo` tant que `siteConfig.geo` est `null`,
- * pas de note ni d'`aggregateRating`.
+ * Type de l'entité commerce : `["Store", "FoodEstablishment"]` + `additionalType`
+ * Wikidata (boucherie, charcuterie, traiteur). schema.org n'a ni `ButcherShop`
+ * ni `Caterer` ; `Store` (commerce de détail : la boutique) et
+ * `FoodEstablishment` (préparation de plats : le traiteur, porteur de `hasMenu`)
+ * sont deux sous-types valides de `LocalBusiness`, combinables en JSON-LD.
+ *
+ * Aucune donnée inventée : pas de note, pas d'`aggregateRating`, pas d'avis,
+ * pas de `priceRange` (aucune fourchette fournie par le client), pas de
+ * moyens de paiement (question client n° 30).
  */
 
 import type { Metadata } from "next";
-import { JOURS, JOURS_SCHEMA_ORG, siteConfig, type HorairesSemaine } from "@/config/site";
+import { JOURS, JOURS_SCHEMA_ORG, LIBELLES_JOURS, siteConfig, type CleJour, type HorairesSemaine, type Plage } from "@/config/site";
 import type { ArticleAvecCouverture } from "./articles";
 import { compositionEnTexte } from "./composition";
 import { estNoindex, urlSite } from "./env";
 import type { HoraireExceptionnel } from "./horaires-exceptionnels";
+import { formaterHeure } from "./horaires";
 import { texteBrut } from "./markdown";
 import { choisirVariante, urlMedia, type ImageMedia } from "./media-url";
-import type { MenuComplet } from "./menus";
+import type { Menu, MenuComplet } from "./menus";
 import { montantSchema } from "./prix";
 
 export type JsonLdDonnees = Record<string, unknown>;
+
+const CONTEXTE = "https://schema.org";
+const DEMI_CADRATIN = "–";
 
 /** URL absolue à partir d'un chemin (ou URL déjà absolue). */
 export function urlAbsolue(cheminOuUrl: string): string {
@@ -31,79 +44,153 @@ export function urlAbsolue(cheminOuUrl: string): string {
   return `${urlSite()}${cheminOuUrl.startsWith("/") ? "" : "/"}${cheminOuUrl}`;
 }
 
-/** Titre complet tel qu'affiché (modèle appliqué). */
+/** URL canonique d'un chemin : « / » garde son slash, les autres n'en ont pas. */
+export function urlCanonique(chemin: string): string {
+  const propre = chemin === "/" ? "/" : chemin.replace(/\/+$/, "");
+  return urlAbsolue(propre);
+}
+
+/** Titre complet tel qu'affiché (modèle appliqué) pour un titre court sans entrée dans `seo.pages`. */
 export function titreComplet(titre?: string): string {
   return titre ? siteConfig.modeleTitre.replace("%s", titre) : siteConfig.titreParDefaut;
 }
 
-export type ImagePartage = { url: string; width?: number; height?: number; alt?: string };
+/** Title, description et libellé de fil d'Ariane d'une page fixe (docs/COPY.md section 18), ou `null`. */
+export function seoPage(chemin: string): { titre: string; description: string; ariane: string } | null {
+  return siteConfig.seo.pages[chemin] ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// Metadata
+// ---------------------------------------------------------------------------
+
+export type ImagePartage = { url: string; width?: number; height?: number; alt?: string; type?: string };
 
 export type EntreeMetadata = {
-  /** Titre court (le modèle ajoute « | Maison Cherblanc, Roanne »). */
+  /** Chemin canonique, ex. "/carte-traiteur". Suffit pour les pages fixes (title et meta de `siteConfig.seo.pages`). */
+  chemin: string;
+  /** Titre court : le modèle « %s | Maison Cherblanc » est ajouté. */
   titre?: string;
-  /** Titre absolu, sans modèle (accueil). */
+  /** Titre absolu, sans modèle (prioritaire). */
   titreAbsolu?: string;
   description?: string;
-  /** Chemin canonique, ex. "/carte-traiteur". */
-  chemin: string;
-  /** Image de partage : image média (ex. `imageEmplacement("og-defaut")`), objet, chemin ou URL. */
+  /**
+   * Image de partage : image média (ex. `imageEmplacement("traiteur-hero")`),
+   * objet, chemin ou URL. Absente : carte générée `/opengraph-image`
+   * (qui reprend la photo `og-defaut` si elle est renseignée).
+   */
   image?: string | ImagePartage | ImageMedia | null;
   noindex?: boolean;
   type?: "website" | "article";
-  /** Article : date de publication ISO. */
+  /** Article : dates ISO. */
   publieLe?: string | null;
+  modifieLe?: string | null;
 };
+
+/**
+ * Image média -> image de partage. On sert l'ORIGINAL ré-encodé (JPEG ou PNG,
+ * lu par tous les réseaux, contrairement au WebP) s'il reste raisonnable,
+ * sinon la variante 1600.
+ */
+export function imagePartageDepuisMedia(image: ImageMedia): ImagePartage {
+  const o = image.variantes.original;
+  if (o && Math.max(o.largeur, o.hauteur) <= 2400) {
+    const type = o.chemin.endsWith(".png") ? "image/png" : "image/jpeg";
+    return { url: urlAbsolue(urlMedia(o.chemin)), width: o.largeur, height: o.hauteur, alt: image.alt, type };
+  }
+  const v = choisirVariante(image, 1600);
+  return { url: urlAbsolue(urlMedia(v.chemin)), width: v.largeur, height: v.hauteur, alt: image.alt, type: "image/webp" };
+}
 
 function resoudreImage(image: EntreeMetadata["image"]): ImagePartage {
   const def = siteConfig.imagePartageParDefaut;
-  if (!image) return { url: urlAbsolue(def.chemin), width: def.largeur, height: def.hauteur, alt: def.alt };
+  if (!image) return { url: urlAbsolue(def.chemin), width: def.largeur, height: def.hauteur, alt: def.alt, type: "image/png" };
   if (typeof image === "string") return { url: urlAbsolue(image) };
-  if ("variantes" in image) {
-    const v = choisirVariante(image, 1600);
-    return { url: urlAbsolue(urlMedia(v.chemin)), width: v.largeur, height: v.hauteur, alt: image.alt };
-  }
+  if ("variantes" in image) return imagePartageDepuisMedia(image);
   return { ...image, url: urlAbsolue(image.url) };
 }
 
 /** Metadata Next.js d'une page publique. */
 export function construireMetadata(e: EntreeMetadata): Metadata {
-  const description = e.description ?? siteConfig.description;
-  const titreTexte = e.titreAbsolu ?? titreComplet(e.titre);
+  const fixe = seoPage(e.chemin);
+  const titreTexte = e.titreAbsolu ?? (e.titre ? titreComplet(e.titre) : (fixe?.titre ?? siteConfig.titreParDefaut));
+  const description = e.description ?? fixe?.description ?? siteConfig.description;
+  const canonique = urlCanonique(e.chemin);
   const og = resoudreImage(e.image);
   const noindex = e.noindex || estNoindex();
+  const article = e.type === "article";
   return {
-    title: e.titreAbsolu ? { absolute: e.titreAbsolu } : (e.titre ?? { absolute: siteConfig.titreParDefaut }),
+    title: { absolute: titreTexte },
     description,
-    alternates: { canonical: e.chemin },
+    alternates: { canonical: canonique },
     openGraph: {
-      type: e.type ?? "website",
+      type: article ? "article" : "website",
       locale: siteConfig.locale,
       siteName: siteConfig.nom,
       title: titreTexte,
       description,
-      url: e.chemin,
+      url: canonique,
       images: [og],
-      ...(e.type === "article" && e.publieLe ? { publishedTime: e.publieLe } : {}),
+      ...(article && e.publieLe ? { publishedTime: e.publieLe } : {}),
+      ...(article && e.modifieLe ? { modifiedTime: e.modifieLe } : {}),
+      ...(article ? { authors: [siteConfig.nom] } : {}),
     },
-    twitter: { card: "summary_large_image", title: titreTexte, description, images: [og.alt ? { url: og.url, alt: og.alt } : og.url] },
-    robots: noindex ? { index: false, follow: false } : { index: true, follow: true },
+    twitter: {
+      card: "summary_large_image",
+      title: titreTexte,
+      description,
+      images: [og.alt ? { url: og.url, alt: og.alt } : og.url],
+    },
+    robots: noindex
+      ? { index: false, follow: false }
+      : { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
+  };
+}
+
+/**
+ * Title et description de /menus-de-fetes. En saison (au moins un menu),
+ * dérivés du menu en base (COPY.md section 9) ; hors saison, `seo.pages`.
+ */
+export function seoMenusDeFetes(menus: Pick<Menu, "titre" | "slug">[]): { titre: string; description: string } {
+  const horsSaison = siteConfig.seo.pages["/menus-de-fetes"];
+  const menu = menus[0];
+  if (!menu) return { titre: horsSaison.titre, description: horsSaison.description };
+  const texte = `${menu.titre} ${menu.slug}`;
+  const annee = /\b(20\d\d)\b/.exec(texte)?.[1];
+  const fetes = /f[êe]tes|no[ëe]l|fin d.ann[ée]e/i.test(texte);
+  if (fetes && annee === "2026") return { ...siteConfig.seo.fetesEnSaison };
+  if (fetes && annee) {
+    return {
+      titre: `Traiteur Noël à Roanne, menus de fêtes ${annee} | Cherblanc`,
+      description: `Menus de fêtes ${annee} de Maison Cherblanc, boucherie et traiteur à Roanne : menus, carte des fêtes, prix, dates limites de commande et horaires.`,
+    };
+  }
+  return {
+    titre: `${menu.titre} à Roanne | Maison Cherblanc`,
+    description: `${menu.titre} de Maison Cherblanc, boucherie et traiteur à Roanne : menu, prix et dates de commande.`,
   };
 }
 
 // ---------------------------------------------------------------------------
-// JSON-LD
+// JSON-LD : identifiants et briques
 // ---------------------------------------------------------------------------
 
-/** Sérialisation sûre pour <script type="application/ld+json">. */
+/** Sérialisation sûre pour <script type="application/ld+json"> (`<` échappé : `</script>` impossible). */
 export function serialiserJsonLd(d: JsonLdDonnees | JsonLdDonnees[]): string {
-  return JSON.stringify(d).replace(/</g, "\\u003c");
+  return JSON.stringify(d).replace(/</g, "\\u003c").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
 }
 
 export const idCommerce = () => `${urlSite()}/#commerce`;
 export const idSiteWeb = () => `${urlSite()}/#site`;
 export const idCarteTraiteur = () => `${urlSite()}/carte-traiteur#carte`;
+export const idLogo = () => `${urlSite()}/#logo`;
 
-function adressePostale(): JsonLdDonnees {
+/** URL absolue d'une image média (variante WebP 1600 px) ou d'un chemin. */
+function urlImage(i: ImageMedia | string): string {
+  return typeof i === "string" ? urlAbsolue(i) : urlAbsolue(urlMedia(choisirVariante(i, 1600).chemin));
+}
+
+export function adressePostale(): JsonLdDonnees {
   const a = siteConfig.adresse;
   return {
     "@type": "PostalAddress",
@@ -113,6 +200,24 @@ function adressePostale(): JsonLdDonnees {
     addressRegion: a.region,
     addressCountry: a.pays,
   };
+}
+
+/** Zone servie : communes (City) et territoires (AdministrativeArea). */
+export function zoneServie(): JsonLdDonnees[] {
+  return siteConfig.zone.map((nom) =>
+    /roannais|loire/i.test(nom) ? { "@type": "AdministrativeArea", name: nom } : { "@type": "City", name: nom },
+  );
+}
+
+/** Logo (PNG 512 px : Google demande une image matricielle d'au moins 112 px). */
+export function logoJsonLd(): JsonLdDonnees {
+  const url = urlAbsolue("/icons/icon-512.png");
+  return { "@type": "ImageObject", "@id": idLogo(), url, contentUrl: url, width: 512, height: 512, caption: siteConfig.nom };
+}
+
+/** Éditeur (Article, Menu...) : bloc autonome, sans dépendre d'un autre JSON-LD de la page. */
+export function editeurJsonLd(): JsonLdDonnees {
+  return { "@type": "Organization", "@id": idCommerce(), name: siteConfig.nom, url: `${urlSite()}/`, logo: logoJsonLd() };
 }
 
 /** Semaine type -> openingHoursSpecification (jours aux plages identiques regroupés). */
@@ -132,7 +237,8 @@ export function specificationHoraires(h: HorairesSemaine): JsonLdDonnees[] {
 /**
  * Horaires exceptionnels -> specialOpeningHoursSpecification. Fermé : opens =
  * closes = "00:00" (convention Google). Horaires précisés seulement en note
- * (`plages = null`) : non publiés (aucune heure inventée).
+ * (`plages = null`, ex. « commandes à récupérer avant 17h ») : non publiés
+ * (aucune heure inventée).
  */
 export function specificationHorairesExceptionnels(liste: HoraireExceptionnel[]): JsonLdDonnees[] {
   const out: JsonLdDonnees[] = [];
@@ -146,38 +252,54 @@ export function specificationHorairesExceptionnels(liste: HoraireExceptionnel[])
   return out;
 }
 
-/** Le commerce (boucherie-charcuterie et traiteur). Horaires lus en base par l'appelant. */
+// ---------------------------------------------------------------------------
+// JSON-LD : entités
+// ---------------------------------------------------------------------------
+
+/**
+ * Le commerce (boucherie-charcuterie et traiteur). Données lues en base par
+ * l'appelant : `commerceJsonLd({ horaires: lireHoraires(), exceptionnels:
+ * horairesExceptionnelsAVenir(60), images: [...] })`.
+ */
 export function commerceJsonLd(e: {
   horaires: HorairesSemaine;
   exceptionnels?: HoraireExceptionnel[];
-  images?: (ImageMedia | string)[];
+  images?: (ImageMedia | string | null | undefined)[];
+  /** Menus de saison en cours (page /menus-de-fetes), ajoutés à `hasMenu`. Images provisoires (IA) ignorées. */
+  menusSaison?: Pick<Menu, "slug" | "titre">[];
 }): JsonLdDonnees {
   const site = urlSite();
-  const images = (e.images ?? [])
-    .map((i) => (typeof i === "string" ? urlAbsolue(i) : urlAbsolue(urlMedia(choisirVariante(i, 1600).chemin))))
-    .filter(Boolean);
+  // Visuels provisoires (IA) exclus : l'entité ne montre que de vraies photos.
+  const images = (e.images ?? []).filter((i): i is ImageMedia | string => !!i && (typeof i === "string" || !i.provisoire)).map(urlImage);
   const editeur = siteConfig.legal.editeur;
+  const menus: JsonLdDonnees[] = [{ "@type": "Menu", "@id": idCarteTraiteur(), name: "Carte traiteur", url: urlAbsolue("/carte-traiteur") }];
+  for (const m of e.menusSaison ?? []) menus.push({ "@type": "Menu", "@id": `${urlAbsolue("/menus-de-fetes")}#${m.slug}`, name: m.titre, url: urlAbsolue("/menus-de-fetes") });
   const donnees: JsonLdDonnees = {
-    "@context": "https://schema.org",
+    "@context": CONTEXTE,
     "@type": ["Store", "FoodEstablishment"],
     "@id": idCommerce(),
+    additionalType: [...siteConfig.seo.typesWikidata],
     name: siteConfig.nom,
     description: siteConfig.description,
+    slogan: siteConfig.signature,
     url: `${site}/`,
     telephone: siteConfig.telephones.boutique.e164,
     email: siteConfig.email,
     image: images.length ? images : [urlAbsolue(siteConfig.imagePartageParDefaut.chemin)],
-    logo: urlAbsolue("/icons/icon-512.png"),
+    logo: logoJsonLd(),
     address: adressePostale(),
-    areaServed: siteConfig.zone.map((name) => ({ "@type": "Place", name })),
+    areaServed: zoneServie(),
     openingHoursSpecification: specificationHoraires(e.horaires),
-    hasMenu: { "@type": "Menu", "@id": idCarteTraiteur(), url: urlAbsolue("/carte-traiteur") },
+    hasMenu: menus.length === 1 ? menus[0] : menus,
     hasMap: siteConfig.itineraire,
+    currenciesAccepted: "EUR",
+    knowsLanguage: "fr",
     sameAs: [siteConfig.reseaux.facebook, siteConfig.reseaux.instagram],
-    founder: { "@type": "Person", name: siteConfig.dirigeant },
   };
   if (editeur.denomination) donnees.legalName = editeur.denomination;
+  if (editeur.immatriculation) donnees.foundingDate = editeur.immatriculation;
   if (editeur.tva) donnees.vatID = editeur.tva;
+  if (editeur.siret) donnees.identifier = { "@type": "PropertyValue", propertyID: "SIRET", value: editeur.siret.replace(/\s/g, "") };
   const speciaux = specificationHorairesExceptionnels(e.exceptionnels ?? []);
   if (speciaux.length) donnees.specialOpeningHoursSpecification = speciaux;
   if (siteConfig.geo) donnees.geo = { "@type": "GeoCoordinates", latitude: siteConfig.geo.latitude, longitude: siteConfig.geo.longitude };
@@ -186,13 +308,41 @@ export function commerceJsonLd(e: {
 
 export function siteWebJsonLd(): JsonLdDonnees {
   return {
-    "@context": "https://schema.org",
+    "@context": CONTEXTE,
     "@type": "WebSite",
     "@id": idSiteWeb(),
     url: `${urlSite()}/`,
     name: siteConfig.nom,
+    description: siteConfig.descriptionCourte,
     inLanguage: "fr-FR",
     publisher: { "@id": idCommerce() },
+  };
+}
+
+/**
+ * Page web typée (AboutPage pour /la-maison, ContactPage pour /contact,
+ * WebPage ailleurs si besoin). Title et description de `seo.pages` par défaut.
+ */
+export function pageWebJsonLd(e: {
+  chemin: string;
+  type?: "WebPage" | "AboutPage" | "ContactPage" | "CollectionPage";
+  nom?: string;
+  description?: string;
+  image?: ImageMedia | string | null;
+}): JsonLdDonnees {
+  const fixe = seoPage(e.chemin);
+  const url = urlCanonique(e.chemin);
+  return {
+    "@context": CONTEXTE,
+    "@type": e.type ?? "WebPage",
+    "@id": `${url}#page`,
+    url,
+    name: e.nom ?? fixe?.titre ?? siteConfig.titreParDefaut,
+    description: e.description ?? fixe?.description ?? siteConfig.description,
+    inLanguage: "fr-FR",
+    isPartOf: { "@id": idSiteWeb() },
+    about: { "@id": idCommerce() },
+    ...(e.image ? { primaryImageOfPage: { "@type": "ImageObject", url: urlImage(e.image) } } : {}),
   };
 }
 
@@ -200,30 +350,52 @@ export function siteWebJsonLd(): JsonLdDonnees {
 export function filArianeJsonLd(elements: { nom: string; chemin: string }[]): JsonLdDonnees {
   const tous = [{ nom: "Accueil", chemin: "/" }, ...elements.filter((e) => e.chemin !== "/")];
   return {
-    "@context": "https://schema.org",
+    "@context": CONTEXTE,
     "@type": "BreadcrumbList",
-    itemListElement: tous.map((e, i) => ({ "@type": "ListItem", position: i + 1, name: e.nom, item: urlAbsolue(e.chemin) })),
+    itemListElement: tous.map((e, i) => ({ "@type": "ListItem", position: i + 1, name: e.nom, item: urlCanonique(e.chemin) })),
   };
+}
+
+/**
+ * Éléments du fil d'Ariane d'un chemin (libellés `seo.pages[...].ariane`) :
+ * "/traiteur-roanne/mariage" -> Traiteur à Roanne › Mariage. `dernier` remplace
+ * le libellé du dernier élément (ex. titre d'un article). À utiliser pour le fil
+ * VISIBLE et pour `filArianeJsonLd(...)`, afin qu'ils restent identiques.
+ */
+export function elementsFilAriane(chemin: string, dernier?: string): { nom: string; chemin: string }[] {
+  const segments = chemin.split("/").filter(Boolean);
+  const out: { nom: string; chemin: string }[] = [];
+  for (let i = 0; i < segments.length; i++) {
+    const c = `/${segments.slice(0, i + 1).join("/")}`;
+    const estDernier = i === segments.length - 1;
+    const nom = estDernier && dernier ? dernier : seoPage(c)?.ariane;
+    if (nom) out.push({ nom, chemin: c });
+  }
+  return out;
 }
 
 export function faqJsonLd(questions: { question: string; reponse: string }[]): JsonLdDonnees {
   return {
-    "@context": "https://schema.org",
+    "@context": CONTEXTE,
     "@type": "FAQPage",
     mainEntity: questions.map((q) => ({ "@type": "Question", name: q.question, acceptedAnswer: { "@type": "Answer", text: q.reponse } })),
   };
 }
 
-/** Menu schema.org depuis un menu complet (sections visibles). */
+/** Menu schema.org depuis un menu complet (sections et plats visibles). */
 export function menuJsonLd(menu: MenuComplet, chemin: string): JsonLdDonnees {
   return {
-    "@context": "https://schema.org",
+    "@context": CONTEXTE,
     "@type": "Menu",
     "@id": menu.slug === "carte-traiteur" ? idCarteTraiteur() : `${urlAbsolue(chemin)}#${menu.slug}`,
     name: menu.titre,
-    ...(menu.intro ? { description: menu.intro } : {}),
+    ...(menu.intro || menu.sous_titre ? { description: menu.intro || menu.sous_titre } : {}),
     inLanguage: "fr-FR",
-    url: urlAbsolue(chemin),
+    url: urlCanonique(chemin),
+    publisher: editeurJsonLd(),
+    ...(menu.pdf
+      ? { associatedMedia: { "@type": "MediaObject", contentUrl: urlAbsolue(menu.pdf.url), encodingFormat: "application/pdf", name: menu.pdf.nom } }
+      : {}),
     hasMenuSection: menu.sections.map((s) => ({
       "@type": "MenuSection",
       name: s.titre,
@@ -242,20 +414,266 @@ export function menuJsonLd(menu: MenuComplet, chemin: string): JsonLdDonnees {
   };
 }
 
+/** Prestations traiteur (une page chacune). Textes tirés de docs/COPY.md (meta et chapôs des pages). */
+export const SERVICES_TRAITEUR = {
+  "/traiteur-roanne": {
+    nom: "Traiteur à Roanne",
+    type: "Traiteur",
+    description:
+      "Plateaux, plats cuisinés, cocktails dînatoires, buffets et repas de mariage préparés par Maison Cherblanc à Roanne. Commande une semaine avant, option service à table, devis gratuit.",
+  },
+  "/traiteur-roanne/mariage": {
+    nom: "Traiteur mariage à Roanne",
+    type: "Traiteur mariage",
+    description:
+      "Vin d’honneur, buffet ou repas servi, plateaux de fromages, pièce montée et macarons pour les mariages à Roanne et dans le Roannais. Option service à table, devis gratuit.",
+  },
+  "/traiteur-roanne/cocktail-dinatoire": {
+    nom: "Cocktail dînatoire et buffets à Roanne",
+    type: "Cocktail dînatoire et buffet",
+    description:
+      "Pièces cocktail à l’unité (mini burgers, wraps, verrines), plateaux de charcuterie, de fromages et de légumes pour vos cocktails dînatoires et buffets à Roanne. Commande une semaine avant.",
+  },
+  "/traiteur-roanne/broche-barbecue": {
+    nom: "Jambon à la broche et barbecue à Roanne",
+    type: "Animation culinaire : jambon à la broche et barbecue",
+    description:
+      "Jambons cuits à la broche sur une rôtissoire installée sur place et côtes de bœuf au barbecue, cuits devant vos invités lors de vos réceptions à Roanne. Devis gratuit.",
+  },
+} as const satisfies Record<string, { nom: string; type: string; description: string }>;
+
+export type CheminService = keyof typeof SERVICES_TRAITEUR;
+
+/**
+ * Prestation traiteur (Service). Sur /traiteur-roanne, passer `sousServices`
+ * pour lister les trois sous-prestations (`hasOfferCatalog`).
+ */
+export function serviceJsonLd(chemin: CheminService, opts: { image?: ImageMedia | string | null; sousServices?: boolean } = {}): JsonLdDonnees {
+  const s = SERVICES_TRAITEUR[chemin];
+  const url = urlCanonique(chemin);
+  const donnees: JsonLdDonnees = {
+    "@context": CONTEXTE,
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name: s.nom,
+    serviceType: s.type,
+    description: s.description,
+    url,
+    provider: {
+      "@type": ["Store", "FoodEstablishment"],
+      "@id": idCommerce(),
+      name: siteConfig.nom,
+      url: `${urlSite()}/`,
+      telephone: siteConfig.telephones.boutique.e164,
+      address: adressePostale(),
+    },
+    areaServed: zoneServie(),
+    availableChannel: {
+      "@type": "ServiceChannel",
+      serviceUrl: urlCanonique("/contact"),
+      servicePhone: { "@type": "ContactPoint", telephone: siteConfig.telephones.boutique.e164, contactType: "customer service", availableLanguage: "fr" },
+    },
+    ...(opts.image ? { image: urlImage(opts.image) } : {}),
+  };
+  if (opts.sousServices) {
+    donnees.hasOfferCatalog = {
+      "@type": "OfferCatalog",
+      name: "Prestations traiteur",
+      itemListElement: (Object.keys(SERVICES_TRAITEUR) as CheminService[])
+        .filter((c) => c !== chemin)
+        .map((c) => ({ "@type": "Offer", itemOffered: { "@type": "Service", "@id": `${urlCanonique(c)}#service`, name: SERVICES_TRAITEUR[c].nom, url: urlCanonique(c), provider: { "@id": idCommerce() } } })),
+    };
+  }
+  return donnees;
+}
+
 export function articleJsonLd(a: ArticleAvecCouverture): JsonLdDonnees {
-  const chemin = `/actualites/${a.slug}`;
+  const url = urlCanonique(`/actualites/${a.slug}`);
   return {
-    "@context": "https://schema.org",
+    "@context": CONTEXTE,
     "@type": "BlogPosting",
+    "@id": `${url}#article`,
     headline: a.titre,
     description: a.description_seo || a.chapo || texteBrut(a.corps, 160),
-    url: urlAbsolue(chemin),
-    mainEntityOfPage: urlAbsolue(chemin),
+    url,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
     inLanguage: "fr-FR",
     ...(a.publie_le ? { datePublished: a.publie_le } : {}),
     dateModified: a.updated_at,
-    ...(a.couverture ? { image: [urlAbsolue(urlMedia(choisirVariante(a.couverture, 1600).chemin))] } : {}),
-    author: { "@type": "Organization", name: siteConfig.nom, url: `${urlSite()}/` },
-    publisher: { "@id": idCommerce() },
+    image: a.couverture ? [urlImage(a.couverture)] : [urlAbsolue(siteConfig.imagePartageParDefaut.chemin)],
+    author: { "@type": "Organization", "@id": idCommerce(), name: siteConfig.nom, url: `${urlSite()}/` },
+    publisher: editeurJsonLd(),
+    isPartOf: { "@id": idSiteWeb() },
   };
+}
+
+/** Liste des actualités (/actualites) : CollectionPage + ItemList des articles affichés. */
+export function listeArticlesJsonLd(articles: Pick<ArticleAvecCouverture, "slug" | "titre">[]): JsonLdDonnees {
+  const url = urlCanonique("/actualites");
+  const fixe = seoPage("/actualites");
+  return {
+    "@context": CONTEXTE,
+    "@type": "CollectionPage",
+    "@id": `${url}#page`,
+    url,
+    name: fixe?.titre,
+    description: fixe?.description,
+    inLanguage: "fr-FR",
+    isPartOf: { "@id": idSiteWeb() },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: articles.map((a, i) => ({ "@type": "ListItem", position: i + 1, url: urlCanonique(`/actualites/${a.slug}`), name: a.titre })),
+    },
+  };
+}
+
+/**
+ * Galerie (/realisations) : ImageGallery des photos affichées. Les photos
+ * réelles portent le crédit Maison Cherblanc ; un visuel provisoire (IA)
+ * n'en porte pas.
+ */
+export function galerieJsonLd(photos: { image: ImageMedia; legende?: string | null }[], opts: { chemin?: string } = {}): JsonLdDonnees {
+  const url = urlCanonique(opts.chemin ?? "/realisations");
+  const fixe = seoPage("/realisations");
+  return {
+    "@context": CONTEXTE,
+    "@type": "ImageGallery",
+    "@id": `${url}#galerie`,
+    url,
+    name: fixe?.titre,
+    description: fixe?.description,
+    inLanguage: "fr-FR",
+    isPartOf: { "@id": idSiteWeb() },
+    about: { "@id": idCommerce() },
+    image: photos.map(({ image, legende }) => {
+      const v = choisirVariante(image, 1600);
+      return {
+        "@type": "ImageObject",
+        contentUrl: urlAbsolue(urlMedia(v.chemin)),
+        width: v.largeur,
+        height: v.hauteur,
+        ...(legende ? { caption: legende } : {}),
+        ...(image.alt ? { description: image.alt } : {}),
+        ...(image.provisoire
+          ? {}
+          : { creditText: siteConfig.nom, creator: { "@type": "Organization", "@id": idCommerce(), name: siteConfig.nom }, copyrightNotice: `© ${siteConfig.nom}` }),
+      };
+    }),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// FAQ (docs/COPY.md sections 3 et 4) : le MÊME texte est affiché et balisé
+// ---------------------------------------------------------------------------
+
+export type QuestionFaq = { question: string; reponse: string };
+
+function heurePlage(p: Plage): string {
+  return `${formaterHeure(p.ouverture)}${DEMI_CADRATIN}${formaterHeure(p.fermeture)}`;
+}
+
+function enContinu(plages: Plage[]): boolean {
+  return plages.length === 1 && plages[0].ouverture < "12:00" && plages[0].fermeture > "14:00";
+}
+
+function listeJours(jours: CleJour[]): string {
+  const noms = jours.map((j, i) => (i === 0 ? LIBELLES_JOURS[j] : LIBELLES_JOURS[j].toLowerCase()));
+  return noms.length <= 1 ? (noms[0] ?? "") : `${noms.slice(0, -1).join(", ")} et ${noms[noms.length - 1]}`;
+}
+
+/**
+ * Horaires en une phrase, jours aux horaires identiques regroupés (même non
+ * consécutifs) : « Mardi et vendredi : 7h30–13h et 15h–19h. … Fermé le lundi. »
+ */
+export function phraseHoraires(h: HorairesSemaine): string {
+  const groupes = new Map<string, { jours: CleJour[]; plages: Plage[] }>();
+  const fermes: CleJour[] = [];
+  for (const j of JOURS) {
+    if (h[j].length === 0) {
+      fermes.push(j);
+      continue;
+    }
+    const cle = h[j].map(heurePlage).join(" et ");
+    const g = groupes.get(cle) ?? { jours: [], plages: h[j] };
+    g.jours.push(j);
+    groupes.set(cle, g);
+  }
+  const phrases = [...groupes.entries()].map(([texte, g]) => `${listeJours(g.jours)} : ${texte}${enContinu(g.plages) ? " en continu" : ""}.`);
+  if (fermes.length) phrases.push(`Fermé le ${fermes.map((j) => LIBELLES_JOURS[j].toLowerCase()).join(" et le ")}.`);
+  return phrases.join(" ");
+}
+
+/** FAQ de /boucherie-roanne (COPY.md section 3, réponses par défaut des points [À VALIDER]). */
+export function faqBoucherie(horaires: HorairesSemaine): QuestionFaq[] {
+  const tel = siteConfig.telephones.boutique.affichage;
+  const dimanche = horaires.dimanche;
+  const reponseDimanche = dimanche.length
+    ? `Oui, le dimanche${dimanche[dimanche.length - 1].fermeture <= "13:00" ? " matin" : ""} ${dimanche.map((p) => `de ${formaterHeure(p.ouverture)} à ${formaterHeure(p.fermeture)}`).join(" et ")}.`
+    : "Non, la boutique est fermée le dimanche.";
+  return [
+    {
+      question: "Quels sont les horaires de la boucherie Maison Cherblanc à Roanne ?",
+      reponse: `${phraseHoraires(horaires)} Les horaires changent pendant les fêtes de fin d’année : ils sont publiés sur la page des menus de fêtes.`,
+    },
+    { question: "Êtes-vous ouverts le dimanche ?", reponse: reponseDimanche },
+    {
+      question: "Peut-on commander sa viande à l’avance ?",
+      reponse: `Oui. Appelez la boutique au ${tel}, passez au comptoir, ou écrivez-nous depuis la page contact en précisant les pièces, les quantités et le jour de retrait. C’est conseillé pour une grosse pièce, une découpe particulière ou une grande quantité.`,
+    },
+    {
+      question: "Faut-il commander les volailles de Noël ?",
+      reponse:
+        "Oui. Les volailles de fête (dinde, poularde, chapon, poulet de Bresse, pintade, canard ou canette, caille) sont vendues uniquement sur commande. Pour Noël 2026, la date limite est le dimanche 20 décembre.",
+    },
+    {
+      question: "D’où vient votre viande ?",
+      reponse: "L’origine des viandes est indiquée en boutique. Demandez-nous, nous vous dirons d’où vient chaque pièce.",
+    },
+    {
+      question: "Faites-vous aussi traiteur ?",
+      reponse:
+        "Oui. Maison Cherblanc est aussi traiteur : plateaux, plats cuisinés, cocktails, buffets et repas de mariage, avec une option service à table. La carte et les prix sont en ligne sur la page carte traiteur.",
+    },
+    { question: "Livrez-vous à domicile ?", reponse: "Les commandes de la boucherie se retirent en boutique." },
+  ];
+}
+
+/** FAQ de /traiteur-roanne (COPY.md section 4, réponses par défaut des points [À VALIDER]). */
+export function faqTraiteur(): QuestionFaq[] {
+  const t = siteConfig.telephones;
+  return [
+    {
+      question: "Combien de temps à l’avance faut-il commander ?",
+      reponse:
+        "Une semaine avant la date, au minimum. Pour un mariage, une grande réception ou une date de fin d’année, contactez-nous dès que la date est fixée. Pour les fêtes, les dates limites sont publiées sur la page menus de fêtes : pour 2026, le dimanche 20 décembre pour Noël et le jeudi 24 décembre pour le jour de l’An.",
+    },
+    {
+      question: "Proposez-vous le service à table ?",
+      reponse:
+        "Oui. L’option service à table est disponible pour vos réceptions. Elle est chiffrée dans le devis, selon le nombre d’invités et la durée du service.",
+    },
+    {
+      question: "Le devis est-il gratuit ?",
+      reponse: `Oui, le devis est gratuit. Écrivez-nous depuis la page contact ou appelez le ${t.boutique.affichage} ou le ${t.mobile.affichage}.`,
+    },
+    {
+      question: "Combien coûte un plateau par personne ?",
+      reponse:
+        "Sur la carte 2027 : 6 € par personne pour le plateau de charcuterie (jambon blanc, jambon cru, rosette, terrine, chorizo), 4,90 € pour le plateau de fromages (brie de Meaux, camembert, chèvre, comté), 4 € pour le plateau de légumes crus avec sa sauce. La formule du chef est à 14 € par personne.",
+    },
+    {
+      question: "Livrez-vous ?",
+      reponse: `Les commandes se retirent à la boutique, ${siteConfig.adresse.rue} à ${siteConfig.adresse.ville}. Pour une réception avec service à table, l’équipe vient sur le lieu de l’événement.`,
+    },
+    {
+      question: "Avez-vous des options végétariennes ?",
+      reponse:
+        "Oui : le petit dînatoire compte un toast de saison vegan, le plateau de légumes crus et le plateau de fromages conviennent aux végétariens. Pour d’autres régimes, dites-le-nous à la demande de devis.",
+    },
+    {
+      question: "Faites-vous les commandes de fêtes ?",
+      reponse:
+        "Oui. Chaque année, nous publions un menu de fêtes avec entrées, plats cuisinés, accompagnements, volailles sur commande et petit dînatoire de Noël, ainsi que les horaires d’ouverture exceptionnels.",
+    },
+  ];
 }

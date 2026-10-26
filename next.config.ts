@@ -8,7 +8,9 @@ import type { NextConfig } from "next";
  * - Modules natifs en `serverExternalPackages`.
  * - Redirections de confort des routes de la v1 (jamais indexées) en 301 explicite
  *   (`statusCode`), `permanent: true` produirait un 308.
- * - En-têtes de sécurité posés par proxy.ts (pas ici) ; `/media/*` par sa route.
+ * - En-têtes de sécurité posés par proxy.ts (pas ici, pour ne pas les doubler) ;
+ *   `/media/*` par sa route ; HSTS seulement en production HTTPS (proxy.ts) : ne pas
+ *   l'ajouter aussi dans les étiquettes Traefik de Coolify (en-tête doublé).
  */
 const nextConfig: NextConfig = {
   // Next 16.4 réécrit AGENTS.md à chaque `next dev` (texte avec tiret cadratin) : désactivé.
@@ -45,6 +47,14 @@ const nextConfig: NextConfig = {
       ...vers("/menus-de-fetes", "/noel"),
       // Ancienne forme de l'URL (les photos montrent une rôtissoire à broche, pas un fumoir).
       ...vers("/traiteur-roanne/broche-barbecue", "/traiteur-roanne/broche-barbecue-fumoir"),
+      // Hôte unique : www -> domaine nu (canonical et sitemap utilisent https://maisoncherblanc.fr).
+      // Sans effet tant que le DNS de www ne pointe pas sur l'application.
+      {
+        source: "/:chemin*",
+        has: [{ type: "host" as const, value: "www.maisoncherblanc.fr" }],
+        destination: "https://maisoncherblanc.fr/:chemin*",
+        statusCode: 301 as const,
+      },
     ];
   },
 };

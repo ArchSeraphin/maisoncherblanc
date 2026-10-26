@@ -475,3 +475,58 @@ Fichiers communs gelés (changement = coordinateur) : `lib/db.ts` (schéma), `li
   de « Réouverture le mardi 5 janvier 2027 ».
 - Photos : le croquembouche et le gâteau aux framboises montrent les prénoms et la date d'un mariage (accord du client avant publication).
 - Carte 2027 valable à partir du 1er janvier 2027 : prix de 2026 non fournis (le contrat indique les mêmes plats).
+
+## 14. SEO : builders par page (lot C)
+
+Tout est dans `lib/seo.ts` ; les blocs JSON-LD se rendent avec `<JsonLd donnees={[...]} />` (`components/ui/json-ld.tsx`,
+`<` échappé, entrées `null`/`false` ignorées : `cond && bloc`). Le JSON-LD est rendu côté serveur, dans la page (jamais dans un composant client).
+
+### Metadata
+- Pages fixes : `construireMetadata({ chemin: "/boucherie-roanne", image: imageEmplacement("boucherie-hero") })` suffit. Title (ABSOLU)
+  et meta exacts de COPY.md section 18 viennent de `siteConfig.seo.pages[chemin]` ; ne pas les recopier dans la page.
+  Canonical absolu (`SITE_URL`), `og:url`, `og:locale fr_FR`, Twitter `summary_large_image`, `robots` (noindex auto si `NOINDEX=1`,
+  sinon `max-image-preview:large`).
+- Image de partage : une **vraie photo** de la page (emplacement hero) ou rien. Sans `image`, la carte générée `/opengraph-image`
+  (olive, monogramme, photo `og-defaut` en volet gauche) est utilisée : c'est le meilleur choix pour l'accueil, les pages légales,
+  /actualites et /contact. Éviter de passer un visuel provisoire IA (`image.provisoire`) : `image: hero?.provisoire ? null : hero`.
+- `/menus-de-fetes` : `const t = seoMenusDeFetes(menusDeSaisonEnCours())` puis
+  `construireMetadata({ chemin: "/menus-de-fetes", titreAbsolu: t.titre, description: t.description, image })` (en saison : titre
+  dérivé du menu en base ; hors saison : texte de COPY.md).
+- Article : ``construireMetadata({ chemin: `/actualites/${a.slug}`, titreAbsolu: a.titre_seo || `${a.titre} | Maison Cherblanc`,
+  description: a.description_seo || a.chapo, image: a.couverture, type: "article", publieLe: a.publie_le, modifieLe: a.updated_at })``.
+- 404 : déjà `noindex` (global-not-found). Ne jamais mettre `noindex` sur une page publique en production.
+
+### JSON-LD par page
+| Page | Blocs à rendre |
+|---|---|
+| `/` | `commerceJsonLd({ horaires: lireHoraires(), exceptionnels: horairesExceptionnelsAVenir(60), images: [photos réelles des portes], menusSaison: menusDeSaisonEnCours() })`, `siteWebJsonLd()` |
+| `/boucherie-roanne` | `filArianeJsonLd(elementsFilAriane("/boucherie-roanne"))`, `faqJsonLd(faqBoucherie(lireHoraires()))` |
+| `/traiteur-roanne` | fil d'Ariane, `serviceJsonLd("/traiteur-roanne", { image, sousServices: true })`, `faqJsonLd(faqTraiteur())` |
+| `/traiteur-roanne/mariage`, `/cocktail-dinatoire`, `/broche-barbecue` | fil d'Ariane, `serviceJsonLd(chemin, { image })` |
+| `/carte-traiteur` | fil d'Ariane, `menuJsonLd(carte, "/carte-traiteur")` |
+| `/menus-de-fetes` | fil d'Ariane, `menuJsonLd(menu, "/menus-de-fetes")` pour chaque menu en cours (rien hors saison) |
+| `/realisations` | fil d'Ariane, `galerieJsonLd(realisations.map((r) => ({ image: r.image, legende: r.legende })))` (photos affichées) |
+| `/la-maison` | fil d'Ariane, `pageWebJsonLd({ chemin: "/la-maison", type: "AboutPage", image })` |
+| `/actualites` | fil d'Ariane, `listeArticlesJsonLd(articles)` |
+| `/actualites/[slug]` | ``filArianeJsonLd(elementsFilAriane(`/actualites/${slug}`, article.titre))``, `articleJsonLd(article)` |
+| `/contact` | fil d'Ariane, `pageWebJsonLd({ chemin: "/contact", type: "ContactPage", image })`, `commerceJsonLd({...})` (même appel que l'accueil : adresse, horaires et fermetures à côté du formulaire) |
+| légales | fil d'Ariane seulement |
+
+- **FAQ** : `faqBoucherie(horaires)` et `faqTraiteur()` renvoient `[{ question, reponse }]` (texte de COPY.md, horaires calculés depuis
+  la base, téléphones de `siteConfig`). Les AFFICHER telles quelles et passer le même tableau à `faqJsonLd` : le balisage doit
+  correspondre au texte visible. Une réponse [À VALIDER] se change dans `lib/seo.ts` (lot C), pas dans la page.
+- **Fil d'Ariane** : `elementsFilAriane(chemin, dernier?)` donne les libellés (« Accueil › Traiteur à Roanne › Mariage », libellés
+  `seo.pages[...].ariane`) : l'utiliser pour le fil VISIBLE et pour `filArianeJsonLd` (l'accueil est ajouté par le builder).
+- `phraseHoraires(h)` : « Mardi et vendredi : 7h30–13h et 15h–19h. … Fermé le lundi. » (passage autonome citable).
+- Pas d'`aggregateRating`, pas de `review` : même quand des avis sont saisis au BO (avis Google repris = balisage interdit).
+- Type de l'entité : `["Store", "FoodEstablishment"]` + `additionalType` Wikidata (Q13164546 boucherie, Q16140622 charcuterie,
+  Q377117 traiteur) ; schema.org n'a ni `ButcherShop` ni `Caterer`. `geo` : 46.038577, 4.057986 (Base Adresse Nationale).
+  Images de l'entité : vraies photos seulement (les provisoires sont filtrées).
+
+### Fichiers du lot C
+`app/(site)/sitemap.ts` (pages fixes, articles, menus datés, images des emplacements hors IA ; vide si `NOINDEX=1`) ·
+`app/robots.ts` (tout ouvert y compris robots IA ; `Disallow: /` si `NOINDEX=1` ; jamais le chemin du BO) · `app/manifest.ts` ·
+`app/opengraph-image.tsx` (1200 x 630, polices locales `public/fonts/og/`, OFL) · `app/llms.txt/route.ts` (présentation pour les
+moteurs IA, horaires, fermetures, menus et articles lus en base) · redirections 301 et `www` -> domaine nu dans `next.config.ts` ·
+`scripts/seed-contenus.ts` (4 actualités de lancement, idempotent par slug ; `contact-boutique`).
+Contrôle : `npx tsx` d'un script appelant les builders + validateur schema.org (0 erreur, 0 avertissement le 26/10/2026).
