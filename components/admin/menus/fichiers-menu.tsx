@@ -6,7 +6,7 @@ import { definirCouvertureMenuAction, retirerCouvertureMenuAction, retirerPdfMen
 import { formaterPoids, type DocumentMedia, type ImageMedia } from "@/lib/media-url";
 import { useExecuter } from "../executer";
 import { Icone } from "../icones";
-import { EnvoiFichier, Mediatheque, Vignette } from "../photos/choix-photo";
+import { EnvoiFichier, Mediatheque, Vignette, type ImagePourChoix } from "../photos/choix-photo";
 import { useConfirmer } from "../retours";
 
 export function FichiersMenu({
@@ -18,7 +18,7 @@ export function FichiersMenu({
   menuId: number;
   pdf: DocumentMedia | null;
   couverture: ImageMedia | null;
-  mediatheque: ImageMedia[];
+  mediatheque: ImagePourChoix[];
 }) {
   const [executer, enCours] = useExecuter();
   const confirmer = useConfirmer();

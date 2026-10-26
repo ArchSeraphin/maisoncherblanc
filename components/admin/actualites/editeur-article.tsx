@@ -12,13 +12,12 @@ import { useRef, useState } from "react";
 import { Markdown } from "@/components/ui/markdown";
 import { creerArticleAction, modifierArticleAction, supprimerArticleAction } from "@/lib/actions/articles";
 import { lienSur, texteBrut } from "@/lib/markdown";
-import type { ImageMedia } from "@/lib/media-url";
 import { slugifier } from "@/lib/slug";
 import { attributsChamp, Champ, Compteur } from "../champs";
 import { useLienAdmin } from "../contexte-admin";
 import { useExecuter, useFormulaire } from "../executer";
 import { Icone } from "../icones";
-import { EnvoiFichier, Mediatheque, Vignette } from "../photos/choix-photo";
+import { EnvoiFichier, Mediatheque, Vignette, type ImagePourChoix } from "../photos/choix-photo";
 import { useConfirmer } from "../retours";
 
 export type ArticleEdite = {
@@ -48,7 +47,7 @@ export function EditeurArticle({
   modeleTitre,
 }: {
   article: ArticleEdite | null;
-  mediatheque: ImageMedia[];
+  mediatheque: ImagePourChoix[];
   domaine: string;
   modeleTitre: string;
 }) {
@@ -79,6 +78,8 @@ export function EditeurArticle({
   const slugAffiche = slugManuel ? slug : slugifier(titre);
   const image = mediatheque.find((m) => m.id === couverture) ?? null;
   const publie = article?.statut === "publie";
+  /** Adresse figée tant que l'actualité est en ligne (le serveur refuse aussi tout changement). */
+  const slugFige = article?.etat === "publie";
 
   /** Remplace la sélection du texte par `avant + sélection + après` et resélectionne. */
   const entourer = (avant: string, apres: string, defaut: string) => {
@@ -157,7 +158,16 @@ export function EditeurArticle({
               {domaine}/actualites/
               {slugManuel ? null : <strong>{slugAffiche || "…"}</strong>}
             </p>
-            {slugManuel ? (
+            {slugFige ? (
+              <input
+                {...attributsChamp("slug-saisie", erreurs.slug, true)}
+                value={article.slug}
+                readOnly
+                aria-readonly="true"
+                className="bo-saisie bo-saisie-figee"
+                autoCapitalize="off"
+              />
+            ) : slugManuel ? (
               <input
                 {...attributsChamp("slug-saisie", erreurs.slug, true)}
                 value={slug}
@@ -168,12 +178,13 @@ export function EditeurArticle({
               />
             ) : null}
             <p id="slug-saisie-aide" className="bo-aide">
-              {slugManuel ? (
-                publie ? (
-                  "Attention : changer l’adresse d’une actualité publiée casse les liens déjà partagés."
-                ) : (
-                  "Lettres sans accents, chiffres et tirets."
-                )
+              {slugFige ? (
+                <>
+                  <Icone nom="cadenas" taille={16} /> Adresse fixée : l’actualité est en ligne, et les liens déjà partagés doivent continuer de
+                  marcher.
+                </>
+              ) : slugManuel ? (
+                "Lettres sans accents, chiffres et tirets. Elle ne pourra plus changer une fois l’actualité en ligne."
               ) : (
                 <>
                   Calculée à partir du titre.{" "}

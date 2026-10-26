@@ -9,9 +9,9 @@
  *   notification confirme l'enregistrement (« Prix enregistré »).
  */
 
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useRef, useState, useTransition } from "react";
 import type { EtatAction } from "@/lib/formulaire";
-import { useNotifier } from "./retours";
+import { useNotifier, useRetirerNotification } from "./retours";
 
 const ERREUR_RESEAU = "La connexion a échoué. Vérifiez le réseau puis réessayez.";
 
@@ -28,8 +28,22 @@ export function estRedirection(err: unknown): boolean {
 
 export type OptionsExecution = { succes?: string; apres?: (r: EtatAction | void) => void };
 
-export function useExecuter() {
+/** Notifier « une seule à la fois » : la notification précédente de ce formulaire est retirée avant la suivante. */
+function useNotifierUnique() {
   const notifier = useNotifier();
+  const retirer = useRetirerNotification();
+  const precedente = useRef<number | null>(null);
+  return useCallback(
+    (texte: string | null, genre?: "succes" | "erreur") => {
+      if (precedente.current !== null) retirer(precedente.current);
+      precedente.current = texte ? notifier(texte, genre) : null;
+    },
+    [notifier, retirer],
+  );
+}
+
+export function useExecuter() {
+  const notifier = useNotifierUnique();
   const [enCours, demarrer] = useTransition();
 
   const executer = useCallback(
@@ -38,10 +52,7 @@ export function useExecuter() {
         try {
           const r = await fn();
           if (r && !r.ok) notifier(r.message ?? "L’opération n’a pas abouti.", "erreur");
-          else {
-            const texte = (r && r.message) || opts.succes;
-            if (texte) notifier(texte);
-          }
+          else notifier((r && r.message) || opts.succes || null);
           opts.apres?.(r);
         } catch (err) {
           if (estRedirection(err)) throw err;
@@ -67,7 +78,7 @@ export function useFormulaire(
     apresSucces?: (r: EtatAction, formulaire: HTMLFormElement) => void;
   } = {},
 ) {
-  const notifier = useNotifier();
+  const notifier = useNotifierUnique();
   const [etat, setEtat] = useState<EtatAction>({ ok: false });
   const [enCours, demarrer] = useTransition();
 
@@ -83,7 +94,7 @@ export function useFormulaire(
         setEtat(r);
         if (r.ok) {
           const texte = r.message || opts.succes;
-          if (texte && !opts.silencieux) notifier(texte);
+          notifier(texte && !opts.silencieux ? texte : null);
           if (opts.viderApresSucces) formulaire.reset();
           opts.apresSucces?.(r, formulaire);
         } else {

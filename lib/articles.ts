@@ -70,6 +70,14 @@ export function etatArticle(a: Pick<Article, "statut" | "publie_le">, maintenant
   return a.publie_le <= maintenant ? "publie" : "programme";
 }
 
+/**
+ * Adresse (slug) figée : un article EN LIGNE garde son adresse, sinon les liens
+ * déjà partagés (réseaux sociaux, Google) mèneraient à une page introuvable.
+ */
+export function slugVerrouille(a: Pick<Article, "statut" | "publie_le">, maintenant = maintenantIso()): boolean {
+  return etatArticle(a, maintenant) === "publie";
+}
+
 /** Articles en ligne, du plus récent au plus ancien. */
 export function listerArticlesPublies(opts: { limite?: number; decalage?: number } = {}): ArticleAvecCouverture[] {
   const lignes = stmt(`SELECT * FROM articles WHERE ${EN_LIGNE} ORDER BY publie_le DESC, id DESC LIMIT @limite OFFSET @decalage`).all({
@@ -196,7 +204,7 @@ export function modifierArticle(id: number, e: EntreeArticle): Article | null {
      WHERE id = @id`,
   ).run({
     id,
-    slug: e.slug ? slugArticleUnique(e.slug, id) : cur.slug,
+    slug: e.slug && !slugVerrouille(cur) ? slugArticleUnique(e.slug, id) : cur.slug,
     titre: e.titre,
     chapo: e.chapo ?? cur.chapo,
     corps: e.corps ?? cur.corps,
@@ -210,16 +218,7 @@ export function modifierArticle(id: number, e: EntreeArticle): Article | null {
   return lireArticle(id);
 }
 
-/** Publie (date conservée si déjà publiée, sinon maintenant) ou repasse en brouillon. */
-export function definirStatutArticle(id: number, statut: StatutArticle): Article | null {
-  const cur = lireArticle(id);
-  if (!cur) return null;
-  const publie_le = statut === "publie" ? (cur.publie_le ?? maintenantIso()) : cur.publie_le;
-  stmt("UPDATE articles SET statut = ?, publie_le = ?, updated_at = ? WHERE id = ?").run(statut, publie_le, maintenantIso(), id);
-  return lireArticle(id);
-}
-
-/** Supprime un article. Renvoie la ligne (la couverture reste à nettoyer : `supprimerMediaSiOrphelin`). */
+/** Supprime un article. Renvoie la ligne (la couverture reste à nettoyer : `supprimerMediaSiOrphelinHorsSeed`). */
 export function supprimerArticle(id: number): Article | null {
   return (stmt("DELETE FROM articles WHERE id = ? RETURNING *").get(id) as Article | undefined) ?? null;
 }

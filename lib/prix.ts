@@ -7,12 +7,48 @@
  *   « 12 » -> « 12 € », « 12,5 » -> « 12,50 € », « 3.2 » -> « 3,20 € », « 30,00 » -> « 30 € » ;
  * - tout autre texte (« Sur devis », « Selon arrivage ») est conservé tel quel.
  * Montant accepté : 0 à 9999,99.
+ *
+ * VALIDATION des saisies du backoffice (`validerPrix`) : seuls sont acceptés
+ * un montant (« 3,40 », « 3,4 », « 3.40 », « 12 », avec ou sans « € »),
+ * normalisé en « 3,40 € », ou un texte de la liste `PRIX_SUR_DEMANDE`
+ * (case « Prix sur demande »). « abc » est refusé avec un message clair au
+ * lieu d'être enregistré tel quel (et de faire sortir le plat du JSON-LD).
  */
 
 export const PRIX_LONGUEUR_MAX = 40;
 
 export const AIDE_PRIX =
-  "Tapez juste le nombre : « 12 » devient « 12 € », « 3,2 » devient « 3,20 € ». Un texte (ex. « Sur devis ») est gardé tel quel. Vide = pas de prix.";
+  "Tapez juste le nombre : « 12 » devient « 12 € », « 3,2 » devient « 3,20 € ». Sans montant : cochez « Prix sur demande ». Vide = pas de prix.";
+
+/** Textes acceptés à la place d'un montant (case « Prix sur demande »). Liste à compléter au besoin. */
+export const PRIX_SUR_DEMANDE = ["Sur devis", "Selon arrivage", "Prix au poids"] as const;
+
+export const ERREUR_PRIX = "Prix non reconnu : tapez un montant (ex. 3,40) ou cochez « Prix sur demande ».";
+
+export type ResultatPrix = { ok: true; prix: string } | { ok: false; erreur: string };
+
+const sansAccents = (t: string) =>
+  t
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+
+/** Texte de `PRIX_SUR_DEMANDE` correspondant à la saisie (casse et accents ignorés), ou `null`. */
+export function prixSurDemande(brut: string): (typeof PRIX_SUR_DEMANDE)[number] | null {
+  const cle = sansAccents(brut);
+  return PRIX_SUR_DEMANDE.find((t) => sansAccents(t) === cle) ?? null;
+}
+
+/** Valide et normalise une saisie de prix du backoffice (voir la règle en tête de module). */
+export function validerPrix(brut: unknown): ResultatPrix {
+  const texte = typeof brut === "string" ? brut.replace(/\s+/g, " ").trim() : "";
+  if (!texte) return { ok: true, prix: "" };
+  if (texte.length <= PRIX_LONGUEUR_MAX && estPrixNumerique(texte)) return { ok: true, prix: normaliserPrix(texte) };
+  const libre = prixSurDemande(texte);
+  return libre ? { ok: true, prix: libre } : { ok: false, erreur: ERREUR_PRIX };
+}
 
 const RE_NOMBRE = /^(\d{1,4})(?:[.,](\d{1,2}))?$/;
 

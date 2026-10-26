@@ -11,6 +11,9 @@
  *   proxy.ts, et attend la fin de l'envoi avant de répondre ; un 413 posé par
  *   proxy.ts arriverait donc trop tard. Seule la route d'upload du backoffice
  *   a droit à plus de 2 Mo.
+ * - Retire des réponses les en-têtes internes de réécriture (`masquerReecriture`) :
+ *   `x-middleware-rewrite` trahirait le segment interne `/bo` du backoffice et
+ *   distinguerait le 404 de la porte de derrière (`/bo/...`) d'un 404 ordinaire.
  * - Avertit une fois au démarrage si TRUST_PROXY n'est pas défini en production.
  * - Passenger intercepte `listen()` : le port importe peu sous Plesk.
  *
@@ -73,6 +76,40 @@ function bodyGate(req, res, uploadPath) {
   return true;
 }
 
+/**
+ * En-têtes internes de Next à ne jamais envoyer au navigateur :
+ * - `x-middleware-*` (réécriture du proxy, toujours) ;
+ * - `x-nextjs-rewritten-path` / `-query` sur les pages HTML (le routeur client
+ *   n'en a besoin que pour ses requêtes RSC, en-tête `rsc: 1`).
+ */
+function enTeteInterne(nom, rsc) {
+  const n = String(nom).toLowerCase();
+  if (n.startsWith("x-middleware-")) return true;
+  return !rsc && (n === "x-nextjs-rewritten-path" || n === "x-nextjs-rewritten-query");
+}
+
+/** Filtre `setHeader` et `writeHead` de la réponse (Next pose ces en-têtes par l'un ou l'autre). */
+function masquerReecriture(req, res) {
+  const rsc = req.headers.rsc === "1";
+  const setHeader = res.setHeader.bind(res);
+  res.setHeader = (nom, valeur) => (enTeteInterne(nom, rsc) ? res : setHeader(nom, valeur));
+  const writeHead = res.writeHead.bind(res);
+  res.writeHead = (statut, ...args) => {
+    for (const nom of res.getHeaderNames()) if (enTeteInterne(nom, rsc)) res.removeHeader(nom);
+    const i = typeof args[0] === "string" ? 1 : 0;
+    const entetes = args[i];
+    if (Array.isArray(entetes)) {
+      // Forme « brute » [nom, valeur, nom, valeur...]
+      const filtres = [];
+      for (let k = 0; k < entetes.length; k += 2) if (!enTeteInterne(entetes[k], rsc)) filtres.push(entetes[k], entetes[k + 1]);
+      args[i] = filtres;
+    } else if (entetes && typeof entetes === "object") {
+      args[i] = Object.fromEntries(Object.entries(entetes).filter(([nom]) => !enTeteInterne(nom, rsc)));
+    }
+    return writeHead(statut, ...args);
+  };
+}
+
 app
   .prepare()
   .then(() => {
@@ -84,6 +121,7 @@ app
       const socketIp = req.socket.remoteAddress;
       if (socketIp) req.headers["x-cherblanc-ip-socket"] = socketIp;
       else delete req.headers["x-cherblanc-ip-socket"];
+      masquerReecriture(req, res);
       handle(req, res);
     }).listen(port, hostname, () => {
       console.log(`> Maison Cherblanc prête sur http://${hostname}:${port} (NODE_ENV=${process.env.NODE_ENV})`);

@@ -35,6 +35,7 @@ const CHEMINS = {
   repondre: "M10 8 4 13l6 5M4 13h10a6 6 0 0 1 6 6",
   telephone: "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z",
   cle: "M14 10a4 4 0 1 0-1.2 2.8L20 20M17 17l2-2",
+  cadenas: "M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3",
   prix: "M20 12 12 20l-8-8V4h8zM8 8h.01",
   chevron: "m9 6 6 6-6 6",
 };

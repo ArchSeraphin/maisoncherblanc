@@ -24,7 +24,8 @@ import {
   supprimerPlatAction,
   supprimerSectionAction,
 } from "@/lib/actions/menus";
-import { AIDE_PRIX, normaliserPrix } from "@/lib/prix";
+import { normaliserPrix } from "@/lib/prix";
+import { ChampPrix } from "./champ-prix";
 import { attributsChamp, Champ, Etiquette } from "../champs";
 import { useExecuter, useFormulaire } from "../executer";
 import { Icone } from "../icones";
@@ -322,17 +323,7 @@ function LignePlat({ plat: p, controles, ctx, cible }: { plat: PlatEdite; contro
               autoComplete="off"
             />
           </Champ>
-          <Champ id={`${pre}-prix`} libelle="Prix" className="bo-plat-prix">
-            <input
-              id={`${pre}-prix`}
-              name="prix"
-              defaultValue={p.prix}
-              className="bo-saisie"
-              autoComplete="off"
-              title={AIDE_PRIX}
-              placeholder="ex. 12"
-            />
-          </Champ>
+          <ChampPrix id={`${pre}-prix`} defaut={p.prix} erreur={f.erreurs.prix} className="bo-plat-prix" />
           <Champ id={`${pre}-unite`} libelle="Unité" className="bo-plat-unite">
             <input
               id={`${pre}-unite`}
@@ -457,9 +448,7 @@ function AjoutPlat({ menuId, sectionId }: { menuId: number; sectionId: number })
         <Champ id={`${pre}-nom`} libelle="Nom du plat" erreur={erreurs.nom} className="bo-plat-nom">
           <input {...attributsChamp(`${pre}-nom`, erreurs.nom)} name="nom" className="bo-saisie" required autoComplete="off" />
         </Champ>
-        <Champ id={`${pre}-prix`} libelle="Prix" className="bo-plat-prix">
-          <input id={`${pre}-prix`} name="prix" className="bo-saisie" autoComplete="off" placeholder="ex. 12" title={AIDE_PRIX} />
-        </Champ>
+        <ChampPrix id={`${pre}-prix`} erreur={erreurs.prix} className="bo-plat-prix" />
         <Champ id={`${pre}-unite`} libelle="Unité" className="bo-plat-unite">
           <input id={`${pre}-unite`} name="unite" className="bo-saisie" list={ID_UNITES} autoComplete="off" placeholder="ex. la part" />
         </Champ>

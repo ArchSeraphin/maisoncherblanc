@@ -2338,3 +2338,163 @@ input[type="datetime-local"].bo-saisie {
 .bo-liste-simple.bo-carte {
   padding: 0.25rem 1.25rem;
 }
+
+/* --- Adresse d'actualité figée (actualité en ligne) --- */
+.bo-saisie-figee,
+.bo-saisie-figee:focus {
+  background: var(--sable);
+  color: var(--bo-discret);
+  cursor: default;
+}
+
+.bo-aide svg {
+  display: inline-block;
+  vertical-align: -0.2em;
+}
+
+/* --- Prix : montant ou « Prix sur demande » --- */
+.bo-plat-ligne {
+  align-items: start;
+}
+
+.bo-champ-prix .bo-case-compacte {
+  gap: 0.45rem;
+  min-height: 44px;
+  padding-block: 0.15rem;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--bo-discret);
+}
+
+.bo-plat .bo-champ-prix .bo-case-compacte {
+  font-size: 0.8rem;
+}
+
+.bo-champ-prix .bo-case-compacte input {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin: 0;
+}
+
+.bo-champ-prix select.bo-saisie {
+  font-weight: 600;
+}
+
+.bo-resultat-prix {
+  align-items: flex-start;
+}
+
+.bo-resultat-prix .bo-champ-prix {
+  flex: 1 1 10.5rem;
+  max-width: 17rem;
+}
+
+.bo-resultat-prix .bo-champ-prix .bo-saisie {
+  width: 100%;
+}
+
+/* --- Choisir une photo (médiathèque) : recherche, filtre, vignettes compactes --- */
+.bo-dialogue-photos {
+  padding: 1rem;
+}
+
+.bo-dialogue-photos .bo-dialogue-tete {
+  margin-bottom: 0.6rem;
+}
+
+.bo-mediatheque-outils {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.bo-mediatheque-outils .bo-recherche .bo-saisie {
+  min-height: 48px;
+}
+
+@media (min-width: 640px) {
+  .bo-dialogue-photos {
+    padding: 1.5rem;
+  }
+  .bo-mediatheque-outils {
+    grid-template-columns: minmax(0, 1fr) 17rem;
+  }
+}
+
+.bo-mediatheque-compte {
+  margin: 0.5rem 0 0.4rem;
+  font-size: 0.85rem;
+}
+
+.bo-dialogue-photos .bo-mediatheque {
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 0.4rem;
+  max-height: min(60vh, 34rem);
+}
+
+@media (min-width: 640px) {
+  .bo-dialogue-photos .bo-mediatheque {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.6rem;
+  }
+}
+
+.bo-dialogue-photos .bo-mediatheque button {
+  gap: 0.25rem;
+  padding: 0.25rem;
+  align-content: start;
+  height: 100%;
+}
+
+.bo-mediatheque-alt {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  overflow-wrap: break-word;
+}
+
+.bo-mediatheque-provisoire {
+  margin-right: 0.3em;
+  color: var(--cuivre-fonce);
+  font-weight: 700;
+}
+
+/* --- Cibles tactiles : 44 px au doigt, sans changer la mise en page --- */
+@media (pointer: coarse) {
+  .bo-bouton-petit,
+  .bo-barre-outils button {
+    min-height: 44px;
+  }
+
+  .bo-barre-outils button {
+    min-width: 44px;
+  }
+
+  /*
+   * Liens isolés (tableau de bord, titres de la liste des actualités et des
+   * menus) : zone de toucher agrandie par un rembourrage compensé par une marge
+   * négative ; le texte ne bouge pas.
+   */
+  .bo-lien,
+  .bo-article h3 a,
+  .bo-menu-carte h3 a {
+    display: inline-block;
+    padding-block: 0.75rem;
+    margin-block: -0.75rem;
+  }
+
+  /* Liens très courts (« Voir ») : la zone s'élargit aussi sur les côtés. */
+  .bo-lien {
+    padding-inline: 0.5rem;
+    margin-inline: -0.5rem;
+  }
+
+  .bo-marque {
+    padding-block: 0.25rem;
+    margin-block: -0.25rem;
+  }
+}

@@ -3,7 +3,7 @@
 /** Server Actions « Actualités ». La couverture s'envoie par /api/upload (usage=media) puis son ID est passé ici. */
 
 import { refresh } from "next/cache";
-import { creerArticle, definirStatutArticle, etatArticle, lireArticle, modifierArticle, supprimerArticle, validerArticle } from "@/lib/articles";
+import { creerArticle, etatArticle, lireArticle, modifierArticle, slugVerrouille, supprimerArticle, validerArticle } from "@/lib/articles";
 import { requireUser } from "@/lib/auth";
 import { formaterHorodatage, isoDepuisHeureParis } from "@/lib/dates";
 import { champChoix, champId, champTexte, type EtatAction } from "@/lib/formulaire";
@@ -65,20 +65,20 @@ export async function modifierArticleAction(id: number, _prec: EtatAction, fd: F
   await requireUser();
   const cur = article(id);
   if (!cur) return { ok: false, message: "Actualité introuvable." };
-  const v = validerArticle(lireChamps(fd), cur.id);
+  const champs = lireChamps(fd);
+  // Adresse figée tant que l'actualité est en ligne (refus serveur, le champ est en lecture seule).
+  if (slugVerrouille(cur) && champs.slug && champs.slug !== cur.slug)
+    return {
+      ok: false,
+      message: "L’adresse d’une actualité en ligne ne peut pas changer.",
+      erreurs: { slug: "L’adresse d’une actualité en ligne ne peut pas changer : les liens déjà partagés ne marcheraient plus." },
+    };
+  const v = validerArticle({ ...champs, slug: slugVerrouille(cur) ? cur.slug : champs.slug }, cur.id);
   if (!v.ok) return { ok: false, message: "Certains champs sont à corriger.", erreurs: v.erreurs as Record<string, string> };
   const a = modifierArticle(cur.id, v.donnees);
   if (cur.couverture_media_id && cur.couverture_media_id !== v.donnees.couverture_media_id) nettoyerMedia(cur.couverture_media_id);
   refresh();
   return { ok: true, message: a ? messageEnregistrement(a) : "Actualité enregistrée." };
-}
-
-export async function definirStatutArticleAction(id: number, statut: "brouillon" | "publie"): Promise<EtatAction> {
-  await requireUser();
-  const cur = article(id);
-  if (!cur || !definirStatutArticle(cur.id, statut === "publie" ? "publie" : "brouillon")) return { ok: false, message: "Actualité introuvable." };
-  refresh();
-  return { ok: true, message: statut === "publie" ? "Actualité publiée." : "Actualité repassée en brouillon." };
 }
 
 export async function supprimerArticleAction(id: number): Promise<EtatAction> {

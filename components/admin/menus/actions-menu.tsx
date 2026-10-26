@@ -9,14 +9,30 @@ import { useExecuter } from "../executer";
 import { Icone } from "../icones";
 import { useConfirmer } from "../retours";
 
-export function BasculerMenuVisible({ menuId, visible }: { menuId: number; visible: boolean }) {
+export function BasculerMenuVisible({ menuId, visible, estCarte = false }: { menuId: number; visible: boolean; estCarte?: boolean }) {
   const [executer, enCours] = useExecuter();
+  const confirmer = useConfirmer();
   return (
     <button
       type="button"
       className={`bo-bouton ${visible ? "bo-bouton-secondaire" : "bo-bouton-principal"}`}
       disabled={enCours}
-      onClick={() => executer(() => basculerMenuVisibleAction(menuId, !visible))}
+      onClick={async () => {
+        // Masquer la carte vide la page Carte traiteur : on prévient avant.
+        if (
+          visible &&
+          estCarte &&
+          !(await confirmer({
+            titre: "Masquer la carte traiteur ?",
+            message:
+              "Elle n’apparaîtra plus sur le site : la page Carte traiteur indiquera seulement que la carte est en cours de mise à jour.",
+            confirmer: "Masquer la carte",
+            danger: true,
+          }))
+        )
+          return;
+        executer(() => basculerMenuVisibleAction(menuId, !visible));
+      }}
     >
       <Icone nom={visible ? "masque" : "oeil"} taille={18} />
       {visible ? "Masquer du site" : "Afficher sur le site"}

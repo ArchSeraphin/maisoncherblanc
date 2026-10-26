@@ -19,7 +19,12 @@ export function etatMenu(m: MenuEtat, jour: string): EtatMenu {
     if (m.slug !== SLUG_CARTE) return { libelle: "En préparation", detail: "Pas encore la carte du site", genre: "neutre", enLigne: false };
     return m.visible
       ? { libelle: "En ligne", detail: "C’est la carte du site", genre: "succes", enLigne: true }
-      : { libelle: "Masquée", detail: "La page Carte traiteur est vide", genre: "attention", enLigne: false };
+      : {
+          libelle: "Masquée",
+          detail: "N’apparaît plus sur le site : la page Carte traiteur annonce une carte en cours de mise à jour",
+          genre: "attention",
+          enLigne: false,
+        };
   }
   if (!m.visible) return { libelle: "Masqué", detail: "Non affiché sur le site", genre: "discret", enLigne: false };
   if (m.publie_du && jour < m.publie_du)
@@ -35,6 +40,10 @@ export function etatMenu(m: MenuEtat, jour: string): EtatMenu {
     };
   return { libelle: "Masqué", genre: "discret", enLigne: false };
 }
+
+/** Avertissement affiché dans le BO quand la carte traiteur n'est plus visible sur le site. */
+export const ALERTE_CARTE_MASQUEE =
+  "La carte traiteur est masquée : elle n’apparaît plus sur le site. La page Carte traiteur indique seulement aux visiteurs que la carte est en cours de mise à jour.";
 
 /** Page publique qui affiche ce type de menu. */
 export function cheminPublicMenu(m: { type: "permanent" | "saison"; slug: string }): string | null {

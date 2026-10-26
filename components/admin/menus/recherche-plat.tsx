@@ -9,7 +9,8 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { modifierPrixAction } from "@/lib/actions/menus";
-import { AIDE_PRIX, normaliserPrix } from "@/lib/prix";
+import { normaliserPrix } from "@/lib/prix";
+import { ChampPrix } from "./champ-prix";
 import { useLienAdmin } from "../contexte-admin";
 import { useFormulaire } from "../executer";
 import { Icone } from "../icones";
@@ -84,7 +85,7 @@ export function RecherchePlat({ plats, focusAuChargement = false }: { plats: Pla
 
 function LignePrix({ plat }: { plat: PlatRecherche }) {
   const lien = useLienAdmin();
-  const { enCours, surSoumission, erreurs } = useFormulaire(modifierPrixAction.bind(null, plat.menuId, plat.platId), {
+  const { enCours, surSoumission, surChangement, erreurs } = useFormulaire(modifierPrixAction.bind(null, plat.menuId, plat.platId), {
     apresSucces: (_r, f) => {
       const champ = f.elements.namedItem("prix") as HTMLInputElement | null;
       if (champ) champ.value = normaliserPrix(champ.value);
@@ -104,20 +105,8 @@ function LignePrix({ plat }: { plat: PlatRecherche }) {
           Modifier tout le plat
         </Link>
       </div>
-      <form onSubmit={surSoumission} className="bo-resultat-prix" noValidate>
-        <label htmlFor={id} className="bo-invisible">
-          Prix de {plat.nom}
-        </label>
-        <input
-          id={id}
-          name="prix"
-          defaultValue={plat.prix}
-          className="bo-saisie"
-          inputMode="decimal"
-          autoComplete="off"
-          title={AIDE_PRIX}
-          aria-invalid={erreurs.prix ? true : undefined}
-        />
+      <form onSubmit={surSoumission} onChange={surChangement} className="bo-resultat-prix" noValidate>
+        <ChampPrix id={id} defaut={plat.prix} erreur={erreurs.prix} libelle={`Prix de ${plat.nom}`} libelleInvisible />
         <button type="submit" className="bo-bouton bo-bouton-principal" disabled={enCours}>
           {enCours ? "…" : "Enregistrer"}
         </button>

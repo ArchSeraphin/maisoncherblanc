@@ -17,7 +17,7 @@ import { bool, maintenantIso, stmt, transaction } from "./db";
 import { lireDocument, lireMedias, versDocument, versImage } from "./media";
 import type { DocumentMedia, ImageMedia } from "./media-url";
 import { echangerDansListe } from "./ordre";
-import { normaliserPrix } from "./prix";
+import { normaliserPrix, validerPrix } from "./prix";
 import { slugifier } from "./slug";
 
 export type TypeMenu = "permanent" | "saison";
@@ -278,7 +278,7 @@ export function definirMenuVisible(id: number, visible: boolean): void {
 
 /**
  * Remplace le PDF du menu. Renvoie l'ID de l'ancien PDF (à supprimer par
- * l'appelant avec `supprimerMediaSiOrphelin`), ou `null`.
+ * l'appelant avec `supprimerMediaSiOrphelinHorsSeed`), ou `null`.
  */
 export function definirPdfMenu(id: number, mediaId: number | null): number | null {
   const cur = lireMenu(id);
@@ -526,15 +526,19 @@ export function menuDuPlat(platId: number): number | null {
 export function validerPlat(e: Partial<Record<keyof EntreePlat, unknown>>):
   | { ok: true; donnees: EntreePlat }
   | { ok: false; erreurs: Partial<Record<keyof EntreePlat, string>> } {
+  const erreurs: Partial<Record<keyof EntreePlat, string>> = {};
   const nom = nettoyer(e.nom, LIMITES_MENU.plat_nom);
-  if (!nom) return { ok: false, erreurs: { nom: "Indiquez le nom du plat." } };
-  if (e.badge && !estBadge(e.badge)) return { ok: false, erreurs: { badge: "Étiquette inconnue." } };
+  if (!nom) erreurs.nom = "Indiquez le nom du plat.";
+  if (e.badge && !estBadge(e.badge)) erreurs.badge = "Étiquette inconnue.";
+  const prix = validerPrix(e.prix);
+  if (!prix.ok) erreurs.prix = prix.erreur;
+  if (Object.keys(erreurs).length || !prix.ok) return { ok: false, erreurs };
   return {
     ok: true,
     donnees: {
       nom,
       description: multiligne(e.description, LIMITES_MENU.plat_description),
-      prix: normaliserPrix(e.prix),
+      prix: prix.prix,
       unite: nettoyer(e.unite, LIMITES_MENU.unite),
       badge: estBadge(e.badge) ? e.badge : null,
       visible: e.visible !== false,

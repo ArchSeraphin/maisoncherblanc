@@ -45,7 +45,7 @@ function ChampMotDePasse({
           className="bo-saisie"
           autoComplete={autoComplete}
           required
-          minLength={nom === "actuel" ? undefined : 12}
+          minLength={nom === "actuel" || nom === "mon_mot_de_passe" ? undefined : 12}
         />
         <button
           type="button"
@@ -135,10 +135,24 @@ export function ListeAdmins({ admins }: { admins: AdminListe[] }) {
   );
 }
 
-function Reinitialiser({ id, fermer }: { id: number; fermer: () => void }) {
-  const { enCours, surSoumission, erreurs } = useFormulaire(reinitialiserMotDePasseAction.bind(null, id), { apresSucces: fermer });
+/** Ré-authentification : votre propre mot de passe, exigé pour créer un compte ou changer celui d'un autre. */
+function ConfirmerAvecMonMotDePasse({ id, erreur }: { id: string; erreur?: string }) {
   return (
-    <form onSubmit={surSoumission} className="bo-plat-details" noValidate>
+    <ChampMotDePasse
+      id={id}
+      nom="mon_mot_de_passe"
+      libelle="Votre mot de passe, pour confirmer"
+      aide="Par sécurité : celui que vous utilisez pour vous connecter."
+      erreur={erreur}
+      autoComplete="current-password"
+    />
+  );
+}
+
+function Reinitialiser({ id, fermer }: { id: number; fermer: () => void }) {
+  const { enCours, surSoumission, surChangement, erreurs } = useFormulaire(reinitialiserMotDePasseAction.bind(null, id), { apresSucces: fermer });
+  return (
+    <form onSubmit={surSoumission} onChange={surChangement} className="bo-plat-details" noValidate>
       <ChampMotDePasse
         id={`reinit-${id}`}
         nom="nouveau"
@@ -147,6 +161,7 @@ function Reinitialiser({ id, fermer }: { id: number; fermer: () => void }) {
         erreur={erreurs.nouveau}
         autoComplete="new-password"
       />
+      <ConfirmerAvecMonMotDePasse id={`reinit-${id}-moi`} erreur={erreurs.mon_mot_de_passe} />
       <div>
         <button type="submit" className="bo-bouton bo-bouton-principal bo-bouton-petit" disabled={enCours}>
           Enregistrer le mot de passe
@@ -178,11 +193,12 @@ export function AjoutAdmin() {
       <ChampMotDePasse
         id="nouvel-admin-mdp"
         nom="mot_de_passe"
-        libelle="Mot de passe"
+        libelle="Mot de passe du nouveau compte"
         aide={AIDE_MDP}
         erreur={erreurs.mot_de_passe}
         autoComplete="new-password"
       />
+      <ConfirmerAvecMonMotDePasse id="nouvel-admin-moi" erreur={erreurs.mon_mot_de_passe} />
       <div>
         <button type="submit" className="bo-bouton bo-bouton-principal" disabled={enCours}>
           <Icone nom="plus" taille={18} />

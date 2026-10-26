@@ -4,7 +4,7 @@ import { Etiquette } from "@/components/admin/champs";
 import { EntetePage } from "@/components/admin/mise-en-page";
 import { siteConfig } from "@/config/site";
 import { etatArticle, LIBELLES_ETAT_ARTICLE, lireArticle } from "@/lib/articles";
-import { requireUser } from "@/lib/auth";
+import { lireUtilisateur, requireUser } from "@/lib/auth";
 import { lienAdmin } from "@/lib/chemin-admin";
 import { heureParisPourChamp } from "@/lib/dates";
 import { urlSite } from "@/lib/env";
@@ -17,7 +17,13 @@ function lire(id: string) {
   return /^\d{1,12}$/.test(id) ? lireArticle(Number(id)) : null;
 }
 
+/**
+ * Titre de l'onglet. Calculé AVANT la redirection du layout : sans session, il
+ * reste générique (aucune donnée lue), sinon le titre de l'actualité fuiterait
+ * dans le corps de la réponse 307 servie à un visiteur non connecté.
+ */
 export async function generateMetadata({ params }: PageProps<"/bo/actualites/[id]">) {
+  if (!(await lireUtilisateur())) return { title: "Actualité" };
   const a = lire((await params).id);
   return { title: a ? a.titre : "Actualité" };
 }

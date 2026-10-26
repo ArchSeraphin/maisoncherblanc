@@ -4,6 +4,7 @@
 
 import { refresh } from "next/cache";
 import { requireUser } from "@/lib/auth";
+import { formaterJourLong, jourParis } from "@/lib/dates";
 import { champBooleen, champJson, champTexte, type EtatAction } from "@/lib/formulaire";
 import {
   enregistrerHoraireExceptionnel,
@@ -92,5 +93,15 @@ export async function enregistrerAnnonceAction(_prec: EtatAction, fd: FormData):
   if (!v.ok) return { ok: false, erreurs: v.erreurs as Record<string, string> };
   ecrireReglage("annonce", v.donnees);
   refresh();
-  return { ok: true, message: v.donnees.active ? "Annonce enregistrée et affichée." : "Annonce enregistrée (masquée)." };
+  return { ok: true, message: messageAnnonce(v.donnees) };
+}
+
+/** Message fidèle à l'état réel du bandeau après l'enregistrement (affiché, programmé, terminé, désactivé). */
+function messageAnnonce(a: { active: boolean; texte: string; debut: string | null; fin: string | null }): string {
+  const jour = jourParis();
+  if (!a.active) return "Annonce enregistrée. Le bandeau est désactivé : rien ne s’affiche sur le site.";
+  if (a.debut && jour < a.debut) return `Annonce enregistrée et programmée : elle s’affichera à partir du ${formaterJourLong(a.debut)}.`;
+  if (a.fin && jour > a.fin)
+    return `Annonce enregistrée, mais elle n’est pas affichée : sa date de fin (${formaterJourLong(a.fin)}) est passée.`;
+  return "Annonce enregistrée et affichée sur le site.";
 }

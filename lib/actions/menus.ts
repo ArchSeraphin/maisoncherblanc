@@ -47,7 +47,7 @@ import {
   validerSection,
   type EntreePlat,
 } from "@/lib/menus";
-import { normaliserPrix } from "@/lib/prix";
+import { validerPrix } from "@/lib/prix";
 import { nettoyerMedia } from "./nettoyage";
 import { booleen, idsValides, listeIds, sens as lireSens } from "./schemas";
 
@@ -127,6 +127,8 @@ export async function basculerMenuVisibleAction(menuId: number, visible: boolean
   if (!m || v === null) return INTROUVABLE;
   definirMenuVisible(m.id, v);
   refresh();
+  if (m.slug === SLUG_CARTE_TRAITEUR)
+    return { ok: true, message: v ? "Carte affichée : elle est de nouveau en ligne." : "Carte masquée : elle n’apparaît plus sur le site." };
   return { ok: true, message: v ? "Menu affiché sur le site." : "Menu masqué du site." };
 }
 
@@ -299,7 +301,7 @@ export async function creerPlatAction(menuId: number, sectionId: number, _prec: 
   const s = sectionDuMenu(menuId, sectionId);
   if (!s) return INTROUVABLE;
   const v = validerPlat(fusionnerPlat(fd, { nom: "", description: "", prix: "", unite: "", badge: null, visible: true }));
-  if (!v.ok) return { ok: false, erreurs: v.erreurs as Record<string, string> };
+  if (!v.ok) return { ok: false, message: v.erreurs.prix, erreurs: v.erreurs as Record<string, string> };
   const p = creerPlat(s.id, v.donnees);
   refresh();
   return { ok: true, message: `« ${p.nom} » ajouté${p.prix ? ` à ${p.prix}` : ""}.`, id: p.id };
@@ -310,7 +312,7 @@ export async function modifierPlatAction(menuId: number, platId: number, _prec: 
   const cur = platDuMenu(menuId, platId);
   if (!cur) return INTROUVABLE;
   const v = validerPlat(fusionnerPlat(fd, cur));
-  if (!v.ok) return { ok: false, erreurs: v.erreurs as Record<string, string> };
+  if (!v.ok) return { ok: false, message: v.erreurs.prix, erreurs: v.erreurs as Record<string, string> };
   modifierPlat(cur.id, { ...v.donnees, visible: cur.visible });
   refresh();
   const d = v.donnees;
@@ -319,12 +321,14 @@ export async function modifierPlatAction(menuId: number, platId: number, _prec: 
   return { ok: true, message: `« ${d.nom} » enregistré.` };
 }
 
-/** Raccourci « Changer un prix » (champ `prix`, normalisé : « 3,2 » devient « 3,20 € »). */
+/** Raccourci « Changer un prix » (champ `prix`, validé et normalisé : « 3,2 » devient « 3,20 € », « abc » est refusé). */
 export async function modifierPrixAction(menuId: number, platId: number, _prec: EtatAction, fd: FormData): Promise<EtatAction> {
   await requireUser();
   const cur = platDuMenu(menuId, platId);
   if (!cur) return INTROUVABLE;
-  const prix = normaliserPrix(champTexte(fd, "prix", 60));
+  const v = validerPrix(champTexte(fd, "prix", 60));
+  if (!v.ok) return { ok: false, message: v.erreur, erreurs: { prix: v.erreur } };
+  const prix = v.prix;
   modifierPlat(cur.id, { prix });
   refresh();
   return { ok: true, message: prix ? `Prix enregistré : ${prix}` : "Prix retiré." };

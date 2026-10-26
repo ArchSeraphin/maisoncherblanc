@@ -110,8 +110,11 @@ async function principal() {
   // Articles
   const art = A.creerArticle({ titre: "Premier article", corps: "Un texte assez long pour être publié.", statut: "brouillon" });
   ok(A.etatArticle(art) === "brouillon" && A.listerArticlesPublies().length === 0, "brouillon invisible");
-  A.definirStatutArticle(art.id, "publie");
-  ok(A.articlePublie("premier-article") !== null, "article publié visible");
+  const pub = A.validerArticle({ titre: art.titre, corps: art.corps, statut: "publie" }, art.id);
+  ok(pub.ok && A.modifierArticle(art.id, pub.donnees) && A.articlePublie("premier-article") !== null, "article publié visible");
+  ok(A.slugVerrouille(A.lireArticle(art.id)!), "adresse figée une fois en ligne");
+  A.modifierArticle(art.id, { titre: art.titre, slug: "nouvelle-adresse", statut: "publie" });
+  ok(A.lireArticle(art.id)?.slug === "premier-article", "adresse d'un article en ligne inchangée");
   const prog = A.creerArticle({ titre: "Programmé", corps: "Un texte assez long pour être publié.", statut: "publie", publie_le: "2099-01-01T08:00:00.000Z" });
   ok(A.etatArticle(prog) === "programme" && A.articlePublie(prog.slug) === null, "article programmé invisible");
   ok(A.validerArticle({ titre: "Autre", slug: "premier-article" }).ok === false, "slug d'article déjà pris refusé");
@@ -150,7 +153,7 @@ async function principal() {
 
   // Médias : pipeline, réalisation, emplacement, suppression
   const png = await sharp({ create: { width: 1200, height: 800, channels: 3, background: "#a3702a" } }).jpeg().toBuffer();
-  const env = await P.enregistrerFichier({ buffer: png, nomOriginal: "essai.jpg", alt: "Essai", source: "test/essai.jpg" });
+  const env = await P.enregistrerFichier({ buffer: png, nomOriginal: "essai.jpg", alt: "Essai" });
   ok(env.ok, "image enregistrée");
   ok((await P.enregistrerFichier({ buffer: Buffer.from("<svg></svg>".padEnd(40)), nomOriginal: "x.svg" })).ok === false, "SVG refusé");
   await P.viderFile();
@@ -165,7 +168,15 @@ async function principal() {
     ok(E.imageEmplacement("og-defaut")?.id === env.media.id, "emplacement rempli");
     ok(Real.supprimerRealisation(re.id) && Med.lireMedia(env.media.id) !== null, "média conservé tant qu'un emplacement l'utilise");
     E.definirEmplacement("og-defaut", null);
-    ok(Med.supprimerMediaSiOrphelin(env.media.id) && !fs.existsSync(path.join(process.env.UPLOADS_DIR!, String(env.media.id))), "média orphelin supprimé avec ses fichiers");
+    ok(Med.supprimerMediaSiOrphelinHorsSeed(env.media.id) && !fs.existsSync(path.join(process.env.UPLOADS_DIR!, String(env.media.id))), "média orphelin supprimé avec ses fichiers");
+    // Média du seed (`source` non nul) : jamais supprimé, même orphelin.
+    const seedEnv = await P.enregistrerFichier({ buffer: png, nomOriginal: "seed.jpg", alt: "Photo de départ", source: "photos/seed.jpg" });
+    if (seedEnv.ok) {
+      await P.viderFile();
+      const reSeed = Real.creerRealisation({ media_id: seedEnv.media.id, categorie: "buffet" });
+      ok(Real.supprimerRealisation(reSeed.id) && Med.lireMedia(seedEnv.media.id) !== null, "média du seed conservé après suppression de sa réalisation");
+      ok(!Med.supprimerMediaSiOrphelinHorsSeed(seedEnv.media.id) && Med.lireMedia(seedEnv.media.id) !== null, "média du seed jamais supprimé");
+    } else ok(false, "import d'un média du seed");
   }
   const pdf = await P.enregistrerFichier({ buffer: Buffer.from("%PDF-1.4\n%essai\n".padEnd(64)), nomOriginal: "Carte 2027.pdf", accepte: ["pdf"] });
   ok(pdf.ok && pdf.media.type === "document" && Med.lireDocument(pdf.media.id)?.nom === "carte-2027.pdf", "PDF enregistré comme document");

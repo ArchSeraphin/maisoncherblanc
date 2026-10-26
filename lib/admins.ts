@@ -79,6 +79,16 @@ export function remplacerHash(id: number, hash: string): void {
   stmt("UPDATE admins SET password_hash = ? WHERE id = ?").run(hash, id);
 }
 
+/**
+ * Ré-authentification avant une action sensible (créer un compte, réinitialiser
+ * le mot de passe d'un autre) : vrai si `motDePasse` est celui du compte `id`.
+ */
+export async function verifierMotDePasseAdmin(id: number, motDePasse: string): Promise<boolean> {
+  const l = stmt("SELECT password_hash FROM admins WHERE id = ?").get(id) as { password_hash: string } | undefined;
+  if (!l || !motDePasse) return false;
+  return verifierMotDePasse(motDePasse.slice(0, 200), l.password_hash);
+}
+
 /** Changement de SON PROPRE mot de passe : exige le mot de passe actuel. */
 export async function changerSonMotDePasse(id: number, actuel: string, nouveau: string): Promise<ResultatMotDePasse> {
   const l = stmt("SELECT password_hash FROM admins WHERE id = ?").get(id) as { password_hash: string } | undefined;

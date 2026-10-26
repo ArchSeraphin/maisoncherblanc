@@ -7,6 +7,7 @@
  *   Échap = annuler, focus initial sur « Annuler », le choix sans risque).
  *
  *   const notifier = useNotifier();      notifier("Prix enregistré.");  notifier("Oups.", "erreur");
+ *   const retirer = useRetirerNotification();   retirer(id)  (id renvoyé par notifier)
  *   const confirmer = useConfirmer();    if (await confirmer({ titre: "Supprimer ce plat ?", danger: true })) …
  */
 
@@ -15,7 +16,8 @@ import { Icone } from "./icones";
 
 export type GenreNotification = "succes" | "erreur" | "info";
 type Notification = { id: number; genre: GenreNotification; texte: string };
-type FonctionNotifier = (texte: string, genre?: GenreNotification) => void;
+/** Affiche une notification et renvoie son identifiant (pour la retirer avant son délai). */
+type FonctionNotifier = (texte: string, genre?: GenreNotification) => number;
 
 export type OptionsConfirmation = {
   titre: string;
@@ -27,6 +29,7 @@ export type OptionsConfirmation = {
 type FonctionConfirmer = (o: OptionsConfirmation) => Promise<boolean>;
 
 const ContexteNotifier = createContext<FonctionNotifier | null>(null);
+const ContexteRetirer = createContext<((id: number) => void) | null>(null);
 const ContexteConfirmer = createContext<FonctionConfirmer | null>(null);
 
 export function FournisseurRetours({ children }: { children: React.ReactNode }) {
@@ -39,6 +42,7 @@ export function FournisseurRetours({ children }: { children: React.ReactNode }) 
       const id = ++suite.current;
       setListe((l) => [...l.slice(-2), { id, genre, texte }]);
       window.setTimeout(() => retirer(id), genre === "erreur" ? 8000 : 4000);
+      return id;
     },
     [retirer],
   );
@@ -74,48 +78,50 @@ export function FournisseurRetours({ children }: { children: React.ReactNode }) 
 
   return (
     <ContexteNotifier.Provider value={notifier}>
-      <ContexteConfirmer.Provider value={confirmer}>
-        {children}
-        <div className="bo-notifications" role="status" aria-live="polite">
-          {liste.map((n) => (
-            <div key={n.id} className={`bo-notification bo-notification-${n.genre}`}>
-              <Icone nom={n.genre === "erreur" ? "alerte" : "coche"} taille={20} />
-              <span>{n.texte}</span>
-              <button type="button" onClick={() => retirer(n.id)} aria-label="Fermer ce message" className="bo-notification-fermer">
-                <Icone nom="fermer" taille={16} />
-              </button>
-            </div>
-          ))}
-        </div>
-        <dialog
-          ref={dialogue}
-          className="bo-dialogue"
-          aria-labelledby="bo-confirmation-titre"
-          aria-describedby={options?.message ? "bo-confirmation-texte" : undefined}
-          onClose={surFermeture}
-        >
-          {options ? (
-            <form method="dialog" className="bo-pile">
-              <h2 id="bo-confirmation-titre" className="bo-sous-titre">
-                {options.titre}
-              </h2>
-              {options.message ? (
-                <div id="bo-confirmation-texte" className="bo-discret">
-                  {options.message}
-                </div>
-              ) : null}
-              <div className="bo-dialogue-actions">
-                <button type="submit" value="non" className="bo-bouton bo-bouton-secondaire" autoFocus>
-                  {options.annuler ?? "Annuler"}
-                </button>
-                <button type="submit" value="oui" className={`bo-bouton ${options.danger ? "bo-bouton-danger-plein" : "bo-bouton-principal"}`}>
-                  {options.confirmer ?? "Confirmer"}
+      <ContexteRetirer.Provider value={retirer}>
+        <ContexteConfirmer.Provider value={confirmer}>
+          {children}
+          <div className="bo-notifications" role="status" aria-live="polite">
+            {liste.map((n) => (
+              <div key={n.id} className={`bo-notification bo-notification-${n.genre}`}>
+                <Icone nom={n.genre === "erreur" ? "alerte" : "coche"} taille={20} />
+                <span>{n.texte}</span>
+                <button type="button" onClick={() => retirer(n.id)} aria-label="Fermer ce message" className="bo-notification-fermer">
+                  <Icone nom="fermer" taille={16} />
                 </button>
               </div>
-            </form>
-          ) : null}
-        </dialog>
-      </ContexteConfirmer.Provider>
+            ))}
+          </div>
+          <dialog
+            ref={dialogue}
+            className="bo-dialogue"
+            aria-labelledby="bo-confirmation-titre"
+            aria-describedby={options?.message ? "bo-confirmation-texte" : undefined}
+            onClose={surFermeture}
+          >
+            {options ? (
+              <form method="dialog" className="bo-pile">
+                <h2 id="bo-confirmation-titre" className="bo-sous-titre">
+                  {options.titre}
+                </h2>
+                {options.message ? (
+                  <div id="bo-confirmation-texte" className="bo-discret">
+                    {options.message}
+                  </div>
+                ) : null}
+                <div className="bo-dialogue-actions">
+                  <button type="submit" value="non" className="bo-bouton bo-bouton-secondaire" autoFocus>
+                    {options.annuler ?? "Annuler"}
+                  </button>
+                  <button type="submit" value="oui" className={`bo-bouton ${options.danger ? "bo-bouton-danger-plein" : "bo-bouton-principal"}`}>
+                    {options.confirmer ?? "Confirmer"}
+                  </button>
+                </div>
+              </form>
+            ) : null}
+          </dialog>
+        </ContexteConfirmer.Provider>
+      </ContexteRetirer.Provider>
     </ContexteNotifier.Provider>
   );
 }
@@ -123,6 +129,13 @@ export function FournisseurRetours({ children }: { children: React.ReactNode }) 
 export function useNotifier(): FonctionNotifier {
   const f = useContext(ContexteNotifier);
   if (!f) throw new Error("useNotifier() doit être utilisé sous <FournisseurRetours>.");
+  return f;
+}
+
+/** Retire une notification par son identifiant (sans effet si elle a déjà disparu). */
+export function useRetirerNotification(): (id: number) => void {
+  const f = useContext(ContexteRetirer);
+  if (!f) throw new Error("useRetirerNotification() doit être utilisé sous <FournisseurRetours>.");
   return f;
 }
 

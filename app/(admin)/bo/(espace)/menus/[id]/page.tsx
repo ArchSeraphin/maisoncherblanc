@@ -3,20 +3,22 @@ import { Etiquette } from "@/components/admin/champs";
 import { BasculerMenuVisible, MettreEnLigneCommeCarte, SupprimerMenu } from "@/components/admin/menus/actions-menu";
 import { DupliquerMenu } from "@/components/admin/menus/dupliquer-menu";
 import { EditeurSections } from "@/components/admin/menus/editeur-sections";
-import { cheminPublicMenu, etatMenu, LIBELLES_TYPE_MENU, SLUG_CARTE } from "@/components/admin/menus/etat-menu";
+import { ALERTE_CARTE_MASQUEE, cheminPublicMenu, etatMenu, LIBELLES_TYPE_MENU, SLUG_CARTE } from "@/components/admin/menus/etat-menu";
 import { FichiersMenu } from "@/components/admin/menus/fichiers-menu";
 import { InfosMenu } from "@/components/admin/menus/infos-menu";
 import { EntetePage, VoirSurLeSite } from "@/components/admin/mise-en-page";
-import { requireUser } from "@/lib/auth";
+import { lireUtilisateur, requireUser } from "@/lib/auth";
 import { lienAdmin } from "@/lib/chemin-admin";
 import { jourParis } from "@/lib/dates";
 import { listerImagesPretes } from "@/lib/media";
 import { reprendreTraitements } from "@/lib/media-pipeline";
-import { BADGES, lireMenuParSlug, menuComplet, SLUG_CARTE_TRAITEUR, UNITES_SUGGEREES } from "@/lib/menus";
+import { BADGES, lireMenu, lireMenuParSlug, menuComplet, SLUG_CARTE_TRAITEUR, UNITES_SUGGEREES } from "@/lib/menus";
 
+/** Titre de l'onglet : générique sans session (calculé avant la redirection du layout, rien ne doit fuiter). */
 export async function generateMetadata({ params }: PageProps<"/bo/menus/[id]">) {
+  if (!(await lireUtilisateur())) return { title: "Menu" };
   const { id } = await params;
-  const m = /^\d+$/.test(id) ? menuComplet(Number(id)) : null;
+  const m = /^\d{1,12}$/.test(id) ? lireMenu(Number(id)) : null;
   return { title: m ? m.titre : "Menu" };
 }
 
@@ -68,13 +70,18 @@ export default async function PageMenu({ params, searchParams }: PageProps<"/bo/
             {m.type === "permanent" && !estCarte ? (
               <MettreEnLigneCommeCarte menuId={m.id} titre={m.titre} titreActuel={carteActuelle?.titre ?? null} />
             ) : (
-              <BasculerMenuVisible menuId={m.id} visible={m.visible} />
+              <BasculerMenuVisible menuId={m.id} visible={m.visible} estCarte={estCarte} />
             )}
             <DupliquerMenu menuId={m.id} titre={m.titre} />
           </>
         }
       />
 
+      {estCarte && !m.visible ? (
+        <p className="bo-alerte" role="status">
+          {ALERTE_CARTE_MASQUEE} Cliquez sur « Afficher sur le site » pour la remettre en ligne.
+        </p>
+      ) : null}
       {m.type === "saison" && !m.visible ? (
         <p className="bo-alerte">
           Ce menu est masqué : relisez les plats et les prix, réglez ses dates d’affichage dans « Informations du menu », puis cliquez sur « Afficher

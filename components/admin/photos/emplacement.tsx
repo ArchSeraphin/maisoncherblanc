@@ -8,7 +8,7 @@ import type { ImageMedia } from "@/lib/media-url";
 import { attributsChamp, Champ, Etiquette } from "../champs";
 import { useExecuter, useFormulaire } from "../executer";
 import { Icone } from "../icones";
-import { EnvoiFichier, Mediatheque, Vignette } from "./choix-photo";
+import { EnvoiFichier, Mediatheque, Vignette, type ImagePourChoix } from "./choix-photo";
 
 export type EmplacementEdite = { cle: string; libelle: string; page: string; ratio: string; image: ImageMedia | null };
 
@@ -45,7 +45,7 @@ function Description({ image, fermer }: { image: ImageMedia; fermer: () => void 
   );
 }
 
-export function Emplacement({ e, mediatheque }: { e: EmplacementEdite; mediatheque: ImageMedia[] }) {
+export function Emplacement({ e, mediatheque }: { e: EmplacementEdite; mediatheque: ImagePourChoix[] }) {
   const [executer, enCours] = useExecuter();
   const [description, setDescription] = useState(false);
   return (

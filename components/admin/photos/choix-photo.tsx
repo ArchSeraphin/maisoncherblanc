@@ -9,7 +9,7 @@
  */
 
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { choisirVariante, urlMedia, type ImageMedia } from "@/lib/media-url";
 import { useLienAdmin } from "../contexte-admin";
 import { attendreMedia, envoyerFichier, FORMATS_IMAGE, FORMATS_PDF, libelleStatut, POIDS_MAX_MO } from "../envoi";
@@ -25,6 +25,32 @@ export function Vignette({ image, alt, className = "bo-vignette" }: { image: Ima
   );
 }
 
+/** Photo proposée dans la médiathèque : avec la catégorie de sa réalisation, s'il y en a une (filtre). */
+export type ImagePourChoix = ImageMedia & { categorie?: string | null };
+
+/** = LIBELLES_CATEGORIES de lib/realisations.ts (module serveur, non importable ici). */
+const LIBELLES_CATEGORIES: Record<string, string> = {
+  mariage: "Mariages",
+  cocktail: "Cocktails",
+  buffet: "Buffets",
+  "broche-barbecue": "Broche et barbecue",
+  plateaux: "Plateaux",
+  boucherie: "Boucherie",
+};
+
+const simplifier = (t: string) =>
+  t
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/œ/g, "oe");
+
+/**
+ * Bouton + fenêtre « Choisir dans mes photos ». Pensée pour le téléphone :
+ * recherche par mots (description de la photo, catégorie), filtre (toutes,
+ * visuels provisoires, réalisations par catégorie), vignettes compactes et
+ * description tronquée à deux lignes (lue en entier par les lecteurs d'écran).
+ */
 export function Mediatheque({
   images,
   surChoix,
@@ -32,21 +58,45 @@ export function Mediatheque({
   titre = "Choisir une photo",
   selection,
 }: {
-  images: ImageMedia[];
-  surChoix: (image: ImageMedia) => void;
+  images: ImagePourChoix[];
+  surChoix: (image: ImagePourChoix) => void;
   libelle?: string;
   titre?: string;
   selection?: number | null;
 }) {
   const dialogue = useRef<HTMLDialogElement>(null);
   const id = useId();
+  const [texte, setTexte] = useState("");
+  const [filtre, setFiltre] = useState("toutes");
+
+  const categories = useMemo(() => {
+    const n = new Map<string, number>();
+    for (const img of images) if (img.categorie) n.set(img.categorie, (n.get(img.categorie) ?? 0) + 1);
+    return Object.keys(LIBELLES_CATEGORIES)
+      .filter((c) => n.has(c))
+      .map((c) => ({ c, libelle: LIBELLES_CATEGORIES[c], nombre: n.get(c)! }));
+  }, [images]);
+  const nbProvisoires = useMemo(() => images.filter((i) => i.provisoire).length, [images]);
+  const index = useMemo(
+    () => images.map((img) => ({ img, cle: simplifier(`${img.alt} ${img.categorie ? LIBELLES_CATEGORIES[img.categorie] ?? "" : ""}`) })),
+    [images],
+  );
+
+  const mots = simplifier(texte).split(/\s+/).filter(Boolean);
+  const visibles = index
+    .filter(({ img }) =>
+      filtre === "toutes" ? true : filtre === "provisoires" ? img.provisoire : filtre === "realisations" ? !!img.categorie : img.categorie === filtre,
+    )
+    .filter(({ cle }) => mots.every((m) => cle.includes(m)))
+    .map(({ img }) => img);
+
   return (
     <>
       <button type="button" className="bo-bouton bo-bouton-secondaire" onClick={() => dialogue.current?.showModal()}>
         <Icone nom="galerie" taille={18} />
         {libelle}
       </button>
-      <dialog ref={dialogue} className="bo-dialogue bo-dialogue-large" aria-labelledby={`${id}-titre`}>
+      <dialog ref={dialogue} className="bo-dialogue bo-dialogue-large bo-dialogue-photos" aria-labelledby={`${id}-titre`}>
         <div className="bo-dialogue-tete">
           <h2 id={`${id}-titre`} className="bo-sous-titre">
             {titre}
@@ -56,26 +106,74 @@ export function Mediatheque({
           </button>
         </div>
         {images.length ? (
-          <ul className="bo-mediatheque">
-            {images.map((img) => (
-              <li key={img.id}>
-                <button
-                  type="button"
-                  aria-pressed={selection === img.id}
-                  onClick={() => {
-                    surChoix(img);
-                    dialogue.current?.close();
-                  }}
-                >
-                  <Vignette image={img} alt="" />
-                  <span>
-                    {img.alt || "Photo sans description"}
-                    {img.provisoire ? " (provisoire)" : ""}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
+          <>
+            <div className="bo-mediatheque-outils">
+              <div className="bo-recherche">
+                <Icone nom="recherche" />
+                <label htmlFor={`${id}-recherche`} className="bo-invisible">
+                  Rechercher une photo
+                </label>
+                <input
+                  id={`${id}-recherche`}
+                  type="search"
+                  className="bo-saisie"
+                  placeholder="Rechercher (ex. plateau, mariage)"
+                  value={texte}
+                  onChange={(e) => setTexte(e.target.value)}
+                  autoComplete="off"
+                  enterKeyHint="search"
+                />
+              </div>
+              <label htmlFor={`${id}-filtre`} className="bo-invisible">
+                Afficher
+              </label>
+              <select id={`${id}-filtre`} className="bo-saisie" value={filtre} onChange={(e) => setFiltre(e.target.value)}>
+                <option value="toutes">Toutes les photos ({images.length})</option>
+                {nbProvisoires ? <option value="provisoires">Visuels provisoires ({nbProvisoires})</option> : null}
+                {categories.length ? (
+                  <optgroup label="Réalisations">
+                    <option value="realisations">Toutes les réalisations ({categories.reduce((n, c) => n + c.nombre, 0)})</option>
+                    {categories.map(({ c, libelle: l, nombre }) => (
+                      <option key={c} value={c}>
+                        {l} ({nombre})
+                      </option>
+                    ))}
+                  </optgroup>
+                ) : null}
+              </select>
+            </div>
+            <p className="bo-discret bo-mediatheque-compte" aria-live="polite">
+              {visibles.length === images.length
+                ? `${images.length} photo${images.length > 1 ? "s" : ""}`
+                : `${visibles.length} photo${visibles.length > 1 ? "s" : ""} sur ${images.length}`}
+            </p>
+            {visibles.length ? (
+              <ul className="bo-mediatheque">
+                {visibles.map((img) => (
+                  <li key={img.id}>
+                    <button
+                      type="button"
+                      aria-pressed={selection === img.id}
+                      onClick={() => {
+                        surChoix(img);
+                        dialogue.current?.close();
+                      }}
+                    >
+                      <Vignette image={img} alt="" />
+                      <span className="bo-mediatheque-alt">
+                        {img.provisoire ? <strong className="bo-mediatheque-provisoire">Provisoire</strong> : null}
+                        {img.alt || "Photo sans description"}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="bo-alerte">
+                Aucune photo ne correspond. Essayez un autre mot, ou choisissez « Toutes les photos ».
+              </p>
+            )}
+          </>
         ) : (
           <p className="bo-discret">Aucune photo dans la médiathèque pour l’instant.</p>
         )}

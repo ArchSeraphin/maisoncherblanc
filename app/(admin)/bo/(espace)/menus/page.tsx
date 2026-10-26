@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Etiquette } from "@/components/admin/champs";
 import { Icone } from "@/components/admin/icones";
 import { DupliquerMenu } from "@/components/admin/menus/dupliquer-menu";
-import { cheminPublicMenu, etatMenu, LIBELLES_TYPE_MENU } from "@/components/admin/menus/etat-menu";
+import { ALERTE_CARTE_MASQUEE, cheminPublicMenu, etatMenu, LIBELLES_TYPE_MENU, SLUG_CARTE } from "@/components/admin/menus/etat-menu";
 import { NouveauMenu } from "@/components/admin/menus/nouveau-menu";
 import { RecherchePlat, type PlatRecherche } from "@/components/admin/menus/recherche-plat";
 import { EntetePage, VoirSurLeSite } from "@/components/admin/mise-en-page";
@@ -41,6 +41,12 @@ export default async function PageMenus({ searchParams }: PageProps<"/bo/menus">
         titre="Carte & menus"
         introduction="La carte traiteur et les menus de saison du site : plats, prix, PDF à télécharger. Un changement est visible sur le site tout de suite."
       />
+
+      {menus.some((m) => m.slug === SLUG_CARTE && !m.visible) ? (
+        <p className="bo-alerte" role="status">
+          {ALERTE_CARTE_MASQUEE} Ouvrez-la puis cliquez sur « Afficher sur le site » pour la remettre en ligne.
+        </p>
+      ) : null}
 
       <RecherchePlat plats={plats} focusAuChargement={chercher !== undefined} />
 
