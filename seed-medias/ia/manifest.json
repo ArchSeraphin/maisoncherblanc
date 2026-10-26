@@ -1,0 +1,98 @@
+[
+  {
+    "fichier": "comptoir-boeuf-persille-marbre-boucherie-maison-cherblanc-roanne.jpg",
+    "alt": "Pièces de bœuf persillées posées sur un marbre blanc, balance en laiton et lumière du matin près d'une fenêtre",
+    "emplacement": "accueil-hero-boucherie",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "buffet-reception-bouchees-champagne-traiteur-roanne.jpg",
+    "alt": "Buffet de réception sur nappe en lin : bouchées salées sur plateaux en laiton, coupes de champagne et branches d'olivier",
+    "emplacement": "accueil-hero-traiteur",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "vitrine-charcuterie-artisanale-boucherie-maison-cherblanc-roanne.jpg",
+    "alt": "Vitrine réfrigérée de boucherie-charcuterie en bois et laiton garnie de terrines, rôtis et saucisses, jambons suspendus en arrière-plan",
+    "emplacement": "boucherie-hero",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "cote-de-boeuf-maturee-pieces-nobles-boucherie-maison-cherblanc-roanne.jpg",
+    "alt": "Côte de bœuf maturée et filet de bœuf sur une planche en chêne, fleur de sel et romarin",
+    "emplacement": "boucherie-viandes",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "charcuterie-maison-jambon-terrine-saucisson-boucherie-maison-cherblanc-roanne.jpg",
+    "alt": "Charcuterie maison sur planche en bois : jambon à l'os tranché, pâté en terrine émaillée, saucissons secs et cornichons",
+    "emplacement": "boucherie-charcuterie",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "fumoir-jambons-fumes-artisanal-boucherie-maison-cherblanc-roanne.jpg",
+    "alt": "Jambons et saucisses fumés suspendus à des crochets dans un fumoir en bois traversé par un rai de lumière",
+    "emplacement": "boucherie-fumoir",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "volaille-fermiere-de-fete-ficelee-boucherie-maison-cherblanc-roanne.jpg",
+    "alt": "Volaille fermière de fête ficelée, prête à cuire dans un plat en cuivre avec thym, laurier, échalotes et brins de sapin",
+    "emplacement": "boucherie-volailles",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "ficelage-roti-de-boeuf-geste-artisan-boucherie-maison-cherblanc-roanne.jpg",
+    "alt": "Mains d'un boucher ficelant un rôti de bœuf avec de la ficelle de cuisine sur un billot en bois",
+    "emplacement": null,
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "plats-cuisines-maison-bourguignon-blanquette-traiteur-roanne.jpg",
+    "alt": "Bœuf bourguignon et blanquette de veau servis dans des cocottes en fonte émaillée crème, pain de campagne et torchon en lin",
+    "emplacement": "traiteur-plats",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "planche-couteau-de-boucher-savoir-faire-boucherie-maison-cherblanc-roanne.jpg",
+    "alt": "Nature morte : billot en chêne, couteau à désosser, fusil à aiguiser, herbes fraîches, sel et balance ancienne en laiton",
+    "emplacement": "accueil-savoir-faire",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "table-de-fete-foie-gras-volaille-rotie-traiteur-roanne.jpg",
+    "alt": "Table de fête dressée : volaille rôtie aux marrons, foie gras et brioche toastée, bougies, verres en cristal et branches de sapin",
+    "emplacement": "fetes-hero",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "carte-traiteur-verrines-petits-fours-charcuterie-fine-traiteur-roanne.jpg",
+    "alt": "Vue de dessus d'une sélection traiteur : verrines salées, petits fours sur plateau en laiton et assiette de charcuterie fine",
+    "emplacement": "carte-hero",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  }
+]
