@@ -130,7 +130,7 @@
   {
     "fichier": "fumoir-mobile-cuisson-jambons-traiteur-evenement-roanne.jpg",
     "alt": "Trois jambons entiers en cuisson à la broche sur une rôtissoire mobile installée en extérieur, devant des arbres",
-    "emplacement": null,
+    "emplacement": "broche-hero",
     "realisation": "broche-barbecue",
     "legende": "Jambons à la broche en extérieur",
     "provisoire": false
@@ -170,7 +170,7 @@
   {
     "fichier": "plateau-aperitif-mini-burgers-verrines-traiteur-roanne.jpg",
     "alt": "Planches apéritives en cuisine : verrines, mini burgers, brioches garnies et bouchées feuilletées, avec serviettes turquoise",
-    "emplacement": null,
+    "emplacement": "maison-hero",
     "realisation": "cocktail",
     "legende": "Planches apéritives garnies",
     "provisoire": false

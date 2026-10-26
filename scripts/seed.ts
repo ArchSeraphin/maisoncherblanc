@@ -8,8 +8,10 @@
  * 6. médias de tous les seed-medias/<dossier>/manifest.json (photos puis ia...),
  *    avec réalisations et emplacements ; relancer plus tard importe les ajouts ;
  * 7. carte traiteur 2027 et menu de fêtes 2026 (créés s'ils n'existent pas ;
- *    `--reset-menus` remplace leur contenu par celui des fichiers de données).
- * Aucun avis ni actualité : rien n'est inventé.
+ *    `--reset-menus` remplace leur contenu par celui des fichiers de données) ;
+ * 8. contenus (scripts/seed-contenus.ts) : les 4 actualités de lancement de
+ *    docs/COPY.md (absentes seulement, par slug) et l'emplacement `contact-boutique`.
+ * Aucun avis : rien n'est inventé.
  *
  * Usage : npm run seed [-- --reset-menus]
  */
@@ -17,6 +19,7 @@
 import path from "node:path";
 import { banniere, drapeau, lancer } from "./_amorce";
 import { dossiersAvecManifeste, importerDocument, importerManifeste } from "./_import-medias";
+import { amorcerContenus } from "./seed-contenus";
 import { MENU_CARTE_2027, SECTIONS_CARTE_2027 } from "./donnees/carte-traiteur-2027";
 import { ANNONCE_FETES_2026, HORAIRES_FETES_2026, MENU_FETES_2026, SECTIONS_FETES_2026 } from "./donnees/menu-fetes-2026";
 
@@ -92,6 +95,12 @@ lancer(async () => {
     }
     if (pdf && !menu.pdf_media_id) definirPdfMenu(menu.id, pdf);
   }
+
+  // Contenus éditoriaux (après les médias : couvertures)
+  const contenus = await amorcerContenus();
+  console.log(
+    `Actualités : ${contenus.articlesCrees} créée(s), ${contenus.articlesExistants} déjà présente(s)${contenus.emplacements.length ? ` ; emplacement rempli : ${contenus.emplacements.join(", ")}` : ""}.`,
+  );
 
   const totaux = compterMenus();
   const emplacements = lireIdsEmplacements();
