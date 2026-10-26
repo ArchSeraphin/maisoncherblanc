@@ -1,0 +1,11 @@
+.git
+.next
+node_modules
+data
+.env
+.env.*
+!.env.example
+docs
+seed-medias/menus/*.jpg
+*.log
+.DS_Store

@@ -1,0 +1,64 @@
+.hero {
+  padding-block: clamp(2rem, 5vw, 3.5rem) var(--section);
+}
+
+.entete {
+  margin-bottom: clamp(1.75rem, 4vw, 3rem);
+}
+
+.titre {
+  max-width: 16ch;
+}
+
+/* Diptyque : deux portes égales ; au survol, la porte s'élargit (flex 1 -> 1.15, 700 ms). */
+.diptyque {
+  display: flex;
+  gap: clamp(1rem, 2vw, 1.75rem);
+}
+
+.porte {
+  flex: 1 1 0;
+  min-width: 0;
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
+  transition: flex-grow 700ms var(--courbe);
+}
+
+.visuel {
+  aspect-ratio: 4 / 5;
+  max-height: 72vh;
+  width: 100%;
+}
+
+.porte:hover .visuel img {
+  transform: scale(1.03);
+}
+
+.texte {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 46ch;
+}
+
+.texte p {
+  margin: 0;
+  color: var(--encre-douce);
+}
+
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .porte:hover {
+    flex-grow: 1.15;
+  }
+}
+
+@media (max-width: 899px) {
+  .diptyque {
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .visuel {
+    aspect-ratio: 4 / 3;
+  }
+}

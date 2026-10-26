@@ -1,0 +1,173 @@
+.pied {
+  margin-top: auto;
+  padding-top: clamp(3.5rem, 8vw, 6rem);
+  font-size: 0.95rem;
+  color: var(--sur-olive-doux);
+}
+
+.grille {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.1fr) repeat(3, minmax(0, 1fr));
+  gap: clamp(2rem, 4vw, 3.5rem);
+  padding-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+.marque {
+  display: grid;
+  gap: 1.25rem;
+  align-content: start;
+}
+
+.accroche {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 1.15rem;
+  line-height: 1.4;
+  color: var(--sur-olive);
+}
+
+.colonne {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.titre {
+  font-family: var(--texte);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: var(--interlettrage-surtitre);
+  text-transform: uppercase;
+  color: var(--or);
+}
+
+.adresse {
+  display: grid;
+  font-style: normal;
+  color: var(--sur-olive);
+}
+
+.contacts {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.contacts li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.etiquette {
+  min-width: 4.5rem;
+  font-size: 0.8rem;
+}
+
+.numero {
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-variant-numeric: lining-nums;
+  color: var(--sur-olive);
+}
+
+.numero:hover {
+  color: var(--or);
+}
+
+.horaires {
+  margin: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ligneHoraire {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--trait-clair);
+  padding-bottom: 0.45rem;
+}
+
+.ligneHoraire dt {
+  color: var(--sur-olive);
+}
+
+.ligneHoraire dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ferme {
+  font-style: italic;
+}
+
+.exceptionnels {
+  margin-top: 0.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--trait-clair);
+  border-radius: var(--r-s);
+}
+
+.exceptionnels ul {
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.exceptionnels li {
+  display: grid;
+}
+
+.sousTitre {
+  margin: 0 0 0.6rem;
+  font-weight: 600;
+  color: var(--or);
+}
+
+.date {
+  color: var(--sur-olive);
+  font-weight: 600;
+}
+
+.liens {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.liens a:hover,
+.legal a:hover {
+  color: var(--sur-olive);
+}
+
+.bas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1.5rem;
+  border-top: 1px solid var(--trait-clair);
+  font-size: 0.85rem;
+}
+
+.bas p {
+  margin: 0;
+}
+
+.legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .grille {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .grille {
+    grid-template-columns: 1fr;
+  }
+}

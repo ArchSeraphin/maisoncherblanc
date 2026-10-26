@@ -1,35 +1,48 @@
 {
   "name": "maisoncherblanc",
-  "version": "1.0.0",
-  "description": "Site vitrine Maison Cherblanc - Traiteur Boucherie Charcuterie Roanne",
-  "main": "app.js",
+  "version": "2.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
-    "build": "npm install && cd client && npm install && npm run build",
-    "seed": "node seed/seed.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "node server.js",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "seed": "tsx scripts/seed.ts",
+    "create-admin": "tsx scripts/create-admin.ts",
+    "list-admins": "tsx scripts/list-admins.ts",
+    "import-medias": "tsx scripts/import-medias.ts",
+    "purge-messages": "tsx scripts/purge-messages.ts",
+    "logos": "tsx scripts/generer-logos.ts",
+    "verifier-lib": "tsx scripts/verifier-lib.ts"
   },
   "dependencies": {
-    "bcrypt": "^5.1.1",
-    "cookie-parser": "^1.4.6",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "express-rate-limit": "^7.3.1",
-    "express-validator": "^7.1.0",
-    "helmet": "^7.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "multer": "^1.4.5-lts.1",
-    "mysql2": "^3.9.7",
-    "nodemailer": "^6.9.13",
-    "sharp": "^0.33.4",
-    "slugify": "^1.6.6",
-    "xss": "^1.0.15"
+    "better-sqlite3": "13.0.3",
+    "dotenv": "18.0.9",
+    "iron-session": "9.0.1",
+    "next": "16.4.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1",
+    "sharp": "0.35.5",
+    "zod": "4.6.7"
   },
   "devDependencies": {
-    "nodemon": "^3.1.3"
+    "@types/better-sqlite3": "9.6.0",
+    "@types/node": "24.19.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.3",
+    "tsx": "4.23.15",
+    "typescript": "^5"
   },
-  "engines": {
-    "node": ">=18.0.0"
+  "allowScripts": {
+    "better-sqlite3": false,
+    "esbuild": false,
+    "unrs-resolver": false
   }
 }

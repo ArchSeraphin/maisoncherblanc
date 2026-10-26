@@ -1,0 +1,507 @@
+/* =========================================================================
+   Backoffice : styles `bo-*`, importés uniquement par app/(admin)/bo/layout.tsx.
+   Objectif : facile pour un artisan, utilisable au téléphone (gros boutons,
+   cibles de 48 px, libellés lisibles). Reprend les jetons de app/globals.css.
+   ========================================================================= */
+
+.bo-racine {
+  --bo-fond: #f6f2ea;
+  --bo-surface: #fffdf9;
+  --bo-trait: rgb(42 43 36 / 0.14);
+  --bo-texte: var(--encre);
+  --bo-discret: var(--encre-douce);
+  --bo-accent: var(--olive);
+  --bo-danger: #8f2f21;
+  --bo-succes: #3d5a2a;
+  min-height: 100vh;
+  background: var(--bo-fond);
+  color: var(--bo-texte);
+  font-size: 1rem;
+}
+
+.bo-invisible,
+.bo-evitement:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.bo-evitement:focus {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  background: var(--bo-accent);
+  color: var(--sur-olive);
+  border-radius: var(--r-s);
+}
+
+/* --- Coquille --- */
+
+.bo-coque {
+  min-height: 100vh;
+}
+
+@media (min-width: 900px) {
+  .bo-coque {
+    display: flex;
+  }
+}
+
+.bo-laterale {
+  display: none;
+  width: 272px;
+  flex: none;
+  background: var(--bo-surface);
+  border-right: 1px solid var(--bo-trait);
+}
+
+@media (min-width: 900px) {
+  .bo-laterale {
+    display: block;
+  }
+  .bo-barre-mobile {
+    display: none !important;
+  }
+}
+
+.bo-laterale-interieur {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.25rem 0.85rem;
+}
+
+.bo-marque {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding-inline: 0.5rem;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  line-height: 1.1;
+  color: var(--bo-texte);
+}
+
+.bo-marque small {
+  display: block;
+  font-family: var(--texte);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cuivre-texte);
+  margin-top: 0.2rem;
+}
+
+.bo-nav {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bo-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.bo-nav-lien {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 46px;
+  padding: 0.55rem 0.75rem;
+  border: 0;
+  border-radius: var(--r-s);
+  background: none;
+  color: var(--bo-texte);
+  font-size: 0.97rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bo-nav-lien:hover {
+  background: var(--sable);
+}
+
+.bo-nav-lien[aria-current="page"] {
+  background: var(--olive);
+  color: var(--sur-olive);
+}
+
+.bo-nav-bas {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--bo-trait);
+}
+
+.bo-utilisateur {
+  margin: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--bo-discret);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bo-pastille {
+  margin-left: auto;
+  min-width: 1.5rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--cuivre-fonce);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.bo-barre-mobile {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding-inline: 1rem;
+  background: var(--bo-surface);
+  border-bottom: 1px solid var(--bo-trait);
+}
+
+.bo-tiroir-fond {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.bo-tiroir-voile {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgb(47 52 36 / 0.45);
+}
+
+.bo-tiroir {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: min(320px, 86vw);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  padding: 1rem;
+  background: var(--bo-surface);
+  box-shadow: var(--ombre-l);
+}
+
+.bo-tiroir-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bo-principal {
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem 1rem 6rem;
+  outline: none;
+}
+
+@media (min-width: 900px) {
+  .bo-principal {
+    padding: 2.5rem 2.5rem 6rem;
+  }
+}
+
+.bo-largeur {
+  max-width: 1040px;
+  margin-inline: auto;
+}
+
+/* --- Typographie --- */
+
+.bo-titre {
+  font-size: clamp(1.7rem, 4vw, 2.2rem);
+  margin: 0 0 0.35rem;
+}
+
+.bo-sous-titre {
+  font-size: 1.3rem;
+  margin: 0 0 0.85rem;
+}
+
+.bo-discret {
+  color: var(--bo-discret);
+  font-size: 0.92rem;
+}
+
+/* --- Mise en page --- */
+
+.bo-pile {
+  display: grid;
+  gap: 1rem;
+}
+
+.bo-pile-large {
+  display: grid;
+  gap: 2.25rem;
+}
+
+.bo-rangee {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.bo-carte {
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-trait);
+  border-radius: var(--r-m);
+  padding: 1.15rem 1.25rem;
+}
+
+a.bo-carte:hover {
+  border-color: var(--olive);
+  box-shadow: var(--ombre-s);
+}
+
+.bo-grille-chiffres {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.bo-chiffre {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.bo-chiffre-valeur {
+  font-family: var(--display);
+  font-size: 2.4rem;
+  line-height: 1;
+  color: var(--olive);
+}
+
+.bo-grille-modules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 0.85rem;
+}
+
+.bo-module {
+  display: grid;
+  gap: 0.3rem;
+  height: 100%;
+}
+
+.bo-tableau {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bo-surface);
+  border-radius: var(--r-m);
+  overflow: hidden;
+}
+
+.bo-tableau :is(th, td) {
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid var(--bo-trait);
+  text-align: left;
+}
+
+.bo-tableau th {
+  font-size: 0.85rem;
+  color: var(--bo-discret);
+}
+
+/* --- Formulaires --- */
+
+.bo-champ {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.bo-champ label {
+  font-weight: 600;
+}
+
+.bo-aide {
+  font-size: 0.85rem;
+  color: var(--bo-discret);
+}
+
+.bo-saisie {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgb(42 43 36 / 0.3);
+  border-radius: var(--r-s);
+  background: #fff;
+  font-size: 1rem;
+}
+
+textarea.bo-saisie {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+.bo-saisie:focus {
+  outline: 2px solid var(--olive);
+  outline-offset: 1px;
+}
+
+.bo-saisie[aria-invalid="true"] {
+  border-color: var(--bo-danger);
+}
+
+.bo-erreur {
+  font-size: 0.88rem;
+  color: var(--bo-danger);
+}
+
+/* --- Boutons (48 px de haut : utilisables au doigt) --- */
+
+.bo-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0.65rem 1.2rem;
+  border: 1px solid transparent;
+  border-radius: var(--r-s);
+  font-weight: 600;
+  font-size: 0.97rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.bo-bouton:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.bo-bouton-principal {
+  background: var(--olive);
+  color: var(--sur-olive);
+}
+
+.bo-bouton-principal:hover {
+  background: var(--olive-profond);
+}
+
+.bo-bouton-secondaire {
+  background: var(--bo-surface);
+  border-color: rgb(42 43 36 / 0.25);
+  color: var(--bo-texte);
+}
+
+.bo-bouton-secondaire:hover {
+  border-color: var(--olive);
+}
+
+.bo-bouton-danger {
+  background: var(--bo-surface);
+  border-color: var(--bo-danger);
+  color: var(--bo-danger);
+}
+
+.bo-bouton-danger:hover {
+  background: var(--bo-danger);
+  color: #fff;
+}
+
+.bo-bouton-large {
+  width: 100%;
+}
+
+.bo-bouton-icone {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--bo-trait);
+  border-radius: var(--r-s);
+  background: var(--bo-surface);
+  cursor: pointer;
+}
+
+/* --- Messages --- */
+
+.bo-alerte {
+  margin: 0;
+  padding: 0.8rem 1rem;
+  border-radius: var(--r-s);
+  background: var(--sable);
+}
+
+.bo-alerte-erreur {
+  background: #f6e1dc;
+  color: var(--bo-danger);
+}
+
+.bo-alerte-succes {
+  background: #e3ead8;
+  color: var(--bo-succes);
+}
+
+.bo-etiquette {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--sable);
+}
+
+.bo-etiquette-provisoire {
+  background: #f4e3c4;
+  color: var(--cuivre-fonce);
+}
+
+/* --- Connexion --- */
+
+.bo-connexion {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+}
+
+.bo-carte-connexion {
+  width: 100%;
+  max-width: 400px;
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+  padding: 2rem;
+}
+
+.bo-carte-connexion form {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.bo-titre-connexion {
+  font-size: 1.8rem;
+  margin: 0.5rem 0 0;
+}

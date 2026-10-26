@@ -1,0 +1,384 @@
+/* En-tête public. `-webkit-backdrop-filter` AVANT `backdrop-filter` (piège lightningcss). */
+
+.entete {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--creme);
+  border-bottom: 1px solid transparent;
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.compact {
+  background: rgb(243 235 220 / 0.86);
+  -webkit-backdrop-filter: saturate(140%) blur(14px);
+  backdrop-filter: saturate(140%) blur(14px);
+  border-bottom-color: var(--trait);
+  box-shadow: var(--ombre-xs);
+}
+
+/* Menu ouvert : pas de flou (un backdrop-filter ferait de l'en-tête le repère du panneau fixe). */
+.ouvert.compact {
+  background: var(--creme);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.barre {
+  max-width: var(--page-large);
+  margin-inline: auto;
+  padding-inline: var(--gouttiere);
+  height: calc(var(--hauteur-entete) + 12px);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  transition: height var(--transition);
+}
+
+.compact .barre {
+  height: var(--hauteur-entete);
+}
+
+/* --- Marque --- */
+
+.marque {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.monogramme {
+  width: 48px;
+  height: 48px;
+  transition:
+    width var(--transition),
+    height var(--transition);
+}
+
+.compact .monogramme {
+  width: 40px;
+  height: 40px;
+}
+
+.nom {
+  display: grid;
+  line-height: 1.1;
+}
+
+.nomPrincipal {
+  font-family: var(--display);
+  font-size: 1.3rem;
+  font-weight: 420;
+  letter-spacing: -0.01em;
+  color: var(--encre);
+}
+
+.signature {
+  white-space: nowrap;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cuivre-texte);
+  margin-top: 0.2rem;
+}
+
+/* --- Navigation bureau --- */
+
+.nav {
+  margin-left: auto;
+}
+
+.liste {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.8rem, 1.3vw, 1.4rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.liste > li {
+  position: relative;
+}
+
+.lien {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--encre);
+  white-space: nowrap;
+}
+
+.avecSousMenu {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.chevron {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: var(--r-xs);
+  color: var(--encre-douce);
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+
+.avecSousMenu[data-ouvert] .chevron {
+  transform: rotate(180deg);
+}
+
+.sousMenu {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  left: -1rem;
+  min-width: 250px;
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem;
+  background: var(--lin);
+  border: 1px solid var(--trait);
+  border-radius: var(--r-m);
+  box-shadow: var(--ombre-l);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition:
+    opacity var(--transition),
+    transform var(--transition),
+    visibility var(--transition);
+}
+
+/* Pont invisible : le survol ne se perd pas entre le lien et le sous-menu. */
+.sousMenu::before {
+  content: "";
+  position: absolute;
+  inset: -0.8rem 0 auto;
+  height: 0.8rem;
+}
+
+.avecSousMenu:hover .sousMenu,
+.avecSousMenu:focus-within .sousMenu,
+.avecSousMenu[data-ouvert] .sousMenu {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.sousLien {
+  display: block;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--r-s);
+  font-size: 0.92rem;
+  color: var(--encre);
+}
+
+.sousLien:hover,
+.sousLien[aria-current="page"] {
+  background: var(--sable);
+}
+
+/* --- Actions --- */
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: none;
+}
+
+.telephone {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--display);
+  font-size: 1.02rem;
+  font-variant-numeric: lining-nums;
+  color: var(--encre);
+  white-space: nowrap;
+}
+
+.telephone svg {
+  color: var(--cuivre);
+}
+
+.burger {
+  display: none;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 1px solid var(--trait-fort);
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  place-items: center;
+}
+
+.burgerTraits,
+.burgerTraits::before,
+.burgerTraits::after {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  background: var(--encre);
+  border-radius: 2px;
+  transition:
+    transform var(--transition),
+    background var(--transition);
+}
+
+.burgerTraits {
+  position: relative;
+}
+
+.burgerTraits::before,
+.burgerTraits::after {
+  content: "";
+  position: absolute;
+  left: 0;
+}
+
+.burgerTraits::before {
+  top: -6px;
+}
+
+.burgerTraits::after {
+  top: 6px;
+}
+
+.ouvert .burgerTraits {
+  background: transparent;
+}
+
+.ouvert .burgerTraits::before {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.ouvert .burgerTraits::after {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* --- Panneau mobile --- */
+
+.panneau {
+  position: fixed;
+  inset: var(--bas-entete, calc(var(--hauteur-entete) + 12px)) 0 0;
+  background: var(--creme);
+  overflow-y: auto;
+  padding: 1.5rem var(--gouttiere) 2.5rem;
+  border-top: 1px solid var(--trait);
+}
+
+.panneau[hidden] {
+  display: none;
+}
+
+.listeMobile {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.listeMobile > li {
+  border-bottom: 1px solid var(--trait);
+  padding-block: 0.25rem;
+}
+
+.lienMobile {
+  display: block;
+  padding-block: 0.75rem;
+  font-family: var(--display);
+  font-size: 1.6rem;
+  font-weight: 380;
+  letter-spacing: -0.015em;
+}
+
+.lienMobile[aria-current="page"] {
+  font-style: italic;
+  color: var(--cuivre-texte);
+}
+
+.sousListeMobile {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0 0 0 1rem;
+  display: grid;
+  gap: 0.15rem;
+  border-left: 1px solid var(--cuivre);
+}
+
+.sousListeMobile a {
+  display: block;
+  padding-block: 0.45rem;
+  color: var(--encre-douce);
+}
+
+.piedPanneau {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+/* --- Points de rupture --- */
+
+/* Le téléphone de l'en-tête n'apparaît que s'il reste de la place (il est aussi dans le pied et le menu mobile). */
+@media (max-width: 1499px) {
+  .telephone {
+    display: none;
+  }
+}
+
+@media (min-width: 1261px) and (max-width: 1399px) {
+  .signature {
+    display: none;
+  }
+}
+
+@media (max-width: 1260px) {
+  .nav {
+    display: none;
+  }
+
+  .burger {
+    display: grid;
+  }
+
+  .actions {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .barre {
+    gap: 0.75rem;
+  }
+
+  /* Spécificité renforcée : la classe globale `.bouton` pose aussi `display`. */
+  .actions .cta {
+    display: none;
+  }
+
+  .signature {
+    display: none;
+  }
+
+  .nomPrincipal {
+    font-size: 1.15rem;
+  }
+}
+
+@media (min-width: 1261px) {
+  .panneau {
+    display: none !important;
+  }
+}

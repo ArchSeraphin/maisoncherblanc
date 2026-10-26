@@ -1,29 +1,30 @@
-# Environment
+# dépendances
+/node_modules
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# données persistantes (base SQLite + fichiers envoyés) : JAMAIS dans git
+/data/
+*.db
+*.db-shm
+*.db-wal
+
+# environnement (secrets) : seul .env.example est versionné
 .env
 .env.*
 !.env.example
 
-# Dependencies
-node_modules/
-client/node_modules/
-
-# Build
-client/dist/
-
-# Uploads (user content)
-uploads/
-
-# Logs
-*.log
-npm-debug.log*
-
-# OS
+# divers
 .DS_Store
 Thumbs.db
-
-# IDE
+*.pem
+*.log
+npm-debug.log*
 .vscode/
 .idea/
-
-# Assets source (originals kept locally)
-assets/
+/coverage

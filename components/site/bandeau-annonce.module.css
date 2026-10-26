@@ -1,0 +1,37 @@
+.bandeau {
+  background: var(--olive-profond);
+  color: var(--sur-olive);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.texte {
+  margin: 0;
+  max-width: var(--page);
+  margin-inline: auto;
+  padding: 0.6rem var(--gouttiere);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  text-align: center;
+}
+
+.losange {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  background: var(--or);
+  transform: rotate(45deg);
+}
+
+.lien {
+  color: var(--sur-olive);
+  text-decoration: underline;
+  text-decoration-color: var(--or);
+  text-underline-offset: 3px;
+}
+
+.lien:hover {
+  color: var(--or);
+}
