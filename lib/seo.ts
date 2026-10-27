@@ -44,10 +44,15 @@ export function urlAbsolue(cheminOuUrl: string): string {
   return `${urlSite()}${cheminOuUrl.startsWith("/") ? "" : "/"}${cheminOuUrl}`;
 }
 
-/** URL canonique d'un chemin : « / » garde son slash, les autres n'en ont pas. */
+/**
+ * URL canonique d'un chemin, sans barre finale, accueil compris
+ * (« https://maisoncherblanc.fr ») : c'est la forme que Next écrit dans
+ * `<link rel="canonical">` ; le sitemap, le fil d'Ariane et le JSON-LD utilisent
+ * la même, pour une seule forme d'URL partout.
+ */
 export function urlCanonique(chemin: string): string {
-  const propre = chemin === "/" ? "/" : chemin.replace(/\/+$/, "");
-  return urlAbsolue(propre);
+  const propre = chemin.replace(/\/+$/, "");
+  return propre ? urlAbsolue(propre) : urlSite();
 }
 
 /** Titre complet tel qu'affiché (modèle appliqué) pour un titre court sans entrée dans `seo.pages`. */
@@ -104,7 +109,7 @@ export function imagePartageDepuisMedia(image: ImageMedia): ImagePartage {
 
 function resoudreImage(image: EntreeMetadata["image"]): ImagePartage {
   const def = siteConfig.imagePartageParDefaut;
-  if (!image) return { url: urlAbsolue(def.chemin), width: def.largeur, height: def.hauteur, alt: def.alt, type: "image/png" };
+  if (!image) return { url: urlAbsolue(def.chemin), width: def.largeur, height: def.hauteur, alt: def.alt, type: "image/jpeg" };
   if (typeof image === "string") return { url: urlAbsolue(image) };
   if ("variantes" in image) return imagePartageDepuisMedia(image);
   return { ...image, url: urlAbsolue(image.url) };
@@ -267,13 +272,16 @@ export function commerceJsonLd(e: {
   images?: (ImageMedia | string | null | undefined)[];
   /** Menus de saison en cours (page /menus-de-fetes), ajoutés à `hasMenu`. Images provisoires (IA) ignorées. */
   menusSaison?: Pick<Menu, "slug" | "titre">[];
+  /** Carte traiteur publiée (`!!carteTraiteur()`) ; masquée : pas de `hasMenu` vers /carte-traiteur. */
+  carteEnLigne?: boolean;
 }): JsonLdDonnees {
   const site = urlSite();
   // Visuels provisoires (IA) exclus : l'entité ne montre que de vraies photos.
   const images = (e.images ?? []).filter((i): i is ImageMedia | string => !!i && (typeof i === "string" || !i.provisoire)).map(urlImage);
   const editeur = siteConfig.legal.editeur;
-  const menus: JsonLdDonnees[] = [{ "@type": "Menu", "@id": idCarteTraiteur(), name: "Carte traiteur", url: urlAbsolue("/carte-traiteur") }];
-  for (const m of e.menusSaison ?? []) menus.push({ "@type": "Menu", "@id": `${urlAbsolue("/menus-de-fetes")}#${m.slug}`, name: m.titre, url: urlAbsolue("/menus-de-fetes") });
+  const menus: JsonLdDonnees[] =
+    e.carteEnLigne === false ? [] : [{ "@type": "Menu", "@id": idCarteTraiteur(), name: "Carte traiteur", url: urlCanonique("/carte-traiteur") }];
+  for (const m of e.menusSaison ?? []) menus.push({ "@type": "Menu", "@id": `${urlAbsolue("/menus-de-fetes")}#${m.slug}`, name: m.titre, url: urlCanonique("/menus-de-fetes") });
   const donnees: JsonLdDonnees = {
     "@context": CONTEXTE,
     "@type": ["Store", "FoodEstablishment"],
@@ -290,7 +298,7 @@ export function commerceJsonLd(e: {
     address: adressePostale(),
     areaServed: zoneServie(),
     openingHoursSpecification: specificationHoraires(e.horaires),
-    hasMenu: menus.length === 1 ? menus[0] : menus,
+    ...(menus.length ? { hasMenu: menus.length === 1 ? menus[0] : menus } : {}),
     hasMap: siteConfig.itineraire,
     currenciesAccepted: "EUR",
     knowsLanguage: "fr",
@@ -603,13 +611,60 @@ export function phraseHoraires(h: HorairesSemaine): string {
   return phrases.join(" ");
 }
 
-/** FAQ de /boucherie-roanne (COPY.md section 3, réponses par défaut des points [À VALIDER]). */
-export function faqBoucherie(horaires: HorairesSemaine): QuestionFaq[] {
+/**
+ * Dates limites de commande des fêtes lues dans `infos_commande` du menu de
+ * saison (« … avant le dimanche 20 décembre pour Noël, et avant le jeudi
+ * 24 décembre pour le jour de l’An. »). Rien n'est supposé : `null` si absent.
+ */
+export function datesCommandeFetes(menu: Pick<Menu, "titre" | "infos_commande"> | null | undefined): {
+  noel: string | null;
+  nouvelAn: string | null;
+  annee: string | null;
+} {
+  const texte = menu?.infos_commande ?? "";
+  return {
+    noel: /avant le ([^,.;]+?) pour Noël/i.exec(texte)?.[1]?.trim() ?? null,
+    nouvelAn: /avant le ([^,.;]+?) pour le jour de l[’']An/i.exec(texte)?.[1]?.trim() ?? null,
+    annee: /\b(20\d{2})\b/.exec(menu?.titre ?? "")?.[1] ?? null,
+  };
+}
+
+const minusculeInitiale = (s: string) => (/^[A-ZÀ-Ý][a-zà-ÿ]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
+
+/** Composition d'un plateau en liste courte (« jambon blanc, jambon cru, rosette »), quantités retirées. */
+function compositionCourte(description: string): string {
+  return description
+    .split(/\r?\n/)
+    .map((l) => l.trim().replace(/^[\d½¼¾,.]+\s+(?:tranches?|morceaux?|pièces?)\s+(?:de |d’|d')/i, ""))
+    .filter(Boolean)
+    .map(minusculeInitiale)
+    .join(", ");
+}
+
+/** Plat de la carte retrouvé par son nom exact (insensible à la casse). */
+function platCarte(carte: MenuComplet | null | undefined, nom: string) {
+  const cible = nom.toLocaleLowerCase("fr");
+  for (const s of carte?.sections ?? []) for (const p of s.plats) if (p.nom.toLocaleLowerCase("fr") === cible && p.prix) return p;
+  return null;
+}
+
+const uniteLongue = (u: string) => (u === "par pers." ? "par personne" : u);
+
+/**
+ * FAQ de /boucherie-roanne (COPY.md section 3, réponses par défaut des points
+ * [À VALIDER]). Horaires et dates de commande des fêtes lus en base : `saison`
+ * = menu de saison en cours (`menusDeSaisonEnCours()[0]`), repli neutre hors saison.
+ */
+export function faqBoucherie(horaires: HorairesSemaine, saison?: Pick<Menu, "titre" | "infos_commande"> | null): QuestionFaq[] {
   const tel = siteConfig.telephones.boutique.affichage;
   const dimanche = horaires.dimanche;
   const reponseDimanche = dimanche.length
     ? `Oui, le dimanche${dimanche[dimanche.length - 1].fermeture <= "13:00" ? " matin" : ""} ${dimanche.map((p) => `de ${formaterHeure(p.ouverture)} à ${formaterHeure(p.fermeture)}`).join(" et ")}.`
     : "Non, la boutique est fermée le dimanche.";
+  const fetes = datesCommandeFetes(saison);
+  const dateVolailles = fetes.noel
+    ? ` Pour Noël${fetes.annee ? ` ${fetes.annee}` : ""}, la date limite de commande est le ${fetes.noel}.`
+    : " Les dates limites de commande sont publiées chaque année sur la page des menus de fêtes.";
   return [
     {
       question: "Quels sont les horaires de la boucherie Maison Cherblanc à Roanne ?",
@@ -622,8 +677,7 @@ export function faqBoucherie(horaires: HorairesSemaine): QuestionFaq[] {
     },
     {
       question: "Faut-il commander les volailles de Noël ?",
-      reponse:
-        "Oui. Les volailles de fête (dinde, poularde, chapon, poulet de Bresse, pintade, canard ou canette, caille) sont vendues uniquement sur commande. Pour Noël 2026, la date limite est le dimanche 20 décembre.",
+      reponse: `Oui. Les volailles de fête (dinde, poularde, chapon, poulet de Bresse, pintade, canard ou canette, caille) sont vendues uniquement sur commande.${dateVolailles}`,
     },
     {
       question: "D’où vient votre viande ?",
@@ -638,14 +692,53 @@ export function faqBoucherie(horaires: HorairesSemaine): QuestionFaq[] {
   ];
 }
 
-/** FAQ de /traiteur-roanne (COPY.md section 4, réponses par défaut des points [À VALIDER]). */
-export function faqTraiteur(): QuestionFaq[] {
+/**
+ * Prix repères des plateaux et de la formule du chef, lus sur la carte traiteur
+ * en base : « Sur la carte 2027 : 6 € par personne pour le plateau de
+ * charcuterie (jambon blanc, …), 4,90 € pour le plateau de fromages (…), 4 €
+ * pour le plateau de légumes crus avec sa sauce. La formule du chef est à 14 €
+ * par personne. » `null` si la carte est masquée ou sans ces plats.
+ * Partagé par la FAQ traiteur et /llms.txt.
+ */
+export function phrasePrixPlateaux(carte: MenuComplet | null | undefined): string | null {
+  const anneeCarte = /\b(20\d{2})\b/.exec(carte?.titre ?? "")?.[1] ?? null;
+  const charcuterie = platCarte(carte, "Plateau de charcuterie");
+  const fromages = platCarte(carte, "Plateau de fromages");
+  const legumes = platCarte(carte, "Plateau de légumes crus");
+  const formule = platCarte(carte, "La formule du chef");
+  const morceaux = [
+    charcuterie && `${charcuterie.prix} ${uniteLongue(charcuterie.unite)} pour le plateau de charcuterie${charcuterie.description ? ` (${compositionCourte(charcuterie.description)})` : ""}`,
+    fromages && `${fromages.prix}${fromages.unite === charcuterie?.unite ? "" : ` ${uniteLongue(fromages.unite)}`} pour le plateau de fromages${fromages.description ? ` (${compositionCourte(fromages.description)})` : ""}`,
+    legumes && `${legumes.prix}${legumes.unite === charcuterie?.unite ? "" : ` ${uniteLongue(legumes.unite)}`} pour le plateau de légumes crus avec sa sauce`,
+  ].filter((m): m is string => !!m);
+  return morceaux.length
+    ? `Sur la carte${anneeCarte ? ` ${anneeCarte}` : ""} : ${morceaux.length > 1 ? `${morceaux.slice(0, -1).join(", ")}, ${morceaux[morceaux.length - 1]}` : morceaux[0]}.${formule ? ` La formule du chef est à ${formule.prix} ${uniteLongue(formule.unite)}.`.replace(/ \./, ".") : ""}`
+    : null;
+}
+
+/**
+ * FAQ de /traiteur-roanne (COPY.md section 4, réponses par défaut des points
+ * [À VALIDER]). Prix lus sur la carte traiteur en base (`carteTraiteur()`),
+ * dates de commande des fêtes sur le menu de saison en cours ; replis neutres
+ * si la carte est masquée ou hors saison.
+ */
+export function faqTraiteur(carte?: MenuComplet | null, saison?: Pick<Menu, "titre" | "infos_commande"> | null): QuestionFaq[] {
   const t = siteConfig.telephones;
+  const fetes = datesCommandeFetes(saison);
+  const datesFetes =
+    fetes.noel && fetes.nouvelAn
+      ? ` : pour ${fetes.annee ?? "cette année"}, le ${fetes.noel} pour Noël et le ${fetes.nouvelAn} pour le jour de l’An`
+      : fetes.noel
+        ? ` : pour ${fetes.annee ?? "cette année"}, le ${fetes.noel} pour Noël`
+        : "";
+
+  const reponsePrix =
+    phrasePrixPlateaux(carte) ?? "Les plateaux sont vendus à la personne : tous les prix sont sur la page carte traiteur, ou sur demande à la boutique."
+
   return [
     {
       question: "Combien de temps à l’avance faut-il commander ?",
-      reponse:
-        "Une semaine avant la date, au minimum. Pour un mariage, une grande réception ou une date de fin d’année, contactez-nous dès que la date est fixée. Pour les fêtes, les dates limites sont publiées sur la page menus de fêtes : pour 2026, le dimanche 20 décembre pour Noël et le jeudi 24 décembre pour le jour de l’An.",
+      reponse: `Une semaine avant la date, au minimum. Pour un mariage, une grande réception ou une date de fin d’année, contactez-nous dès que la date est fixée. Pour les fêtes, les dates limites sont publiées sur la page menus de fêtes${datesFetes}.`,
     },
     {
       question: "Proposez-vous le service à table ?",
@@ -656,11 +749,7 @@ export function faqTraiteur(): QuestionFaq[] {
       question: "Le devis est-il gratuit ?",
       reponse: `Oui, le devis est gratuit. Écrivez-nous depuis la page contact ou appelez le ${t.boutique.affichage} ou le ${t.mobile.affichage}.`,
     },
-    {
-      question: "Combien coûte un plateau par personne ?",
-      reponse:
-        "Sur la carte 2027 : 6 € par personne pour le plateau de charcuterie (jambon blanc, jambon cru, rosette, terrine, chorizo), 4,90 € pour le plateau de fromages (brie de Meaux, camembert, chèvre, comté), 4 € pour le plateau de légumes crus avec sa sauce. La formule du chef est à 14 € par personne.",
-    },
+    { question: "Combien coûte un plateau par personne ?", reponse: reponsePrix },
     {
       question: "Livrez-vous ?",
       reponse: `Les commandes se retirent à la boutique, ${siteConfig.adresse.rue} à ${siteConfig.adresse.ville}. Pour une réception avec service à table, l’équipe vient sur le lieu de l’événement.`,

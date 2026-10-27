@@ -11,7 +11,7 @@ import { FlecheDroite } from "@/components/ui/motifs";
 import { compterVue } from "@/lib/compter-vue";
 import { chargerEmplacements } from "@/lib/emplacements";
 import { groupesComposition } from "@/lib/composition";
-import { carteTraiteur } from "@/lib/menus";
+import { carteTraiteur, menusDeSaisonEnCours } from "@/lib/menus";
 import { coordonnees } from "@/lib/reglages";
 import { construireMetadata, elementsFilAriane, faqJsonLd, faqTraiteur, filArianeJsonLd, serviceJsonLd } from "@/lib/seo";
 import styles from "./traiteur.module.css";
@@ -20,7 +20,9 @@ const CHEMIN = "/traiteur-roanne";
 const ARIANE = elementsFilAriane(CHEMIN);
 
 export async function generateMetadata() {
-  return construireMetadata({ chemin: CHEMIN, image: photoPartage(chargerEmplacements(["traiteur-hero"] as const)["traiteur-hero"]) });
+  // Vraie photo d'en-tête si elle existe, sinon la carte de partage du traiteur (/partage/traiteur).
+  const photo = photoPartage(chargerEmplacements(["traiteur-hero"] as const)["traiteur-hero"]);
+  return construireMetadata({ chemin: CHEMIN, image: photo ?? { url: "/partage/traiteur", width: 1200, height: 630, alt: "Traiteur à Roanne, Maison Cherblanc", type: "image/jpeg" } });
 }
 
 
@@ -75,7 +77,7 @@ export default async function PageTraiteur() {
   ];
 
   // FAQ de lib/seo.ts (lot C) : même texte affiché et balisé.
-  const questions = faqTraiteur();
+  const questions = faqTraiteur(carte, menusDeSaisonEnCours()[0] ?? null);
 
   const compoFormule = formule ? groupesComposition(formule.description).flatMap((g) => g.elements) : [];
 

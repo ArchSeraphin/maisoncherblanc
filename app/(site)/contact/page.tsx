@@ -12,7 +12,7 @@ import { emettreJeton, USAGE_CONTACT } from "@/lib/jeton-formulaire";
 import { coordonnees, lireHoraires } from "@/lib/reglages";
 import { commerceJsonLd, construireMetadata, elementsFilAriane, filArianeJsonLd, pageWebJsonLd } from "@/lib/seo";
 import { photoPartage } from "@/components/site/outils";
-import { menusDeSaisonEnCours } from "@/lib/menus";
+import { carteTraiteur, menusDeSaisonEnCours } from "@/lib/menus";
 import styles from "./contact.module.css";
 
 const CHEMIN = "/contact";
@@ -41,7 +41,7 @@ export default async function PageContact({ searchParams }: PageProps<"/contact"
         donnees={[
           filArianeJsonLd(ARIANE),
           pageWebJsonLd({ chemin: CHEMIN, type: "ContactPage", image: photoPartage(img["contact-boutique"]) }),
-          commerceJsonLd({ horaires, exceptionnels: horairesExceptionnelsAVenir(60), menusSaison: menusDeSaisonEnCours() }),
+          commerceJsonLd({ horaires, exceptionnels: horairesExceptionnelsAVenir(60), menusSaison: menusDeSaisonEnCours(), carteEnLigne: !!carteTraiteur() }),
         ]}
       />
 

@@ -3,9 +3,9 @@ import { listerArticlesPublies } from "@/lib/articles";
 import { formaterJourLong } from "@/lib/dates";
 import { formaterPlage } from "@/lib/horaires";
 import { horairesExceptionnelsAVenir } from "@/lib/horaires-exceptionnels";
-import { menusDeSaisonEnCours } from "@/lib/menus";
+import { carteTraiteur, menusDeSaisonEnCours } from "@/lib/menus";
 import { coordonnees, lireHoraires } from "@/lib/reglages";
-import { phraseHoraires, urlCanonique } from "@/lib/seo";
+import { phrasePrixPlateaux, phraseHoraires, seoMenusDeFetes, urlCanonique } from "@/lib/seo";
 
 /**
  * /llms.txt : présentation factuelle du commerce pour les moteurs IA
@@ -35,6 +35,10 @@ export async function GET() {
   const exceptionnels = horairesExceptionnelsAVenir(60);
   const saison = menusDeSaisonEnCours();
   const articles = listerArticlesPublies({ limite: 20 });
+  const carte = carteTraiteur();
+  const prix = phrasePrixPlateaux(carte);
+  // Description de /menus-de-fetes selon la saison : texte du menu en cours, ou « hors saison ».
+  const descriptions: Record<string, string | undefined> = { "/menus-de-fetes": seoMenusDeFetes(saison).description };
 
   const lignes: string[] = [
     `# ${siteConfig.nom}`,
@@ -49,14 +53,14 @@ export async function GET() {
     `- E-mail : ${c.email}`,
     `- Horaires d’ouverture : ${phraseHoraires(lireHoraires())}`,
     `- Traiteur : ${siteConfig.traiteur.delaiCommande} ${siteConfig.traiteur.serviceATable} ${siteConfig.traiteur.devis}`,
-    "- Prix repères (carte traiteur 2027) : plateau de charcuterie 6 € par personne, plateau de fromages 4,90 € par personne, plateau de légumes crus 4 € par personne, formule du chef 14 € par personne. Carte complète et prix à jour : page carte traiteur.",
+    ...(prix ? [`- Prix repères : ${prix} Carte complète et prix à jour : page carte traiteur.`] : []),
     `- Itinéraire : ${siteConfig.itineraire}`,
   ];
 
   if (exceptionnels.length) {
     lignes.push("", "## Horaires exceptionnels à venir", "");
     for (const h of exceptionnels) {
-      const detail = h.plages === null ? h.note || "ouvert" : h.plages.length === 0 ? "fermé" : `ouvert ${h.plages.map((p) => formaterPlage(p)).join(", ")}`;
+      const detail = h.plages === null ? h.note || "ouvert" : h.plages.length === 0 ? "fermé" : `ouvert ${h.plages.map((p) => formaterPlage(p, { minutesZero: false })).join(", ")}`;
       const note = h.plages !== null && h.note ? ` (${h.note})` : "";
       lignes.push(`- ${formaterJourLong(h.date)}${h.libelle ? `, ${h.libelle}` : ""} : ${detail}${note}`);
     }
@@ -72,7 +76,8 @@ export async function GET() {
 
   lignes.push("", "## Pages principales", "");
   for (const l of LIENS) {
-    const d = siteConfig.seo.pages[l.chemin]?.description;
+    if (l.chemin === "/carte-traiteur" && !carte) continue; // carte masquée : page en cours de mise à jour
+    const d = descriptions[l.chemin] ?? siteConfig.seo.pages[l.chemin]?.description;
     lignes.push(`- [${l.libelle}](${urlCanonique(l.chemin)})${d ? ` : ${d}` : ""}`);
   }
 

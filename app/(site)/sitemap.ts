@@ -17,7 +17,8 @@ import { urlAbsolue, urlCanonique } from "@/lib/seo";
  *   visuels provisoires IA ne sont pas proposés à Google Images).
  * Aucune date inventée : une page sans date connue n'a pas de `lastModified`.
  * Uniquement des URLs publiques : le backoffice n'y figure JAMAIS.
- * NOINDEX=1 : sitemap vide.
+ * NOINDEX=1 : sitemap vide. Carte traiteur masquée : /carte-traiteur absente.
+ * URL : même forme que le canonical (`urlCanonique`, accueil sans barre finale).
  */
 export const dynamic = "force-dynamic";
 
@@ -56,7 +57,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/menus-de-fetes": saison.map((m) => m.couverture),
   };
 
-  const fixes: MetadataRoute.Sitemap = siteConfig.pages.map((p) => {
+  // Carte masquée dans le backoffice : /carte-traiteur affiche « en cours de mise à
+  // jour » en noindex, elle sort donc du sitemap.
+  const pagesFixes = siteConfig.pages.filter((p) => p.chemin !== "/carte-traiteur" || carte);
+  const fixes: MetadataRoute.Sitemap = pagesFixes.map((p) => {
     const imgs = urlsImages([...(imagesParPage.get(p.chemin) ?? []), ...(imagesMenus[p.chemin] ?? [])]);
     const date = dates[p.chemin];
     return {

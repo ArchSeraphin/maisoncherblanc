@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { AppelFinal } from "@/components/site/appel-final";
 import { CarteMenu } from "@/components/site/carte-menu";
 import { EnTetePage } from "@/components/site/en-tete-page";
@@ -18,15 +17,66 @@ const CHEMIN = "/carte-traiteur";
 const ARIANE = elementsFilAriane(CHEMIN);
 
 export async function generateMetadata() {
-  return construireMetadata({ chemin: CHEMIN, image: photoPartage(chargerEmplacements(["carte-hero"] as const)["carte-hero"]) });
+  // Carte masquée dans le backoffice : la page reste en ligne (elle est liée partout)
+  // mais n'est pas indexée le temps de la mise à jour (et sort du sitemap).
+  const enLigne = !!carteTraiteur();
+  return construireMetadata({
+    chemin: CHEMIN,
+    image: photoPartage(chargerEmplacements(["carte-hero"] as const)["carte-hero"]),
+    ...(enLigne ? {} : { noindex: true }),
+  });
+}
+
+/** Carte masquée : état « en cours de mise à jour » (200, noindex), contacts pour commander quand même. */
+function CarteEnMiseAJour({ telephone }: { telephone: { affichage: string; href: string } }) {
+  return (
+    <>
+      <JsonLd donnees={[filArianeJsonLd(ARIANE)]} />
+      <EnTetePage
+        ariane={ARIANE}
+        sansImage
+        surtitre="Carte traiteur · Roanne"
+        titre={
+          <>
+            Carte <em>traiteur</em> en cours de mise à jour
+          </>
+        }
+        chapo={
+          <p>
+            Nous mettons à jour la carte traiteur et ses prix : elle revient en ligne très bientôt. En attendant, la boutique vous renseigne et prend vos
+            commandes, une semaine avant la date.
+          </p>
+        }
+        actions={
+          <>
+            <a href={telephone.href} className="bouton">
+              Appeler le {telephone.affichage}
+            </a>
+            <Link href="/contact?type=devis-traiteur" className="bouton bouton-contour">
+              Demander un devis
+            </Link>
+          </>
+        }
+      />
+      <AppelFinal
+        titre="Une réception en vue ?"
+        texte="Dites-nous la date, le nombre de personnes et ce qui vous ferait plaisir : nous vous répondons avec une proposition et un devis gratuit."
+        actions={
+          <Link href="/traiteur-roanne" className="bouton">
+            Découvrir le traiteur
+          </Link>
+        }
+      />
+    </>
+  );
 }
 
 export default async function PageCarte() {
   await compterVue(CHEMIN);
   const carte = carteTraiteur();
-  if (!carte) notFound();
-  const img = chargerEmplacements(["carte-hero"] as const);
   const coord = coordonnees();
+  if (!carte) return <CarteEnMiseAJour telephone={coord.telephone} />;
+  const img = chargerEmplacements(["carte-hero"] as const);
   const validite = periode(carte.valable_du, carte.valable_au);
 
   return (

@@ -13,14 +13,17 @@ import { chargerEmplacements } from "@/lib/emplacements";
 import { horairesExceptionnelsAVenir } from "@/lib/horaires-exceptionnels";
 import { carteTraiteur, menusDeSaisonEnCours } from "@/lib/menus";
 import { coordonnees, lireHoraires } from "@/lib/reglages";
-import { construireMetadata, elementsFilAriane, faqBoucherie, faqJsonLd, filArianeJsonLd } from "@/lib/seo";
+import { commerceJsonLd, construireMetadata, elementsFilAriane, faqBoucherie, faqJsonLd, filArianeJsonLd } from "@/lib/seo";
 import styles from "./boucherie.module.css";
 
 const CHEMIN = "/boucherie-roanne";
 const ARIANE = elementsFilAriane(CHEMIN);
 
 export async function generateMetadata() {
-  return construireMetadata({ chemin: CHEMIN, image: photoPartage(chargerEmplacements(["boucherie-hero"] as const)["boucherie-hero"]) });
+  // Vraie photo d'en-tête si elle existe, sinon la carte de partage de la boucherie
+  // (/partage/boucherie) : jamais une photo du traiteur.
+  const photo = photoPartage(chargerEmplacements(["boucherie-hero"] as const)["boucherie-hero"]);
+  return construireMetadata({ chemin: CHEMIN, image: photo ?? { url: "/partage/boucherie", width: 1200, height: 630, alt: "Boucherie à Roanne, Maison Cherblanc", type: "image/jpeg" } });
 }
 
 export default async function PageBoucherie() {
@@ -38,11 +41,24 @@ export default async function PageBoucherie() {
   const dateVolailles = fetes.noel ? `pour ${fetes.annee ?? "cette année"}, avant le ${fetes.noel.replace(/^\S+ /, "")}` : null;
 
   // FAQ de lib/seo.ts (lot C) : même texte affiché et balisé.
-  const questions = faqBoucherie(horaires);
+  const questions = faqBoucherie(horaires, saison);
 
   return (
     <>
-      <JsonLd donnees={[filArianeJsonLd(ARIANE), faqJsonLd(questions)]} />
+      <JsonLd
+        donnees={[
+          filArianeJsonLd(ARIANE),
+          // Le commerce (Store) : adresse, horaires et fermetures à côté du texte de la boucherie.
+          commerceJsonLd({
+            horaires,
+            exceptionnels: horairesExceptionnelsAVenir(60),
+            images: [img["boucherie-hero"], img["boucherie-viandes"], img["boucherie-charcuterie"], img["boucherie-volailles"], img["boucherie-fumoir"]],
+            menusSaison: saison ? [saison] : [],
+            carteEnLigne: !!carte,
+          }),
+          faqJsonLd(questions),
+        ]}
+      />
 
       <EnTetePage
         ariane={ARIANE}
@@ -87,7 +103,7 @@ export default async function PageBoucherie() {
           </div>
 
           <div className={s.rubriques}>
-            <article className={`apparait ${s.rubrique}`}>
+            <article id="viandes" className={`apparait ${s.rubrique}`}>
               <div>
                 <h3 className="titre-m">Le bœuf, le veau, le porc</h3>
                 <p>
@@ -99,7 +115,7 @@ export default async function PageBoucherie() {
               <CadrePhoto image={img["boucherie-viandes"]} className={`ratio-paysage ${s.rubriqueImage}`} sizes="(min-width: 900px) 380px, 92vw" />
             </article>
 
-            <article className={`apparait ${s.rubrique}`}>
+            <article id="charcuterie" className={`apparait ${s.rubrique}`}>
               <div>
                 <h3 className="titre-m">La charcuterie</h3>
                 <p>
@@ -119,7 +135,7 @@ export default async function PageBoucherie() {
               <CadrePhoto image={img["boucherie-charcuterie"]} className={`ratio-paysage ${s.rubriqueImage}`} sizes="(min-width: 900px) 380px, 92vw" />
             </article>
 
-            <article className={`apparait ${s.rubrique}`}>
+            <article id="volailles" className={`apparait ${s.rubrique}`}>
               <div>
                 <h3 className="titre-m">Les volailles</h3>
                 <p>
@@ -134,7 +150,7 @@ export default async function PageBoucherie() {
               <CadrePhoto image={img["boucherie-volailles"]} className={`ratio-paysage ${s.rubriqueImage}`} sizes="(min-width: 900px) 380px, 92vw" />
             </article>
 
-            <article className={`apparait ${s.rubrique}`}>
+            <article id="broche" className={`apparait ${s.rubrique}`}>
               <div>
                 <h3 className="titre-m">La broche</h3>
                 <p>
