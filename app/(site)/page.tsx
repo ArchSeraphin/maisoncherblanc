@@ -13,6 +13,7 @@ import { siteConfig } from "@/config/site";
 import { compterVue } from "@/lib/compter-vue";
 import { chargerEmplacements } from "@/lib/emplacements";
 import { horairesExceptionnelsAVenir } from "@/lib/horaires-exceptionnels";
+import { formaterHeure } from "@/lib/horaires";
 import { carteTraiteur, menusDeSaisonEnCours } from "@/lib/menus";
 import { listerRealisationsPubliques, type RealisationPublique } from "@/lib/realisations";
 import { coordonnees, lireHoraires } from "@/lib/reglages";
@@ -24,9 +25,13 @@ export async function generateMetadata() {
   return construireMetadata({ chemin: "/" });
 }
 
-/** Six photos pour la mosaïque : une par catégorie à tour de rôle (variété). */
+/**
+ * Six photos pour la mosaïque : une par catégorie à tour de rôle (variété).
+ * Ordre pensé pour l'équilibre boucherie / traiteur : plateau de charcuterie
+ * (grande tuile), boucherie, broche, mariage, puis cocktail et buffet.
+ */
 function choisirMosaique(toutes: RealisationPublique[], n = 6): RealisationPublique[] {
-  const ordre = ["plateaux", "broche-barbecue", "buffet", "mariage", "cocktail", "boucherie"];
+  const ordre = ["plateaux", "boucherie", "broche-barbecue", "mariage", "cocktail", "buffet"];
   const parCat = new Map<string, RealisationPublique[]>();
   for (const r of toutes) parCat.set(r.categorie, [...(parCat.get(r.categorie) ?? []), r]);
   const files = [...parCat.entries()].sort((a, b) => ordre.indexOf(a[0]) - ordre.indexOf(b[0])).map(([, liste]) => liste);
@@ -45,6 +50,11 @@ export default async function Accueil() {
     "accueil-hero-traiteur",
     "accueil-savoir-faire",
     "accueil-maison",
+    "boucherie-hero",
+    "boucherie-viandes",
+    "boucherie-charcuterie",
+    "boucherie-volailles",
+    "boucherie-fumoir",
     "traiteur-mariage",
     "traiteur-cocktail",
     "traiteur-broche",
@@ -56,7 +66,6 @@ export default async function Accueil() {
   const anneeCarte = anneeDuTitre(carte?.titre);
   const saison = menusDeSaisonEnCours()[0] ?? null;
   const mosaique = choisirMosaique(listerRealisationsPubliques());
-  const plateau = trouverPlat(carte, "Plateau de charcuterie");
   const nbJours = joursOuverts(horaires);
 
   const portes = [
@@ -78,13 +87,50 @@ export default async function Accueil() {
     },
   ];
 
+  // Repères : deux pour la boucherie, deux pour le traiteur, faits réels uniquement
+  // (horaires lus en base, délai et service à table de la carte imprimée).
+  const dimanche = horaires.dimanche;
+  const dimancheMatin = dimanche.length > 0 && dimanche[dimanche.length - 1].fermeture <= "13:00";
+  const ouvertureBoucherie =
+    horaires.lundi.length === 0 && nbJours === 6
+      ? `Du mardi au dimanche${dimancheMatin ? `, ${dimanche.map((p) => `de ${formaterHeure(p.ouverture)} à ${formaterHeure(p.fermeture)}`).join(" et ")} le dimanche` : ""}.`
+      : "Horaires détaillés en bas de page.";
   const reperes = [
-    { valeur: "Une semaine", texte: "Le délai conseillé pour commander le traiteur." },
-    ...(plateau
-      ? [{ valeur: `${plateau.prix} ${plateau.unite}`.trim(), texte: `Le plateau de charcuterie${anneeCarte ? ` (carte ${anneeCarte})` : ""}.` }]
-      : []),
-    { valeur: "Service à table", texte: "En option pour vos réceptions." },
-    { valeur: "Devis gratuit", texte: "Pour toute demande sur mesure." },
+    { metier: "Boucherie", valeur: nbJours === 6 ? "Six jours sur sept" : `${nbJours} jours sur sept`, texte: ouvertureBoucherie },
+    { metier: "Boucherie", valeur: "Le conseil", texte: "Pièce, poids et cuisson : on vous oriente au comptoir." },
+    { metier: "Traiteur", valeur: "Une semaine", texte: "Le délai conseillé pour commander le traiteur." },
+    { metier: "Traiteur", valeur: "Service à table", texte: "En option pour vos réceptions, devis gratuit." },
+  ];
+
+  const rayons = [
+    {
+      titre: "Bœuf, veau, porc",
+      texte: "Pièces à rôtir, à griller ou à mijoter, découpées devant vous, au poids demandé.",
+      href: "/boucherie-roanne#viandes",
+      lien: "Les viandes",
+      image: img["boucherie-viandes"],
+    },
+    {
+      titre: "La charcuterie",
+      texte: "Jambon blanc, jambon cru, rosette, chorizo, terrine : à la tranche ou en plateau.",
+      href: "/boucherie-roanne#charcuterie",
+      lien: "La charcuterie",
+      image: img["boucherie-charcuterie"],
+    },
+    {
+      titre: "Les volailles",
+      texte: "Les volailles du moment toute l’année, et les volailles de fête sur commande.",
+      href: "/boucherie-roanne#volailles",
+      lien: "Les volailles",
+      image: img["boucherie-volailles"],
+    },
+    {
+      titre: "La broche",
+      texte: "Des jambons cuits lentement en rôtissoire : couenne dorée, chair moelleuse.",
+      href: "/boucherie-roanne#broche",
+      lien: "La broche",
+      image: img["boucherie-fumoir"],
+    },
   ];
 
   const prestations = [
@@ -120,6 +166,7 @@ export default async function Accueil() {
             exceptionnels: horairesExceptionnelsAVenir(60),
             images: [img["accueil-hero-boucherie"], img["accueil-hero-traiteur"], img["accueil-savoir-faire"], img["accueil-maison"]],
             menusSaison: saison ? [saison] : [],
+            carteEnLigne: !!carte,
           }),
           siteWebJsonLd(),
         ]}
@@ -131,7 +178,7 @@ export default async function Accueil() {
           <Surtitre>
             {siteConfig.nom} · {siteConfig.adresse.rue}, {siteConfig.adresse.ville}
           </Surtitre>
-          <h1 id="titre-accueil" className={`titre-xl fondu-entree ${styles.heroTitre}`}>
+          <h1 id="titre-accueil" className={`titre-xl glisse-entree ${styles.heroTitre}`}>
             <em>Boucherie</em>, charcuterie et <em>traiteur</em> à Roanne
           </h1>
         </div>
@@ -139,7 +186,7 @@ export default async function Accueil() {
           {portes.map((p, i) => (
             <Link key={p.href} href={p.href} className={styles.porte}>
               <div className={`cadre voile zoom-lent ${styles.porteVisuel}`}>
-                <Visuel image={p.image} alt="" sizes="(min-width: 900px) 50vw, 100vw" priorite={i === 0} largeurCible={1600} />
+                <Visuel image={p.image} alt="" sizes="(min-width: 1440px) 680px, (min-width: 900px) calc(50vw - 3.5rem), calc(100vw - 2.5rem)" priorite={i === 0} largeurCible={960} />
               </div>
               <div className={styles.porteTexte}>
                 <h2 className={styles.porteTitre}>
@@ -168,47 +215,13 @@ export default async function Accueil() {
         </div>
       </section>
 
-      {/* Deux métiers */}
-      <section className="section" aria-labelledby="deux-metiers">
-        <div className="contenu">
-          <div className={`${s.tete} ${s.teteCentre}`}>
-            <p className="surtitre apparait">Deux métiers, une maison</p>
-            <h2 id="deux-metiers" className="titre-l apparait">
-              Au comptoir comme à votre table
-            </h2>
-          </div>
-          <div className={`serie ${styles.miroirs}`}>
-            <article className={`apparait ${styles.miroir}`}>
-              <h3 className="titre-m">La boucherie de la rue Mulsant</h3>
-              <p>
-                Bœuf, veau, porc et volailles, découpés à la demande. Un rôti ficelé pour le dimanche, des côtes à griller, une volaille entière : dites-nous
-                combien vous serez, nous vous conseillons la pièce, le poids et la cuisson.
-              </p>
-              <Link href="/boucherie-roanne" className="lien-fleche">
-                Voir la boucherie <FlecheDroite />
-              </Link>
-            </article>
-            <span className={styles.miroirFilet} aria-hidden="true" />
-            <article className={`apparait ${styles.miroir}`}>
-              <h3 className="titre-m">Le traiteur des grandes et des petites tablées</h3>
-              <p>
-                Un plateau de charcuterie pour dix, une formule du chef pour cinquante, un cocktail dînatoire ou un repas de mariage : vous choisissez à la
-                carte ou sur devis, vous récupérez en boutique, ou nous assurons le service à table.
-              </p>
-              <Link href="/traiteur-roanne" className="lien-fleche">
-                Voir le traiteur <FlecheDroite />
-              </Link>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      {/* Repères */}
+      {/* Repères : deux boucherie, deux traiteur */}
       <section className={`fond-sable ${styles.reperes}`} aria-label="Repères">
         <div className="contenu">
           <ul className={`sans-puces serie ${styles.reperesListe}`}>
             {reperes.map((r) => (
               <li key={r.valeur} className={`apparait ${styles.repere}`}>
+                <p className={styles.repereMetier}>{r.metier}</p>
                 <p className={styles.repereValeur}>{r.valeur}</p>
                 <p className={styles.repereTexte}>{r.texte}</p>
               </li>
@@ -217,63 +230,99 @@ export default async function Accueil() {
         </div>
       </section>
 
-      {/* Savoir-faire traiteur */}
-      <section className="section fond-lin" aria-labelledby="savoir-faire">
-        <div className={`contenu ${s.duo} ${s.duoInverse}`}>
-          <div className={s.duoTexte}>
-            <p className="surtitre apparait">Le traiteur</p>
-            <h2 id="savoir-faire" className="titre-l apparait">
-              Une carte claire, des prix affichés
-            </h2>
-            <p className="apparait">
-              Plateau de charcuterie, de fromages ou de légumes croquants à la personne. Formule du chef avec entrée froide, plat, accompagnement et fromage
-              ou dessert. Plats cuisinés à la part, quiches et pizzas à la plaque, petit dînatoire à la pièce. Toute la carte traiteur est en ligne avec ses
-              prix, pour composer votre réception tranquillement, puis nous appeler pour la confirmer.
-            </p>
-            <div className={`apparait ${styles.extrait}`}>
-              <ListePrix
-                lignes={[
-                  lignePlat(trouverPlat(carte, "Plateau de charcuterie")),
-                  lignePlat(trouverPlat(carte, "La formule du chef")),
-                  lignePlat(trouverPlat(carte, "Mini hamburger bœuf cheddar")),
-                ]}
-              />
+      {/* La boucherie */}
+      <section className="section fond-lin" aria-labelledby="la-boucherie">
+        <div className="contenu">
+          <div className={`${s.duo} ${styles.metierTete}`}>
+            <div className={s.duoTexte}>
+              <p className="surtitre apparait">La boucherie</p>
+              <h2 id="la-boucherie" className="titre-l apparait">
+                Au comptoir de la rue Mulsant
+              </h2>
+              <p className="apparait">
+                Bœuf, veau, porc et volailles, découpés à la demande. Un rôti ficelé pour le dimanche, des côtes à griller, une volaille entière : dites-nous
+                combien vous serez, nous vous conseillons la pièce, le poids et la cuisson.
+              </p>
+              <div className={`rangee apparait ${s.duoActions}`}>
+                <Link href="/boucherie-roanne" className="bouton">
+                  Découvrir la boucherie
+                </Link>
+                <Link href="/contact?type=commande-boucherie" className="bouton bouton-contour">
+                  Commander à la boutique
+                </Link>
+              </div>
             </div>
-            <div className={`apparait ${s.duoActions}`}>
-              <Link href="/carte-traiteur" className="bouton">
-                Voir la carte et les prix
-              </Link>
+            <div className={`apparait ${s.duoImage}`}>
+              <CadrePhoto image={img["boucherie-hero"]} className="ratio-paysage" sizes="(min-width: 900px) min(560px, 42vw), calc(100vw - 2.5rem)" />
             </div>
           </div>
-          <div className={`apparait ${s.duoImage}`}>
-            <CadrePhoto image={img["accueil-savoir-faire"]} className="ratio-portrait" sizes="(min-width: 900px) 40vw, 92vw" />
-          </div>
+          <ul className={`sans-puces serie ${s.prestations} ${styles.rayons} ${styles.cartesMetier}`}>
+            {rayons.map((r) => (
+              <li key={r.href} className={`apparait ${s.prestation}`}>
+                <Link href={r.href} tabIndex={-1} aria-hidden="true">
+                  <CadrePhoto image={r.image} alt="" className="ratio-portrait cadre-zoom" sizes="(min-width: 1100px) 270px, (min-width: 560px) 45vw, calc(100vw - 2.5rem)" />
+                </Link>
+                <h3>{r.titre}</h3>
+                <p>{r.texte}</p>
+                <Link href={r.href} className={`lien-fleche ${s.prestationLien}`}>
+                  {r.lien} <FlecheDroite />
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
-      {/* Prestations */}
-      <section className="section" aria-labelledby="prestations">
+      {/* Le traiteur */}
+      <section className="section" aria-labelledby="le-traiteur">
         <div className="contenu">
-          <div className={s.tete}>
-            <p className="surtitre apparait">Vos réceptions</p>
-            <h2 id="prestations" className="titre-l apparait">
-              Ce que nous préparons pour vous
-            </h2>
+          <div className={`${s.duo} ${s.duoInverse} ${styles.metierTete}`}>
+            <div className={s.duoTexte}>
+              <p className="surtitre apparait">Le traiteur</p>
+              <h2 id="le-traiteur" className="titre-l apparait">
+                Des grandes et des petites tablées
+              </h2>
+              <p className="apparait">
+                Un plateau de charcuterie pour dix, une formule du chef pour cinquante, un cocktail dînatoire ou un repas de mariage : vous choisissez à la carte
+                ou sur devis, vous récupérez en boutique, ou nous assurons le service à table.
+              </p>
+              <div className={`apparait ${styles.extrait}`}>
+                <ListePrix
+                  lignes={[
+                    lignePlat(trouverPlat(carte, "Plateau de charcuterie")),
+                    lignePlat(trouverPlat(carte, "La formule du chef")),
+                    lignePlat(trouverPlat(carte, "Mini hamburger bœuf cheddar")),
+                  ]}
+                />
+                {anneeCarte ? <p className={styles.extraitNote}>Prix de la carte traiteur {anneeCarte}.</p> : null}
+              </div>
+              <div className={`rangee apparait ${s.duoActions}`}>
+                <Link href="/carte-traiteur" className="bouton">
+                  Voir la carte et les prix
+                </Link>
+                <Link href="/traiteur-roanne" className="bouton bouton-contour">
+                  Découvrir le traiteur
+                </Link>
+              </div>
+            </div>
+            <div className={`apparait ${s.duoImage}`}>
+              <CadrePhoto image={img["accueil-savoir-faire"]} className="ratio-paysage" sizes="(min-width: 900px) min(560px, 42vw), calc(100vw - 2.5rem)" />
+            </div>
           </div>
-          <div className={`serie ${s.prestations}`}>
+          <ul className={`sans-puces serie ${s.prestations} ${styles.cartesMetier}`}>
             {prestations.map((p) => (
-              <article key={p.href} className={`apparait ${s.prestation}`}>
+              <li key={p.href} className={`apparait ${s.prestation}`}>
                 <Link href={p.href} tabIndex={-1} aria-hidden="true">
-                  <CadrePhoto image={p.image} alt="" className="ratio-portrait cadre-zoom" sizes="(min-width: 1100px) 360px, (min-width: 700px) 45vw, 92vw" />
+                  <CadrePhoto image={p.image} alt="" className="ratio-portrait cadre-zoom" sizes="(min-width: 1100px) 370px, (min-width: 700px) 45vw, calc(100vw - 2.5rem)" />
                 </Link>
                 <h3>{p.titre}</h3>
                 <p>{p.texte}</p>
                 <Link href={p.href} className={`lien-fleche ${s.prestationLien}`}>
                   {p.lien} <FlecheDroite />
                 </Link>
-              </article>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
