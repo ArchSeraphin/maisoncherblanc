@@ -15,6 +15,7 @@ export function Visuel({
   className,
   alt,
   priorite = false,
+  immediat = false,
   ratio,
   largeurCible,
   largeurMax,
@@ -28,6 +29,11 @@ export function Visuel({
   alt?: string;
   /** Image principale au-dessus de la ligne de flottaison : chargement immédiat, priorité haute. */
   priorite?: boolean;
+  /**
+   * Chargement immédiat (jamais différé) sans priorité haute : seconde image d'un
+   * premier écran, qui ne doit pas disputer la bande passante à l'image LCP.
+   */
+  immediat?: boolean;
   /** Proportions de l'aplat de secours (ex. "4/3") quand le média est absent. */
   ratio?: string;
   /** Largeur de la variante utilisée en `src` (navigateurs sans srcset). */
@@ -70,7 +76,7 @@ export function Visuel({
       height={a.height}
       alt={alt ?? a.alt}
       className={className}
-      loading={priorite ? "eager" : "lazy"}
+      loading={priorite || immediat ? "eager" : "lazy"}
       fetchPriority={priorite ? "high" : "auto"}
       decoding="async"
     />

@@ -7,7 +7,8 @@ import { ListePrix, lignePlat } from "@/components/site/liste-prix";
 import { anneeDuTitre, joursOuverts, trouverPlat } from "@/components/site/outils";
 import s from "@/components/site/sections.module.css";
 import { JsonLd } from "@/components/ui/json-ld";
-import { FiletLosange, FlecheDroite, Surtitre } from "@/components/ui/motifs";
+import { Logo } from "@/components/ui/logo";
+import { FiletLosange, FlecheDroite } from "@/components/ui/motifs";
 import { Visuel } from "@/components/ui/visuel";
 import { siteConfig } from "@/config/site";
 import { compterVue } from "@/lib/compter-vue";
@@ -68,23 +69,10 @@ export default async function Accueil() {
   const mosaique = choisirMosaique(listerRealisationsPubliques());
   const nbJours = joursOuverts(horaires);
 
+  // Les deux portes du premier écran (images qui se répondent en lumière et en palette).
   const portes = [
-    {
-      article: "La",
-      titre: "Boucherie",
-      texte: "Viandes, volailles et charcuterie, servies et conseillées au comptoir. Ouvert six jours sur sept, dimanche matin compris.",
-      href: "/boucherie-roanne",
-      lien: "Découvrir la boucherie",
-      image: img["accueil-hero-boucherie"],
-    },
-    {
-      article: "Le",
-      titre: "Traiteur",
-      texte: "Plateaux, buffets, cocktails dînatoires et repas de mariage, préparés par la maison. Service à table en option.",
-      href: "/traiteur-roanne",
-      lien: "Découvrir le traiteur",
-      image: img["accueil-hero-traiteur"],
-    },
+    { article: "La", nom: "boucherie", href: "/boucherie-roanne", image: img["accueil-hero-boucherie"] },
+    { article: "Le", nom: "traiteur", href: "/traiteur-roanne", image: img["accueil-hero-traiteur"] },
   ];
 
   // Repères : deux pour la boucherie, deux pour le traiteur, faits réels uniquement
@@ -172,35 +160,38 @@ export default async function Accueil() {
         ]}
       />
 
-      {/* Premier écran : deux portes égales */}
+      {/* Premier écran plein cadre : diptyque bord à bord, deux portes égales.
+          Le H1 est centré à cheval sur les deux photos (au-dessus en bureau, sur la
+          jointure en mobile), visible dès le premier affichage (pas d'opacité nulle :
+          il glisse seulement). Image LCP : la boucherie, en priorité haute ; le
+          traiteur se charge aussitôt, sans priorité. */}
       <section className={styles.hero} aria-labelledby="titre-accueil">
-        <div className={`contenu-large ${styles.heroTete}`}>
-          <Surtitre>
+        <div className={styles.titreBloc}>
+          <Logo variante="monogramme" couleur="or" taille={64} className={`${styles.monogramme} ${styles.fondu}`} />
+          <p className={`${styles.heroAdresse} ${styles.fondu}`}>
             {siteConfig.nom} · {siteConfig.adresse.rue}, {siteConfig.adresse.ville}
-          </Surtitre>
-          <h1 id="titre-accueil" className={`titre-xl glisse-entree ${styles.heroTitre}`}>
+          </p>
+          <h1 id="titre-accueil" className={`glisse-entree ${styles.titre}`}>
             <em>Boucherie</em>, charcuterie et <em>traiteur</em> à Roanne
           </h1>
+          <FiletLosange className={`${styles.filet} ${styles.fondu}`} />
         </div>
-        <div className={`contenu-large ${styles.diptyque}`}>
+        <div className={styles.portes}>
           {portes.map((p, i) => (
             <Link key={p.href} href={p.href} className={styles.porte}>
-              <div className={`cadre voile zoom-lent ${styles.porteVisuel}`}>
-                <Visuel image={p.image} alt="" sizes="(min-width: 1440px) 680px, (min-width: 900px) calc(50vw - 3.5rem), calc(100vw - 2.5rem)" priorite={i === 0} largeurCible={960} />
-              </div>
-              <div className={styles.porteTexte}>
-                <h2 className={styles.porteTitre}>
-                  {p.article} <em>{p.titre}</em>
-                </h2>
-                <p>{p.texte}</p>
-                <span className={`lien-fleche ${styles.porteLien}`}>
-                  {p.lien}
-                  <FlecheDroite />
+              <span className={`zoom-lent ${styles.porteVisuel}`}>
+                <Visuel image={p.image} alt="" sizes="(min-width: 700px) 50vw, 100vw" priorite={i === 0} immediat largeurCible={960} />
+              </span>
+              <span className={`${styles.appel} ${styles.fondu}`}>
+                <span>
+                  {p.article} <em>{p.nom}</em>
                 </span>
-              </div>
+                <FlecheDroite />
+              </span>
             </Link>
           ))}
         </div>
+        <span className={`${styles.defiler} ${styles.fondu}`} aria-hidden="true" />
       </section>
 
       {/* Introduction */}

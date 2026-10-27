@@ -26,6 +26,69 @@
   box-shadow: var(--ombre-xs);
 }
 
+/* Accueil, haut de page : en-tête transparent sur la photo du premier écran.
+   Logo, liens et téléphone crème, accents or ; le voile du premier écran assure
+   le contraste. Dès le défilement, retour au fond crème (`.compact`). */
+.surHero {
+  background: transparent;
+  --couleur-monogramme: var(--sur-olive);
+}
+
+.surHero .nomPrincipal,
+.surHero .lien,
+.surHero .telephone,
+.surHero .chevron {
+  color: var(--sur-olive);
+}
+
+.surHero .signature {
+  color: var(--or);
+}
+
+.surHero .telephone svg {
+  color: var(--or);
+}
+
+.surHero :global(.lien-souligne) {
+  background-image: linear-gradient(var(--or), var(--or));
+}
+
+.surHero .actions .cta {
+  --fond: var(--or);
+  --couleur: var(--olive-profond);
+}
+
+.surHero .actions .cta:hover {
+  --fond: var(--creme);
+}
+
+.surHero .burger {
+  border-color: var(--trait-clair);
+}
+
+.surHero :is(a, button):focus-visible {
+  outline-color: var(--or);
+}
+
+.surHero .burgerTraits,
+.surHero .burgerTraits::before,
+.surHero .burgerTraits::after {
+  background: var(--sur-olive);
+}
+
+.nomPrincipal,
+.signature,
+.telephone {
+  transition: color var(--transition);
+}
+
+/* Liens : la couleur suit le passage transparent / crème, le soulignement garde son animation. */
+.lien {
+  transition:
+    color var(--transition),
+    background-size 420ms var(--courbe);
+}
+
 /* Menu ouvert : pas de flou (un backdrop-filter ferait de l'en-tête le repère du panneau fixe). */
 .ouvert.compact {
   background: var(--creme);
@@ -61,11 +124,16 @@
 }
 
 .monogramme {
+  flex: none;
   width: 48px;
   height: 48px;
+  background-color: var(--couleur-monogramme, var(--olive));
+  -webkit-mask: url("/logo/monogramme-olive.svg") center / contain no-repeat;
+  mask: url("/logo/monogramme-olive.svg") center / contain no-repeat;
   transition:
     width var(--transition),
-    height var(--transition);
+    height var(--transition),
+    background-color var(--transition);
 }
 
 .compact .monogramme {
@@ -148,7 +216,9 @@
   border-radius: var(--r-xs);
   color: var(--encre-douce);
   cursor: pointer;
-  transition: transform var(--transition);
+  transition:
+    transform var(--transition),
+    color var(--transition);
 }
 
 .avecSousMenu[data-ouvert] .chevron {

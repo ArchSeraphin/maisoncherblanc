@@ -6,7 +6,7 @@ import styles from "./bandeau-annonce.module.css";
 export function BandeauAnnonce({ annonce }: { annonce: Annonce }) {
   const externe = /^https:\/\//i.test(annonce.lien);
   return (
-    <div className={styles.bandeau} role="region" aria-label="Annonce">
+    <div className={styles.bandeau} role="region" aria-label="Annonce" data-bandeau="">
       <p className={styles.texte}>
         <span className={styles.losange} aria-hidden="true" />
         {annonce.lien ? (

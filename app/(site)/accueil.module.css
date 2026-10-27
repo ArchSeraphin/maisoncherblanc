@@ -1,22 +1,43 @@
-/* ---------- Premier écran : H1 + diptyque pleine hauteur ---------- */
+/* ---------- Premier écran plein cadre : diptyque bord à bord ----------
+   Hauteur : la fenêtre sous le bandeau d'annonce ; la section remonte sous
+   l'en-tête (transparent tant que la page n'a pas défilé, entete.module.css).
+   Bureau (>= 700 px) : deux portes côte à côte, H1 centré à cheval sur la
+   jointure, appel centré au pied de chaque porte, indication de défilement au
+   milieu. Mobile : portes empilées (boucherie en haut, traiteur en bas), H1 sur
+   la jointure, appels aux deux extrémités (composition en miroir).
+   Mouvement : zoom lent des photos (`.zoom-lent`), fondu court des textes
+   secondaires, porte survolée élargie (flex 1 -> 1.12). Le H1 ne fait que glisser. */
 
 .hero {
-  padding-block: clamp(1.5rem, 3.5vw, 2.75rem) 0;
+  --entete-plein: calc(var(--hauteur-entete) + 13px);
+  position: relative;
+  isolation: isolate;
+  margin-top: calc(-1 * var(--entete-plein));
+  height: calc(100svh - var(--hauteur-bandeau, 0px));
+  min-height: 34rem;
+  overflow: hidden;
+  background: var(--olive-profond);
+  color: var(--sur-olive);
 }
 
-.heroTete {
-  margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
-}
-
-.heroTitre {
-  max-width: 17ch;
-}
-
-/* Diptyque : deux portes égales ; au survol, la porte s'élargit (flex 1 -> 1.15, 700 ms). */
-.diptyque {
+.portes {
+  position: absolute;
+  inset: 0;
   display: flex;
-  gap: clamp(0.75rem, 1.4vw, 1.25rem);
-  height: clamp(480px, calc(100svh - 17rem), 780px);
+}
+
+/* Voile olive : haut (lisibilité de l'en-tête), centre (H1), pied (appels). */
+.portes::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgb(47 52 36 / 0.62) 0, rgb(47 52 36 / 0) calc(var(--entete-plein) + 5rem)),
+    radial-gradient(ellipse 52% 42% at 50% 40%, rgb(47 52 36 / 0.6) 0%, rgb(47 52 36 / 0.3) 55%, rgb(47 52 36 / 0) 100%),
+    linear-gradient(to top, rgb(47 52 36 / 0.72) 0, rgb(47 52 36 / 0) 32%),
+    rgb(47 52 36 / 0.12);
 }
 
 .porte {
@@ -24,92 +45,236 @@
   flex: 1 1 0;
   min-width: 0;
   display: block;
-  border-radius: var(--r-m);
   overflow: hidden;
   color: var(--sur-olive);
   transition: flex-grow 700ms var(--courbe);
 }
 
+/* Focus clavier : cadre or dans la porte (un contour classique serait recouvert
+   par la photo et le voile). */
+.porte:focus-visible {
+  outline: none;
+}
+
+.porte:focus-visible::after {
+  content: "";
+  position: absolute;
+  inset: calc(var(--entete-plein) + 0.5rem) 0.75rem 0.75rem;
+  z-index: 3;
+  border: 2px solid var(--or);
+  border-radius: var(--r-s);
+  pointer-events: none;
+}
+
 .porteVisuel {
   position: absolute;
   inset: 0;
-  border-radius: inherit;
+  display: block;
 }
 
 .porteVisuel img {
-  object-position: 50% 72%;
-}
-
-/* Voile renforcé en bas : lisibilité du texte posé sur des photos chargées. */
-.porteVisuel::after {
-  background: linear-gradient(to top, rgb(47 52 36 / 0.9) 0%, rgb(47 52 36 / 0.55) 38%, rgb(47 52 36 / 0) 72%);
-}
-
-.porteVisuel > div {
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  object-position: 50% 25%;
 }
 
-.porte:hover .porteVisuel img {
-  transform: scale(1.03);
-}
-
-.porteTexte {
+.appel {
   position: absolute;
-  inset: auto 0 0 0;
-  z-index: 1;
-  display: grid;
-  gap: 0.8rem;
-  padding: clamp(1.5rem, 3.4vw, 3rem);
-  max-width: 34rem;
-}
-
-.porteTitre {
-  font-size: clamp(2.4rem, 4.6vw, 4rem);
-  font-weight: 340;
-  line-height: 1;
+  z-index: 2;
+  inset: auto 0 clamp(2.25rem, 7vh, 4rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding-inline: 1.5rem;
+  font-family: var(--display);
+  font-size: clamp(1.5rem, 2.3vw, 2.15rem);
+  font-weight: 350;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
   color: var(--sur-olive);
+  text-shadow: 0 1px 18px rgb(47 52 36 / 0.5);
 }
 
-.porteTexte p {
-  margin: 0;
-  color: var(--sur-olive);
-  opacity: 0.92;
-  max-width: 40ch;
+.appel em {
+  font-style: italic;
+  font-weight: 330;
 }
 
-.porteLien {
+.appel svg {
+  flex: none;
   color: var(--or);
-  margin-top: 0.4rem;
 }
 
-.porte:focus-visible {
-  outline-offset: 4px;
+.titreBloc {
+  position: absolute;
+  z-index: 3;
+  inset: var(--entete-plein) 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--gouttiere) clamp(7rem, 28vh, 17rem);
+  text-align: center;
+  pointer-events: none;
 }
 
-@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+.monogramme {
+  width: clamp(46px, 4.2vw, 64px);
+  height: auto;
+  margin-bottom: clamp(0.9rem, 2.2vh, 1.4rem);
+}
+
+.titre {
+  max-width: 12.5em;
+  font-size: clamp(2.6rem, 5.6vw, 5.9rem);
+  font-weight: 340;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  color: var(--sur-olive);
+  text-shadow: 0 2px 32px rgb(47 52 36 / 0.5);
+}
+
+.titre em {
+  font-weight: 320;
+}
+
+.filet {
+  width: min(260px, 60%);
+  margin-top: clamp(1.25rem, 3.2vh, 2.1rem);
+  color: var(--or);
+}
+
+.filet::before,
+.filet::after {
+  opacity: 0.85;
+}
+
+.heroAdresse {
+  margin: 0 0 clamp(1rem, 2.6vh, 1.6rem);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: var(--interlettrage-surtitre);
+  text-transform: uppercase;
+  color: var(--or);
+}
+
+/* Indication de défilement : filet vertical terminé par un losange, au milieu du pied. */
+.defiler {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 0;
+  width: 1px;
+  height: clamp(2.75rem, 8vh, 4.5rem);
+  background: linear-gradient(to bottom, rgb(228 203 143 / 0), var(--or));
+  pointer-events: none;
+}
+
+.defiler::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 7px;
+  height: 7px;
+  background: var(--or);
+  transform: rotate(45deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fondu {
+    animation: fondu-hero 700ms var(--courbe) 250ms both;
+  }
+}
+
+@keyframes fondu-hero {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Bureau : la porte survolée s'élargit légèrement. */
+@media (min-width: 700px) and (hover: hover) and (prefers-reduced-motion: no-preference) {
   .porte:hover,
   .porte:focus-visible {
-    flex-grow: 1.15;
+    flex-grow: 1.12;
   }
 }
 
-@media (max-width: 899px) {
-  /* Texte posé plus bas sur la photo : voile plus dense pour rester lisible. */
-  .porteVisuel::after {
-    background: linear-gradient(to top, rgb(47 52 36 / 0.94) 0%, rgb(47 52 36 / 0.78) 42%, rgb(47 52 36 / 0.15) 75%, rgb(47 52 36 / 0) 90%);
-  }
-
-  .diptyque {
+/* Mobile : portes empilées ; le H1 est posé dans un cartouche plein largeur sur la
+   jointure (comme une enseigne entre deux vitrines), appels aux extrémités. */
+@media (max-width: 699px) {
+  .portes {
     flex-direction: column;
-    height: auto;
   }
 
-  .porte {
-    flex: none;
-    aspect-ratio: 5 / 6;
-    max-height: 78svh;
-    width: 100%;
+  .portes::after {
+    background:
+      linear-gradient(to bottom, rgb(47 52 36 / 0.6) 0, rgb(47 52 36 / 0) calc(var(--entete-plein) + 3.5rem)),
+      linear-gradient(to top, rgb(47 52 36 / 0.7) 0, rgb(47 52 36 / 0) 22%),
+      rgb(47 52 36 / 0.14);
+  }
+
+  .porte:first-child .porteVisuel img {
+    object-position: 50% 100%;
+  }
+
+  .porte:last-child .porteVisuel img {
+    object-position: 50% 40%;
+  }
+
+  .porte:first-child .appel {
+    inset: calc(var(--entete-plein) + 0.5rem) 0 auto;
+  }
+
+  .porte:last-child .appel {
+    inset: auto 0 1.75rem;
+  }
+
+  .porte:last-child:focus-visible::after {
+    top: 0.75rem;
+  }
+
+  .appel {
+    font-size: 1.45rem;
+  }
+
+  .titreBloc {
+    inset: 50% 0 auto;
+    transform: translateY(-50%);
+    padding: 1.5rem var(--gouttiere) 1.35rem;
+    background: rgb(47 52 36 / 0.88);
+    border-block: 1px solid rgb(228 203 143 / 0.45);
+  }
+
+  .monogramme {
+    display: none;
+  }
+
+  .heroAdresse {
+    margin-bottom: 0.7rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+  }
+
+  .titre {
+    font-size: clamp(2.05rem, 9vw, 2.6rem);
+    text-shadow: none;
+  }
+
+  .filet {
+    margin-top: 0.9rem;
+    width: min(200px, 60%);
+  }
+
+  .defiler {
+    display: none;
   }
 }
 

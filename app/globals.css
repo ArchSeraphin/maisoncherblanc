@@ -78,6 +78,18 @@
   color-scheme: light;
 }
 
+/* Hauteur du bandeau d'annonce, s'il est affiché (premier écran de l'accueil :
+   fenêtre moins ce bandeau). Valeur par défaut : une ligne (deux en mobile),
+   corrigée par l'en-tête (components/site/entete.tsx) si le texte en prend plus. */
+:root:has([data-bandeau]) {
+  --hauteur-bandeau: 2.425rem;
+}
+@media (max-width: 699px) {
+  :root:has([data-bandeau]) {
+    --hauteur-bandeau: 3.65rem;
+  }
+}
+
 /* =========================================================================
    Base
    ========================================================================= */

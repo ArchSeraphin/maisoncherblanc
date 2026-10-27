@@ -3,8 +3,10 @@
 /**
  * En-tête du site public : logo, navigation du contrat (sous-menu « Le
  * traiteur »), téléphone et appel à l'action. Se compacte et prend un fond
- * crème translucide au défilement. Mobile : menu plein écran (Échap ferme,
- * défilement de la page bloqué, focus rendu au bouton).
+ * crème translucide au défilement. Sur l'accueil, tant que la page n'a pas
+ * défilé, il est transparent (logo et liens crème) au-dessus du premier écran
+ * photo. Mobile : menu plein écran (Échap ferme, défilement de la page bloqué,
+ * focus rendu au bouton).
  * Ne lie JAMAIS le backoffice.
  */
 
@@ -13,7 +15,6 @@ import { usePathname } from "next/navigation";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import type { LienNavigation } from "@/config/site";
-import { Logo } from "@/components/ui/logo";
 import styles from "./entete.module.css";
 
 type Props = {
@@ -55,6 +56,22 @@ export function Entete({ navigation, appelAction, telephone, nom, signature }: P
     surDefilement();
     window.addEventListener("scroll", surDefilement, { passive: true });
     return () => window.removeEventListener("scroll", surDefilement);
+  }, []);
+
+  // Hauteur réelle du bandeau d'annonce (`--hauteur-bandeau`) : le premier écran de
+  // l'accueil occupe exactement la fenêtre sous ce bandeau. globals.css en donne une
+  // valeur par défaut (une ligne, deux en mobile) ; on corrige si le texte en prend plus.
+  useEffect(() => {
+    const bandeau = document.querySelector<HTMLElement>("[data-bandeau]");
+    const racine = document.documentElement.style;
+    if (!bandeau) return;
+    const mesurer = () => racine.setProperty("--hauteur-bandeau", `${bandeau.getBoundingClientRect().height}px`);
+    const observateur = new ResizeObserver(mesurer);
+    observateur.observe(bandeau);
+    return () => {
+      observateur.disconnect();
+      racine.removeProperty("--hauteur-bandeau");
+    };
   }, []);
 
   // Changement de page : Next remet le défilement à zéro dans ses propres effets de
@@ -107,11 +124,19 @@ export function Entete({ navigation, appelAction, telephone, nom, signature }: P
     };
   }, [menuOuvert, sousMenu]);
 
+  // Accueil non défilé : en-tête transparent sur la photo (le premier écran de
+  // l'accueil remonte sous l'en-tête, app/(site)/accueil.module.css).
+  const surHero = chemin === "/" && !compact && !menuOuvert;
+
   return (
-    <header ref={refEntete} className={`${styles.entete} ${compact ? styles.compact : ""} ${menuOuvert ? styles.ouvert : ""}`}>
+    <header
+      ref={refEntete}
+      className={`${styles.entete} ${compact ? styles.compact : ""} ${menuOuvert ? styles.ouvert : ""} ${surHero ? styles.surHero : ""}`}
+    >
       <div className={styles.barre}>
         <Link href="/" className={styles.marque} aria-label={`${nom}, accueil`}>
-          <Logo variante="monogramme" couleur="olive" taille={48} className={styles.monogramme} />
+          {/* Monogramme en masque CSS : il prend la couleur du texte (olive, ou crème sur la photo). */}
+          <span className={styles.monogramme} aria-hidden="true" />
           <span className={styles.nom}>
             <span className={styles.nomPrincipal}>{nom}</span>
             <span className={styles.signature}>{signature}</span>
