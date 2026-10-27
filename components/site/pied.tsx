@@ -3,7 +3,8 @@ import { adresseUneLigne, siteConfig, type HorairesSemaine } from "@/config/site
 import { Logo } from "@/components/ui/logo";
 import { formaterJourCourt, jourDeSemaine } from "@/lib/dates";
 import type { HoraireExceptionnel } from "@/lib/horaires-exceptionnels";
-import { formaterJour, grouperHoraires } from "@/lib/horaires";
+import { grouperHoraires } from "@/lib/horaires";
+import { jourCourt } from "./outils";
 import styles from "./pied.module.css";
 
 type Coordonnees = {
@@ -12,16 +13,16 @@ type Coordonnees = {
   email: string;
 };
 
-/** Libellé d'un horaire exceptionnel : « Fermé », « 8h00–12h00 » ou la note. */
+/** Libellé d'un horaire exceptionnel : « Fermé », « 8h–12h » ou la note. */
 function texteExceptionnel(h: HoraireExceptionnel): string {
   if (h.plages === null) return h.note || "Horaires particuliers";
   if (h.plages.length === 0) return "Fermé";
-  return formaterJour(h.plages);
+  return jourCourt(h.plages, " · ");
 }
 
 /**
  * Pied de page (fond olive profond) : logo, coordonnées, horaires de la semaine
- * type (base), horaires exceptionnels des 30 prochains jours, navigation,
+ * type (base, même format que partout : « 7h30–13h · 15h–19h »), horaires exceptionnels des 30 prochains jours, navigation,
  * liens légaux et réseaux. Ne lie JAMAIS le backoffice.
  */
 export function Pied({
@@ -39,7 +40,7 @@ export function Pied({
     <footer className={`${styles.pied} fond-olive-profond`}>
       <div className={`contenu-large ${styles.grille}`}>
         <div className={styles.marque}>
-          <Logo variante="complet" couleur="or" taille={150} alt={`${siteConfig.nom}, ${siteConfig.activite.toLowerCase()}`} />
+          <Logo variante="complet" couleur="or" taille={150} differe alt={`${siteConfig.nom}, ${siteConfig.activite.toLowerCase()}`} />
           <p className={styles.accroche}>
             Boucherie, charcuterie et traiteur
             <br />
@@ -89,7 +90,7 @@ export function Pied({
             {groupes.map((g) => (
               <div key={g.jours.join("-")} className={styles.ligneHoraire}>
                 <dt>{g.libelle}</dt>
-                <dd className={g.ferme ? styles.ferme : undefined}>{g.horaires}</dd>
+                <dd className={g.ferme ? styles.ferme : undefined}>{g.ferme ? "Fermé" : jourCourt(horaires[g.jours[0]], " · ")}</dd>
               </div>
             ))}
           </dl>

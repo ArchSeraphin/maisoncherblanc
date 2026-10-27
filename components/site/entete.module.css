@@ -103,12 +103,19 @@
   padding: 0;
 }
 
+/* Toutes les entrées ont la même boîte (24 px, contenu centré) : « Le traiteur »
+   et son chevron restent alignés sur leurs voisines. */
 .liste > li {
   position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 24px;
 }
 
 .lien {
+  display: block;
   font-size: 0.9rem;
+  line-height: 24px;
   font-weight: 500;
   color: var(--encre);
   white-space: nowrap;
@@ -173,6 +180,13 @@
   opacity: 1;
   visibility: visible;
   transform: none;
+}
+
+/* Refermé par Échap : masqué même si le focus ou le pointeur sont encore dessus. */
+.avecSousMenu[data-masque] .sousMenu {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
 }
 
 .sousLien {
@@ -296,6 +310,7 @@
 
 .lienMobile {
   display: block;
+  min-height: 44px;
   padding-block: 0.75rem;
   font-family: var(--display);
   font-size: 1.6rem;
@@ -318,8 +333,10 @@
 }
 
 .sousListeMobile a {
-  display: block;
-  padding-block: 0.45rem;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding-block: 0.3rem;
   color: var(--encre-douce);
 }
 

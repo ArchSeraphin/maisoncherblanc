@@ -32,6 +32,12 @@ export function Entete({ navigation, appelAction, telephone, nom, signature }: P
   const [compact, setCompact] = useState(false);
   const [menuOuvert, setMenuOuvert] = useState(false);
   const [sousMenu, setSousMenu] = useState<string | null>(null);
+  /**
+   * Sous-menu refermé par Échap alors que le focus est encore dedans : sans cet
+   * état, `:focus-within` le garderait affiché. Levé quand le pointeur revient ou
+   * que le focus quitte l'entrée.
+   */
+  const [sousMenuMasque, setSousMenuMasque] = useState<string | null>(null);
   const boutonMenu = useRef<HTMLButtonElement>(null);
   const refEntete = useRef<HTMLElement>(null);
 
@@ -96,7 +102,19 @@ export function Entete({ navigation, appelAction, telephone, nom, signature }: P
                   key={l.href}
                   className={styles.avecSousMenu}
                   data-ouvert={sousMenu === l.href ? "" : undefined}
+                  data-masque={sousMenuMasque === l.href ? "" : undefined}
+                  onMouseEnter={() => setSousMenuMasque((m) => (m === l.href ? null : m))}
                   onMouseLeave={() => setSousMenu((s) => (s === l.href ? null : s))}
+                  onKeyDown={(e) => {
+                    if (e.key !== "Escape") return;
+                    setSousMenu(null);
+                    setSousMenuMasque(l.href);
+                    // Le focus revient sur l'entrée « Le traiteur » (il était peut-être dans le sous-menu).
+                    (e.currentTarget.querySelector(`.${styles.lien}`) as HTMLElement | null)?.focus();
+                  }}
+                  onBlur={(e) => {
+                    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setSousMenuMasque((m) => (m === l.href ? null : m));
+                  }}
                 >
                   <Link href={l.href} className={`${styles.lien} lien-souligne`} aria-current={estActif(chemin, l.href) ? "page" : undefined}>
                     {l.libelle}
@@ -106,7 +124,10 @@ export function Entete({ navigation, appelAction, telephone, nom, signature }: P
                     className={styles.chevron}
                     aria-expanded={sousMenu === l.href}
                     aria-label={`Afficher les prestations : ${l.libelle}`}
-                    onClick={() => setSousMenu((s) => (s === l.href ? null : l.href))}
+                    onClick={() => {
+                      setSousMenuMasque(null);
+                      setSousMenu((s) => (s === l.href ? null : l.href));
+                    }}
                   >
                     <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
                       <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

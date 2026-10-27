@@ -95,7 +95,8 @@ export default async function PageConfidentialite() {
             <p>
               <strong>Notification par e-mail :</strong> lorsque vous envoyez le formulaire, une copie de votre message nous est transmise par e-mail via le
               service {conf.prestataireEmail.nom} ({conf.prestataireEmail.societe}, {conf.prestataireEmail.ville}), qui agit comme sous-traitant pour le seul
-              envoi de ce message.
+              envoi de ce message. La suppression automatique ne concerne que la base du site : cette copie reçue dans notre messagerie est supprimée par
+              Maison Cherblanc dans le même délai de {conf.conservationMessagesMois} mois.
             </p>
           ) : null}
 

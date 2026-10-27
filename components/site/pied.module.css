@@ -99,6 +99,9 @@
 }
 
 .ferme {
+  /* Italique de Fraunces (déjà chargée pour les titres) : évite de télécharger
+     l'italique de DM Sans pour ce seul mot. */
+  font-family: var(--display);
   font-style: italic;
 }
 
@@ -169,5 +172,17 @@
 @media (max-width: 600px) {
   .grille {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Écrans tactiles : zone cliquable d'au moins 44 px de haut, aspect inchangé
+   (le rembourrage est compensé par une marge négative). */
+@media (pointer: coarse), (max-width: 899px) {
+  .liens a,
+  .legal a,
+  .contacts a {
+    display: inline-block;
+    padding-block: 0.7rem;
+    margin-block: -0.7rem;
   }
 }

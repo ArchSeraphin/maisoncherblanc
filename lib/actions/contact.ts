@@ -33,6 +33,8 @@ const MAX_PAR_IP_EN_CHARGE = 1;
 const PLAFOND_GLOBAL = 300;
 const CLE_GLOBALE = "contact:global";
 const RE_LIEN = /https?:\/\/|www\.|\[url|<a\s/i;
+/** Longueur minimale d'un message (même règle côté navigateur, components/site/formulaire-contact.tsx). */
+const MESSAGE_MIN = 15;
 
 export async function envoyerMessageAction(_prec: EtatAction, fd: FormData): Promise<EtatAction> {
   // Champ piège rempli = robot : succès simulé, rien n'est enregistré.
@@ -65,6 +67,8 @@ export async function envoyerMessageAction(_prec: EtatAction, fd: FormData): Pro
 
   const v = validerMessage(valeurs);
   const erreurs: Record<string, string> = v.ok ? {} : (v.erreurs as Record<string, string>);
+  const longueur = valeurs.message.trim().length;
+  if (!erreurs.message && longueur > 0 && longueur < MESSAGE_MIN) erreurs.message = "Votre message est un peu court : précisez votre demande en quelques mots.";
   if (RE_LIEN.test(valeurs.message)) erreurs.message = "Merci de ne pas mettre de lien dans le message.";
   if (!v.ok || Object.keys(erreurs).length) return { ok: false, erreurs, valeurs };
 

@@ -30,7 +30,8 @@
   color: var(--encre);
 }
 
+/* Décoratif (aria-hidden), mais lisible : cuivre foncé, 4,9:1 sur crème. */
 .separateur {
   margin-inline: 0.55rem;
-  color: var(--cuivre);
+  color: var(--cuivre-texte);
 }

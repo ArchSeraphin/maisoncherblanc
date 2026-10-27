@@ -51,6 +51,36 @@ function aujourdhuiIso(decalage = 0): string {
 
 const ORDRE_CHAMPS = ["type", "prenom", "nom", "email", "telephone", "date_evenement", "nb_personnes", "message"];
 
+/** Longueur minimale du message (même règle dans la Server Action, lib/actions/contact.ts). */
+const MESSAGE_MIN = 15;
+const MESSAGE_TROP_COURT = "Votre message est un peu court : précisez votre demande en quelques mots.";
+
+/**
+ * Vérification avant envoi, avec les messages de docs/COPY.md. Le serveur
+ * revérifie tout (`envoyerMessageAction`) : ceci évite seulement un aller-retour
+ * et garde les erreurs à jour quand l'envoi est bloqué côté navigateur.
+ */
+function verifierSaisie(fd: FormData, type: TypeDemande): Record<string, string> {
+  const val = (n: string) => String(fd.get(n) ?? "").trim();
+  const e: Record<string, string> = {};
+  if (!val("type")) e.type = "Choisissez le type de demande.";
+  if (!val("prenom")) e.prenom = "Indiquez votre prénom.";
+  if (!val("nom")) e.nom = "Indiquez votre nom.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val("email"))) e.email = "Cette adresse e-mail ne semble pas valide.";
+  const tel = val("telephone");
+  if (tel && !/^\+?[\d\s.()-]{6,}$/.test(tel)) e.telephone = "Ce numéro de téléphone ne semble pas valide.";
+  if (type === "devis-traiteur") {
+    const date = val("date_evenement");
+    if (date && date < aujourdhuiIso()) e.date_evenement = "Cette date est déjà passée.";
+    const nb = val("nb_personnes");
+    if (nb && !(Number.isInteger(Number(nb)) && Number(nb) >= 1)) e.nb_personnes = "Indiquez un nombre de personnes.";
+  }
+  const message = val("message");
+  if (!message) e.message = "Votre message est vide.";
+  else if (message.length < MESSAGE_MIN) e.message = MESSAGE_TROP_COURT;
+  return e;
+}
+
 /**
  * Formulaire de contact public : devis traiteur, commande boucherie, autre.
  * Branché sur la Server Action `envoyerMessageAction` (anti-robot : jeton
@@ -74,14 +104,25 @@ export function FormulaireContact({
   const [etat, envoyer, enCours] = useActionState<EtatAction, FormData>(envoyerMessageAction, etatInitial);
   const [type, setType] = useState<TypeDemande>(typeInitial);
   const [dateEvenement, setDateEvenement] = useState("");
-  const [erreurDate, setErreurDate] = useState<string | null>(null);
+  /** Erreurs trouvées avant envoi (envoi bloqué dans le navigateur). */
+  const [erreursClient, setErreursClient] = useState<Record<string, string>>({});
+  /** Champs modifiés depuis la dernière réponse du serveur : leur ancienne erreur n'est plus affichée. */
+  const [modifies, setModifies] = useState<Record<string, true>>({});
   const refFormulaire = useRef<HTMLFormElement>(null);
   const refRetour = useRef<HTMLDivElement>(null);
 
+  // Nouvelle réponse du serveur : on repart de ses erreurs (ajustement pendant le rendu, sans effet).
+  const [etatVu, setEtatVu] = useState(etat);
+  if (etat !== etatVu) {
+    setEtatVu(etat);
+    setModifies({});
+    setErreursClient({});
+  }
+
   const v = etat.valeurs ?? {};
   const erreurs: Record<string, string> = {};
-  for (const [champ, texte] of Object.entries(etat.erreurs ?? {})) erreurs[champ] = messageErreur(champ, texte, etat.valeurs);
-  if (erreurDate) erreurs.date_evenement = erreurDate;
+  for (const [champ, texte] of Object.entries(etat.erreurs ?? {})) if (!modifies[champ]) erreurs[champ] = messageErreur(champ, texte, etat.valeurs);
+  Object.assign(erreurs, erreursClient);
 
   const dateProche = type === "devis-traiteur" && dateEvenement && dateEvenement >= aujourdhuiIso() && dateEvenement < aujourdhuiIso(7);
 
@@ -144,13 +185,31 @@ export function FormulaireContact({
       action={envoyer}
       noValidate
       className={styles.formulaire}
+      onChange={(e) => {
+        // Un champ modifié perd son erreur affichée (elle sera revérifiée à l'envoi).
+        const nom = (e.target as unknown as HTMLInputElement).name;
+        if (!nom) return;
+        if (!modifies[nom]) setModifies((m) => ({ ...m, [nom]: true }));
+        if (erreursClient[nom]) {
+          setErreursClient((ec) => {
+            const reste = { ...ec };
+            delete reste[nom];
+            return reste;
+          });
+        }
+      }}
       onSubmit={(e) => {
-        const date = (e.currentTarget.elements.namedItem("date_evenement") as HTMLInputElement | null)?.value ?? "";
-        if (type === "devis-traiteur" && date && date < aujourdhuiIso()) {
+        const trouvees = verifierSaisie(new FormData(e.currentTarget), type);
+        // Toutes les erreurs de cette vérification remplacent les précédentes (aucune erreur périmée).
+        const toutes: Record<string, true> = {};
+        for (const c of ORDRE_CHAMPS) toutes[c] = true;
+        if (Object.keys(trouvees).length) {
           e.preventDefault();
-          setErreurDate("Cette date est déjà passée.");
-          (e.currentTarget.elements.namedItem("date_evenement") as HTMLInputElement).focus();
-        } else setErreurDate(null);
+          setModifies(toutes);
+          setErreursClient(trouvees);
+          const premier = ORDRE_CHAMPS.find((c) => trouvees[c]);
+          if (premier) e.currentTarget.querySelector<HTMLElement>(`[name="${premier}"]`)?.focus();
+        } else setErreursClient({});
       }}
     >
       <div ref={refRetour} tabIndex={-1} className={styles.retour} aria-live="polite">
@@ -219,10 +278,7 @@ export function FormulaireContact({
               type="date"
               min={aujourdhuiIso()}
               defaultValue={v.date_evenement}
-              onChange={(e) => {
-                setDateEvenement(e.target.value);
-                setErreurDate(null);
-              }}
+              onChange={(e) => setDateEvenement(e.target.value)}
             />
             <p id="contact-date-aide" className={styles.aide}>
               Les commandes traiteur se passent au moins une semaine avant.
@@ -246,7 +302,7 @@ export function FormulaireContact({
         <label htmlFor="contact-message">
           Votre message <span aria-hidden="true">*</span>
         </label>
-        <textarea {...champ("message")} className="saisie" rows={6} placeholder={PLACEHOLDERS[type]} defaultValue={v.message} required />
+        <textarea {...champ("message")} className="saisie" rows={6} placeholder={PLACEHOLDERS[type]} defaultValue={v.message} required minLength={MESSAGE_MIN} />
         {erreur("message")}
       </div>
 
