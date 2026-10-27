@@ -51,7 +51,7 @@
 
 .infos {
   margin-top: clamp(3.5rem, 7vw, 5rem);
-  scroll-margin-top: calc(var(--hauteur-entete) + 4.5rem);
+  scroll-margin-top: var(--marge-ancre, 0.75rem);
 }
 
 .commander {
@@ -107,6 +107,11 @@
 }
 
 @media (max-width: 999px) {
+  /* Sommaire en bandeau collant sous l'en-tête : les ancres s'arrêtent juste dessous. */
+  .grille {
+    --marge-ancre: 4.25rem;
+  }
+
   .sommaire {
     margin-inline: calc(var(--gouttiere) * -1);
     padding: 0.6rem var(--gouttiere);

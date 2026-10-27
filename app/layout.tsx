@@ -22,8 +22,13 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  // `data-scroll-behavior="smooth"` : Next 16 coupe le défilement doux (posé en CSS
+  // pour les ancres) le temps de remonter en haut à chaque changement de page.
+  // Sans cet attribut, la remise à zéro était animée, Next la croyait ratée et
+  // faisait un `scrollIntoView` du contenu : arrivée à 24-43 px du haut, bandeau
+  // d'annonce masqué et en-tête qui glissait.
   return (
-    <html lang="fr" className={classesHtml}>
+    <html lang="fr" className={classesHtml} data-scroll-behavior="smooth">
       <body>{children}</body>
     </html>
   );

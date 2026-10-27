@@ -4,7 +4,9 @@
 }
 
 .section {
-  scroll-margin-top: calc(var(--hauteur-entete) + 4.5rem);
+  /* Le décalage de l'en-tête est déjà porté par `scroll-padding-top` (globals.css) :
+     on n'ajoute ici que ce qui recouvre en plus le contenu (sommaire collant en mobile). */
+  scroll-margin-top: var(--marge-ancre, 0.75rem);
 }
 
 .entete {

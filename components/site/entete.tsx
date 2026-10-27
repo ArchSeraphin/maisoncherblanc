@@ -10,7 +10,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import type { LienNavigation } from "@/config/site";
 import { Logo } from "@/components/ui/logo";
 import styles from "./entete.module.css";
@@ -55,6 +56,29 @@ export function Entete({ navigation, appelAction, telephone, nom, signature }: P
     window.addEventListener("scroll", surDefilement, { passive: true });
     return () => window.removeEventListener("scroll", surDefilement);
   }, []);
+
+  // Changement de page : Next remet le défilement à zéro dans ses propres effets de
+  // mise en page, qui passent APRÈS ceux de l'en-tête. On relit donc la position à
+  // l'image suivante, avant qu'elle ne soit peinte, et on applique l'état sans
+  // transition : la nouvelle page arrive avec un en-tête déjà à sa hauteur finale
+  // (sinon il regrandissait de 12 px en 320 ms et faisait glisser toute la page).
+  useLayoutEffect(() => {
+    const entete = refEntete.current;
+    if (!entete) return;
+    let suivante = 0;
+    const image = requestAnimationFrame(() => {
+      entete.dataset.instantane = "";
+      flushSync(() => setCompact(window.scrollY > 24));
+      suivante = requestAnimationFrame(() => {
+        suivante = requestAnimationFrame(() => delete entete.dataset.instantane);
+      });
+    });
+    return () => {
+      cancelAnimationFrame(image);
+      cancelAnimationFrame(suivante);
+      delete entete.dataset.instantane;
+    };
+  }, [chemin]);
 
   // Fermeture à chaque changement de page (ajustement pendant le rendu, sans effet).
   const [cheminPrecedent, setCheminPrecedent] = useState(chemin);

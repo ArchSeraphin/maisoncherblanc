@@ -12,6 +12,12 @@
     box-shadow var(--transition);
 }
 
+/* Juste après un changement de page : l'état (compact ou non) s'applique sans transition. */
+.entete[data-instantane],
+.entete[data-instantane] * {
+  transition: none !important;
+}
+
 .compact {
   background: rgb(243 235 220 / 0.86);
   -webkit-backdrop-filter: saturate(140%) blur(14px);
