@@ -58,7 +58,7 @@
   {
     "fichier": "ficelage-roti-de-boeuf-geste-artisan-boucherie-maison-cherblanc-roanne.jpg",
     "alt": "Mains d'un boucher ficelant un rôti de bœuf avec de la ficelle de cuisine sur un billot en bois",
-    "emplacement": null,
+    "emplacement": "maison-hero",
     "realisation": null,
     "legende": null,
     "provisoire": true
@@ -74,7 +74,7 @@
   {
     "fichier": "planche-couteau-de-boucher-savoir-faire-boucherie-maison-cherblanc-roanne.jpg",
     "alt": "Nature morte : billot en chêne, couteau à désosser, fusil à aiguiser, herbes fraîches, sel et balance ancienne en laiton",
-    "emplacement": null,
+    "emplacement": "contact-boutique",
     "realisation": null,
     "legende": null,
     "provisoire": true
@@ -90,7 +90,39 @@
   {
     "fichier": "carte-traiteur-verrines-petits-fours-charcuterie-fine-traiteur-roanne.jpg",
     "alt": "Vue de dessus d'une sélection traiteur : verrines salées, petits fours sur plateau en laiton et assiette de charcuterie fine",
-    "emplacement": "accueil-savoir-faire",
+    "emplacement": "cocktail-hero",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "buffet-traiteur-jambon-charcuterie-verrines-traiteur-roanne.jpg",
+    "alt": "Buffet traiteur sur nappe en lin : jambon à l’os sur planche, assiette de charcuterie, verrines, bouchées sur plateaux en laiton et fromages",
+    "emplacement": "traiteur-hero",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "table-reception-mariage-lin-bougies-traiteur-mariage-roanne.jpg",
+    "alt": "Longue table de réception de mariage dressée sur nappe en lin : assiettes crème, serviettes nouées d’olivier, verres en cristal, bougeoirs en laiton et fleurs blanches",
+    "emplacement": "mariage-hero",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "rotissoire-broche-exterieur-cuisson-sur-place-traiteur-roanne.jpg",
+    "alt": "Pièces de porc dorées tournant à la broche dans une rôtissoire vitrée installée en extérieur, sous les arbres",
+    "emplacement": "broche-hero",
+    "realisation": null,
+    "legende": null,
+    "provisoire": true
+  },
+  {
+    "fichier": "comptoir-boutique-paquet-kraft-terrine-maison-cherblanc-roanne.jpg",
+    "alt": "Comptoir de boutique en marbre et bois : paquet en papier kraft ficelé, terrine émaillée, balance en laiton, bouquet d’herbes et torchons en lin, vitrine en arrière-plan",
+    "emplacement": "accueil-maison",
     "realisation": null,
     "legende": null,
     "provisoire": true

@@ -1,74 +1,10 @@
 [
   {
-    "fichier": "animation-bar-biere-soiree-evenement-traiteur-roanne.jpg",
-    "alt": "Espace bar à bière décoré pour une soirée : banderole BierZone, comptoir en bois, masques tiki et guirlandes lumineuses",
-    "emplacement": null,
-    "realisation": "cocktail",
-    "legende": "Bar à bière décoré",
-    "provisoire": false
-  },
-  {
-    "fichier": "animation-tiki-bar-cocktails-soiree-traiteur-maison-cherblanc.jpg",
-    "alt": "Tiki bar dressé pour une soirée : bouteilles, bocaux de fruits et verres alignés devant une toile tropicale colorée",
-    "emplacement": null,
-    "realisation": "cocktail",
-    "legende": "Tiki bar à cocktails",
-    "provisoire": false
-  },
-  {
-    "fichier": "aperitif-charcuterie-artisanale-traiteur-maison-cherblanc-roanne.jpg",
-    "alt": "Montage de photos superposées : plateaux de bagels, verrines, jambon cru, saucisson, terrine et rosaces de charcuterie",
-    "emplacement": null,
-    "realisation": null,
-    "legende": null,
-    "provisoire": false
-  },
-  {
-    "fichier": "bar-limonades-decoration-evenement-traiteur-maison-cherblanc.jpg",
-    "alt": "Bar à limonades en palettes roses décoré de lierre et d’oranges, avec fontaine à boisson et bouteilles de sirop",
-    "emplacement": null,
-    "realisation": "cocktail",
-    "legende": "Bar à limonades fleuri",
-    "provisoire": false
-  },
-  {
-    "fichier": "buffet-cocktail-bagels-wraps-traiteur-roanne.jpg",
-    "alt": "Plateau cocktail vu de dessus : club sandwichs, mini burgers, bagels au saumon, wraps, verrines de crevettes et mini hot-dogs",
+    "fichier": "plateau-charcuterie-fromages-traiteur-maison-cherblanc-roanne.jpg",
+    "alt": "Plateau de charcuterie et fromages en coffret : jambon cru, saucisson, chorizo, jambon blanc, coppa, fromages et cornichons",
     "emplacement": "carte-hero",
     "realisation": "plateaux",
-    "legende": "Plateau cocktail salé",
-    "provisoire": false
-  },
-  {
-    "fichier": "buffet-cocktail-crevettes-wraps-traiteur-roanne.jpg",
-    "alt": "Plateau cocktail garni de bagels au saumon, mini burgers, cornets de wraps, verrines de crevettes et mini hot-dogs",
-    "emplacement": null,
-    "realisation": null,
-    "legende": null,
-    "provisoire": false
-  },
-  {
-    "fichier": "buffet-cocktail-exterieur-reception-traiteur-roanne-loire.jpg",
-    "alt": "Buffet cocktail en extérieur : plateaux de mini burgers et de verrines, mange-debout et pyramide de macarons, mise en place en cours",
-    "emplacement": "cocktail-hero",
-    "realisation": "cocktail",
-    "legende": "Buffet cocktail en extérieur",
-    "provisoire": false
-  },
-  {
-    "fichier": "buffet-cocktail-traiteur-roanne-maison-cherblanc.jpg",
-    "alt": "Planches apéritives en cours de dressage en cuisine : verrines, mini burgers, brioches garnies et bouchées salées",
-    "emplacement": null,
-    "realisation": "cocktail",
-    "legende": "Planches apéritives en préparation",
-    "provisoire": false
-  },
-  {
-    "fichier": "chef-traiteur-fumoir-mobile-maison-cherblanc-roanne.jpg",
-    "alt": "Cuisinier en tablier rouge surveillant la cuisson de jambons à la broche sur une rôtissoire mobile, en plein air",
-    "emplacement": null,
-    "realisation": "broche-barbecue",
-    "legende": "Cuisson à la broche en plein air",
+    "legende": "Plateau charcuterie et fromages",
     "provisoire": false
   },
   {
@@ -80,59 +16,19 @@
     "provisoire": false
   },
   {
-    "fichier": "cuisson-cotes-boeuf-barbecue-traiteur-evenement-roanne.jpg",
-    "alt": "Côtes de bœuf saisies sur un grand barbecue mobile, d’autres pièces de viande en attente au-dessus, en fin de journée",
-    "emplacement": null,
+    "fichier": "jambon-fume-artisanal-boucherie-cherblanc-roanne.jpg",
+    "alt": "Deux jambons entiers maintenus dans un filet métallique, dorés à la broche devant les brûleurs d’une rôtissoire",
+    "emplacement": "traiteur-broche",
     "realisation": "broche-barbecue",
-    "legende": "Côtes de bœuf au barbecue",
+    "legende": "Jambons dorés à la broche",
     "provisoire": false
   },
   {
-    "fichier": "detail-organisation-mariage-traiteur-maison-cherblanc-roanne.jpg",
-    "alt": "Panier « trousse de secours » pour les invités : mouchoirs, trousse de soins, déodorant, brosse et petits accessoires",
-    "emplacement": null,
-    "realisation": null,
-    "legende": null,
-    "provisoire": false
-  },
-  {
-    "fichier": "equipe-traiteur-maison-cherblanc-roanne-service-evenement.jpg",
-    "alt": "Deux membres de l’équipe Maison Cherblanc présentent des planches de wraps roulés et de carrés salés gratinés en cuisine",
-    "emplacement": "maison-equipe",
-    "realisation": "cocktail",
-    "legende": "L’équipe et ses planches apéritives",
-    "provisoire": false
-  },
-  {
-    "fichier": "fromage-artisanal-aux-noix-boucherie-cherblanc-roanne.jpg",
-    "alt": "Meule de fromage à pâte crémeuse entamée, fourrée de fruits secs et de noix, présentée sur un plateau noir",
-    "emplacement": null,
-    "realisation": "boucherie",
-    "legende": "Fromage fourré aux fruits secs",
-    "provisoire": false
-  },
-  {
-    "fichier": "fromage-bleu-artisanal-boucherie-maison-cherblanc-roanne.jpg",
-    "alt": "Meule de fromage à pâte persillée entamée, une part posée sur le dessus, présentée sur un plateau noir et fond blanc",
-    "emplacement": null,
-    "realisation": "boucherie",
-    "legende": "Fromage à pâte persillée",
-    "provisoire": false
-  },
-  {
-    "fichier": "fumage-artisanal-viande-boucherie-maison-cherblanc-roanne.jpg",
-    "alt": "Grosse pièce de viande roulée et dorée, en cuisson à la broche devant les brûleurs d’une rôtissoire",
-    "emplacement": "boucherie-fumoir",
-    "realisation": "broche-barbecue",
-    "legende": "Pièce de viande à la broche",
-    "provisoire": false
-  },
-  {
-    "fichier": "fumoir-mobile-cuisson-jambons-traiteur-evenement-roanne.jpg",
-    "alt": "Trois jambons entiers en cuisson à la broche sur une rôtissoire mobile installée en extérieur, devant des arbres",
-    "emplacement": "broche-hero",
-    "realisation": "broche-barbecue",
-    "legende": "Jambons à la broche en extérieur",
+    "fichier": "plateau-fromages-luxe-brie-saint-marcellin-traiteur-cherblanc.jpg",
+    "alt": "Coffret de fromages : rondelles de fromage frais, pâtes molles, pâte pressée, raisin, fruits de la passion et orange ciselée",
+    "emplacement": "accueil-savoir-faire",
+    "realisation": "plateaux",
+    "legende": "Coffret de fromages aux fruits",
     "provisoire": false
   },
   {
@@ -144,35 +40,163 @@
     "provisoire": false
   },
   {
-    "fichier": "grande-table-buffet-traiteur-evenement-roanne-loire.jpg",
-    "alt": "Plaques de mini burgers, mini hot-dogs et bagels garnis alignées sur une table avant le service d’un buffet",
+    "fichier": "fumoir-mobile-cuisson-jambons-traiteur-evenement-roanne.jpg",
+    "alt": "Trois jambons entiers en cuisson à la broche sur une rôtissoire mobile installée en extérieur, devant des arbres",
+    "emplacement": null,
+    "realisation": "broche-barbecue",
+    "legende": "Jambons à la broche en extérieur",
+    "provisoire": false
+  },
+  {
+    "fichier": "plateau-petits-fours-canapes-roules-traiteur-roanne.jpg",
+    "alt": "Plateau de petits fours salés : canapés au jambon cru, roulés de jambon, tartelettes, mini hot-dogs, verrines et mini burgers",
+    "emplacement": "traiteur-cocktail",
+    "realisation": "plateaux",
+    "legende": "Petits fours et canapés salés",
+    "provisoire": false
+  },
+  {
+    "fichier": "fromage-artisanal-aux-noix-boucherie-cherblanc-roanne.jpg",
+    "alt": "Meule de fromage à pâte crémeuse entamée, fourrée de fruits secs et de noix, présentée sur un plateau noir",
+    "emplacement": null,
+    "realisation": "boucherie",
+    "legende": "Fromage fourré aux fruits secs",
+    "provisoire": false
+  },
+  {
+    "fichier": "tour-macarons-dessert-reception-mariage-traiteur-roanne.jpg",
+    "alt": "Pyramide de macarons garnis dressée sur un présentoir noir à étages, en cuisine avant le service",
+    "emplacement": null,
+    "realisation": "cocktail",
+    "legende": "Pyramide de macarons garnis",
+    "provisoire": false
+  },
+  {
+    "fichier": "cuisson-cotes-boeuf-barbecue-traiteur-evenement-roanne.jpg",
+    "alt": "Côtes de bœuf saisies sur un grand barbecue mobile, d’autres pièces de viande en attente au-dessus, en fin de journée",
+    "emplacement": null,
+    "realisation": "broche-barbecue",
+    "legende": "Côtes de bœuf au barbecue",
+    "provisoire": false
+  },
+  {
+    "fichier": "plateau-fromages-brie-noix-traiteur-roanne-rhone-alpes.jpg",
+    "alt": "Petit plateau de fromages sur planche en bois : pâtes molles, cerneaux de noix, raisin blanc et tranches d’orange",
+    "emplacement": null,
+    "realisation": "plateaux",
+    "legende": "Plateau de fromages aux noix",
+    "provisoire": false
+  },
+  {
+    "fichier": "service-cocktail-exterieur-charcuterie-traiteur-roanne.jpg",
+    "alt": "Table de buffet en extérieur : plateaux de jambon cru entourés de verrines, mini burgers, brioches garnies et pyramide de macarons",
     "emplacement": null,
     "realisation": "buffet",
-    "legende": "Mini burgers et hot-dogs pour buffet",
+    "legende": "Buffet apéritif en extérieur",
     "provisoire": false
   },
   {
-    "fichier": "jambon-fume-artisanal-boucherie-cherblanc-roanne.jpg",
-    "alt": "Deux jambons entiers maintenus dans un filet métallique, dorés à la broche devant les brûleurs d’une rôtissoire",
-    "emplacement": "traiteur-broche",
-    "realisation": "broche-barbecue",
-    "legende": "Jambons dorés à la broche",
-    "provisoire": false
-  },
-  {
-    "fichier": "piece-montee-framboises-mariage-traiteur-maison-cherblanc-roanne.jpg",
-    "alt": "Gâteau de mariage rond couvert de framboises, décoré de cœurs dorés et d’un nœud en chocolat, porté par l’équipe en cuisine",
+    "fichier": "fromage-bleu-artisanal-boucherie-maison-cherblanc-roanne.jpg",
+    "alt": "Meule de fromage à pâte persillée entamée, une part posée sur le dessus, présentée sur un plateau noir et fond blanc",
     "emplacement": null,
-    "realisation": null,
-    "legende": null,
+    "realisation": "boucherie",
+    "legende": "Fromage à pâte persillée",
+    "provisoire": false
+  },
+  {
+    "fichier": "plateau-fromages-saint-marcellin-camembert-traiteur-roanne.jpg",
+    "alt": "Plateau de fromages sur planche en bois : petits fromages étiquetés, brie, pâte pressée, noix, raisin blanc et oranges",
+    "emplacement": null,
+    "realisation": "plateaux",
+    "legende": "Plateau de fromages sur planche",
+    "provisoire": false
+  },
+  {
+    "fichier": "fumage-artisanal-viande-boucherie-maison-cherblanc-roanne.jpg",
+    "alt": "Grosse pièce de viande roulée et dorée, en cuisson à la broche devant les brûleurs d’une rôtissoire",
+    "emplacement": "boucherie-fumoir",
+    "realisation": "broche-barbecue",
+    "legende": "Pièce de viande à la broche",
+    "provisoire": false
+  },
+  {
+    "fichier": "plateau-sandwichs-cocktail-traiteur-roanne.jpg",
+    "alt": "Plateau de sandwichs cocktail : bagels au jambon cru et au saumon, club sandwichs, mini burgers, wraps et verrines de crevettes",
+    "emplacement": null,
+    "realisation": "plateaux",
+    "legende": "Plateau de sandwichs cocktail",
+    "provisoire": false
+  },
+  {
+    "fichier": "plateau-fromages-camembert-comte-roquefort-traiteur-roanne.jpg",
+    "alt": "Grand plateau de fromages étiquetés : camembert, petit brie, comté au lait cru, roquefort, Boursault, raisin et oranges",
+    "emplacement": null,
+    "realisation": "plateaux",
+    "legende": "Fromages étiquetés pour réception",
+    "provisoire": false
+  },
+  {
+    "fichier": "chef-traiteur-fumoir-mobile-maison-cherblanc-roanne.jpg",
+    "alt": "Cuisinier en tablier rouge surveillant la cuisson de jambons à la broche sur une rôtissoire mobile, en plein air",
+    "emplacement": null,
+    "realisation": "broche-barbecue",
+    "legende": "Cuisson à la broche en plein air",
+    "provisoire": false
+  },
+  {
+    "fichier": "plateau-fromages-brie-bleu-mariage-traiteur-roanne.jpg",
+    "alt": "Plateau rond de fromages : bordure de brie, cœur de bleu en morceaux, fromages crémeux, raisin blanc et tranches d’orange",
+    "emplacement": null,
+    "realisation": "plateaux",
+    "legende": "Plateau brie et bleu",
     "provisoire": false
   },
   {
     "fichier": "plateau-aperitif-mini-burgers-verrines-traiteur-roanne.jpg",
     "alt": "Planches apéritives en cuisine : verrines, mini burgers, brioches garnies et bouchées feuilletées, avec serviettes turquoise",
-    "emplacement": "maison-hero",
+    "emplacement": null,
     "realisation": "cocktail",
     "legende": "Planches apéritives garnies",
+    "provisoire": false
+  },
+  {
+    "fichier": "plateau-fromages-artisanal-buffet-mariage-traiteur-roanne.jpg",
+    "alt": "Plateau de fromages : pâtes molles à croûte fleurie, bleu, pâte pressée en lamelles, raisin blanc et oranges ciselées",
+    "emplacement": null,
+    "realisation": "plateaux",
+    "legende": "Plateau de fromages et raisins",
+    "provisoire": false
+  },
+  {
+    "fichier": "preparation-buffet-traiteur-maison-cherblanc-roanne.jpg",
+    "alt": "Préparation d’un buffet en cuisine professionnelle : planches en bois, verrines et cuillères de tartare alignées sur le plan de travail",
+    "emplacement": null,
+    "realisation": "buffet",
+    "legende": "Préparation du buffet en cuisine",
+    "provisoire": false
+  },
+  {
+    "fichier": "equipe-traiteur-maison-cherblanc-roanne-service-evenement.jpg",
+    "alt": "Deux membres de l’équipe Maison Cherblanc présentent des planches de wraps roulés et de carrés salés gratinés en cuisine",
+    "emplacement": "maison-equipe",
+    "realisation": "cocktail",
+    "legende": "L’équipe et ses planches apéritives",
+    "provisoire": false
+  },
+  {
+    "fichier": "preparation-cuisine-macarons-charcuterie-traiteur-maison-cherblanc.jpg",
+    "alt": "En cuisine, l’équipe dresse une pyramide de macarons, un plateau de jambon cru entouré de verrines et des mini burgers",
+    "emplacement": null,
+    "realisation": "cocktail",
+    "legende": "Macarons et plateau de jambon cru",
+    "provisoire": false
+  },
+  {
+    "fichier": "buffet-cocktail-exterieur-reception-traiteur-roanne-loire.jpg",
+    "alt": "Buffet cocktail en extérieur : plateaux de mini burgers et de verrines, mange-debout et pyramide de macarons, mise en place en cours",
+    "emplacement": null,
+    "realisation": "cocktail",
+    "legende": "Buffet cocktail en extérieur",
     "provisoire": false
   },
   {
@@ -192,11 +216,115 @@
     "provisoire": false
   },
   {
-    "fichier": "plateau-charcuterie-fromages-traiteur-maison-cherblanc-roanne.jpg",
-    "alt": "Plateau de charcuterie et fromages en coffret : jambon cru, saucisson, chorizo, jambon blanc, coppa, fromages et cornichons",
-    "emplacement": "boucherie-charcuterie",
+    "fichier": "buffet-cocktail-bagels-wraps-traiteur-roanne.jpg",
+    "alt": "Plateau cocktail vu de dessus : club sandwichs, mini burgers, bagels au saumon, wraps, verrines de crevettes et mini hot-dogs",
+    "emplacement": null,
     "realisation": "plateaux",
-    "legende": "Plateau charcuterie et fromages",
+    "legende": "Plateau cocktail salé",
+    "provisoire": false
+  },
+  {
+    "fichier": "plateau-mini-burgers-hot-dogs-wraps-traiteur-roanne.jpg",
+    "alt": "Coffret apéritif Maison Cherblanc : mini burgers, mini hot-dogs gratinés, wraps roulés, sandwichs toastés et verrines",
+    "emplacement": null,
+    "realisation": "plateaux",
+    "legende": "Coffret apéritif garni",
+    "provisoire": false
+  },
+  {
+    "fichier": "grande-table-buffet-traiteur-evenement-roanne-loire.jpg",
+    "alt": "Plaques de mini burgers, mini hot-dogs et bagels garnis alignées sur une table avant le service d’un buffet",
+    "emplacement": null,
+    "realisation": "buffet",
+    "legende": "Mini burgers et hot-dogs pour buffet",
+    "provisoire": false
+  },
+  {
+    "fichier": "buffet-cocktail-traiteur-roanne-maison-cherblanc.jpg",
+    "alt": "Planches apéritives en cours de dressage en cuisine : verrines, mini burgers, brioches garnies et bouchées salées",
+    "emplacement": null,
+    "realisation": "cocktail",
+    "legende": "Planches apéritives en préparation",
+    "provisoire": false
+  },
+  {
+    "fichier": "bar-limonades-decoration-evenement-traiteur-maison-cherblanc.jpg",
+    "alt": "Bar à limonades en palettes roses décoré de lierre et d’oranges, avec fontaine à boisson et bouteilles de sirop",
+    "emplacement": null,
+    "realisation": "cocktail",
+    "legende": "Bar à limonades fleuri",
+    "provisoire": false
+  },
+  {
+    "fichier": "animation-tiki-bar-cocktails-soiree-traiteur-maison-cherblanc.jpg",
+    "alt": "Tiki bar dressé pour une soirée : bouteilles, bocaux de fruits et verres alignés devant une toile tropicale colorée",
+    "emplacement": null,
+    "realisation": "cocktail",
+    "legende": "Tiki bar à cocktails",
+    "provisoire": false
+  },
+  {
+    "fichier": "salle-reception-mariage-dressage-traiteur-roanne-loire.jpg",
+    "alt": "Grande salle de réception dressée : longues tables à nappes vichy rouges, chaises blanches, bouquets et fanions au plafond",
+    "emplacement": null,
+    "realisation": "mariage",
+    "legende": "Salle de réception dressée",
+    "provisoire": false
+  },
+  {
+    "fichier": "table-accueil-decoration-reception-traiteur-maison-cherblanc-roanne.jpg",
+    "alt": "Table d’accueil décorée : nappe vichy rouge, bouquets de fleurs, bidon à lait habillé de ruban, lanterne et ardoise décorative",
+    "emplacement": null,
+    "realisation": "mariage",
+    "legende": "Table d’accueil fleurie",
+    "provisoire": false
+  },
+  {
+    "fichier": "table-maries-decoration-mariage-traiteur-maison-cherblanc-roanne.jpg",
+    "alt": "Table d’honneur des mariés avec nappe vichy rouge, chemin de table en toile de jute, bouquets et fanion Mr & Mrs",
+    "emplacement": null,
+    "realisation": "mariage",
+    "legende": "Table des mariés en vichy",
+    "provisoire": false
+  },
+  {
+    "fichier": "animation-bar-biere-soiree-evenement-traiteur-roanne.jpg",
+    "alt": "Espace bar à bière décoré pour une soirée : banderole BierZone, comptoir en bois, masques tiki et guirlandes lumineuses",
+    "emplacement": null,
+    "realisation": "cocktail",
+    "legende": "Bar à bière décoré",
+    "provisoire": false
+  },
+  {
+    "fichier": "aperitif-charcuterie-artisanale-traiteur-maison-cherblanc-roanne.jpg",
+    "alt": "Montage de photos superposées : plateaux de bagels, verrines, jambon cru, saucisson, terrine et rosaces de charcuterie",
+    "emplacement": null,
+    "realisation": null,
+    "legende": null,
+    "provisoire": false
+  },
+  {
+    "fichier": "buffet-cocktail-crevettes-wraps-traiteur-roanne.jpg",
+    "alt": "Plateau cocktail garni de bagels au saumon, mini burgers, cornets de wraps, verrines de crevettes et mini hot-dogs",
+    "emplacement": null,
+    "realisation": null,
+    "legende": null,
+    "provisoire": false
+  },
+  {
+    "fichier": "detail-organisation-mariage-traiteur-maison-cherblanc-roanne.jpg",
+    "alt": "Panier « trousse de secours » pour les invités : mouchoirs, trousse de soins, déodorant, brosse et petits accessoires",
+    "emplacement": null,
+    "realisation": null,
+    "legende": null,
+    "provisoire": false
+  },
+  {
+    "fichier": "piece-montee-framboises-mariage-traiteur-maison-cherblanc-roanne.jpg",
+    "alt": "Gâteau de mariage rond couvert de framboises, décoré de cœurs dorés et d’un nœud en chocolat, porté par l’équipe en cuisine",
+    "emplacement": null,
+    "realisation": null,
+    "legende": null,
     "provisoire": false
   },
   {
@@ -216,46 +344,6 @@
     "provisoire": false
   },
   {
-    "fichier": "plateau-fromages-artisanal-buffet-mariage-traiteur-roanne.jpg",
-    "alt": "Plateau de fromages : pâtes molles à croûte fleurie, bleu, pâte pressée en lamelles, raisin blanc et oranges ciselées",
-    "emplacement": null,
-    "realisation": "plateaux",
-    "legende": "Plateau de fromages et raisins",
-    "provisoire": false
-  },
-  {
-    "fichier": "plateau-fromages-brie-bleu-mariage-traiteur-roanne.jpg",
-    "alt": "Plateau rond de fromages : bordure de brie, cœur de bleu en morceaux, fromages crémeux, raisin blanc et tranches d’orange",
-    "emplacement": null,
-    "realisation": "plateaux",
-    "legende": "Plateau brie et bleu",
-    "provisoire": false
-  },
-  {
-    "fichier": "plateau-fromages-brie-noix-traiteur-roanne-rhone-alpes.jpg",
-    "alt": "Petit plateau de fromages sur planche en bois : pâtes molles, cerneaux de noix, raisin blanc et tranches d’orange",
-    "emplacement": null,
-    "realisation": "plateaux",
-    "legende": "Plateau de fromages aux noix",
-    "provisoire": false
-  },
-  {
-    "fichier": "plateau-fromages-camembert-comte-roquefort-traiteur-roanne.jpg",
-    "alt": "Grand plateau de fromages étiquetés : camembert, petit brie, comté au lait cru, roquefort, Boursault, raisin et oranges",
-    "emplacement": null,
-    "realisation": "plateaux",
-    "legende": "Fromages étiquetés pour réception",
-    "provisoire": false
-  },
-  {
-    "fichier": "plateau-fromages-luxe-brie-saint-marcellin-traiteur-cherblanc.jpg",
-    "alt": "Coffret de fromages : rondelles de fromage frais, pâtes molles, pâte pressée, raisin, fruits de la passion et orange ciselée",
-    "emplacement": null,
-    "realisation": "plateaux",
-    "legende": "Coffret de fromages aux fruits",
-    "provisoire": false
-  },
-  {
     "fichier": "plateau-fromages-mariage-traiteur-cherblanc-roanne.jpg",
     "alt": "Plateau de fromages étiquetés : camembert pasteurisé, petit brie, comté au lait cru et roquefort, avec raisin et oranges",
     "emplacement": null,
@@ -272,99 +360,11 @@
     "provisoire": false
   },
   {
-    "fichier": "plateau-fromages-saint-marcellin-camembert-traiteur-roanne.jpg",
-    "alt": "Plateau de fromages sur planche en bois : petits fromages étiquetés, brie, pâte pressée, noix, raisin blanc et oranges",
-    "emplacement": null,
-    "realisation": "plateaux",
-    "legende": "Plateau de fromages sur planche",
-    "provisoire": false
-  },
-  {
-    "fichier": "plateau-mini-burgers-hot-dogs-wraps-traiteur-roanne.jpg",
-    "alt": "Coffret apéritif Maison Cherblanc : mini burgers, mini hot-dogs gratinés, wraps roulés, sandwichs toastés et verrines",
-    "emplacement": "og-defaut",
-    "realisation": "plateaux",
-    "legende": "Coffret apéritif garni",
-    "provisoire": false
-  },
-  {
-    "fichier": "plateau-petits-fours-canapes-roules-traiteur-roanne.jpg",
-    "alt": "Plateau de petits fours salés : canapés au jambon cru, roulés de jambon, tartelettes, mini hot-dogs, verrines et mini burgers",
-    "emplacement": "traiteur-cocktail",
-    "realisation": "plateaux",
-    "legende": "Petits fours et canapés salés",
-    "provisoire": false
-  },
-  {
-    "fichier": "plateau-sandwichs-cocktail-traiteur-roanne.jpg",
-    "alt": "Plateau de sandwichs cocktail : bagels au jambon cru et au saumon, club sandwichs, mini burgers, wraps et verrines de crevettes",
-    "emplacement": null,
-    "realisation": "plateaux",
-    "legende": "Plateau de sandwichs cocktail",
-    "provisoire": false
-  },
-  {
-    "fichier": "preparation-buffet-traiteur-maison-cherblanc-roanne.jpg",
-    "alt": "Préparation d’un buffet en cuisine professionnelle : planches en bois, verrines et cuillères de tartare alignées sur le plan de travail",
-    "emplacement": null,
-    "realisation": "buffet",
-    "legende": "Préparation du buffet en cuisine",
-    "provisoire": false
-  },
-  {
-    "fichier": "preparation-cuisine-macarons-charcuterie-traiteur-maison-cherblanc.jpg",
-    "alt": "En cuisine, l’équipe dresse une pyramide de macarons, un plateau de jambon cru entouré de verrines et des mini burgers",
-    "emplacement": "accueil-maison",
-    "realisation": "cocktail",
-    "legende": "Macarons et plateau de jambon cru",
-    "provisoire": false
-  },
-  {
-    "fichier": "salle-reception-mariage-dressage-traiteur-roanne-loire.jpg",
-    "alt": "Grande salle de réception dressée : longues tables à nappes vichy rouges, chaises blanches, bouquets et fanions au plafond",
-    "emplacement": "traiteur-hero",
-    "realisation": "mariage",
-    "legende": "Salle de réception dressée",
-    "provisoire": false
-  },
-  {
-    "fichier": "service-cocktail-exterieur-charcuterie-traiteur-roanne.jpg",
-    "alt": "Table de buffet en extérieur : plateaux de jambon cru entourés de verrines, mini burgers, brioches garnies et pyramide de macarons",
-    "emplacement": null,
-    "realisation": "buffet",
-    "legende": "Buffet apéritif en extérieur",
-    "provisoire": false
-  },
-  {
-    "fichier": "table-accueil-decoration-reception-traiteur-maison-cherblanc-roanne.jpg",
-    "alt": "Table d’accueil décorée : nappe vichy rouge, bouquets de fleurs, bidon à lait habillé de ruban, lanterne et ardoise décorative",
-    "emplacement": null,
-    "realisation": "mariage",
-    "legende": "Table d’accueil fleurie",
-    "provisoire": false
-  },
-  {
     "fichier": "table-cocktail-aperitif-mariage-traiteur-maison-cherblanc.jpg",
     "alt": "Mise en place d’une table apéritive en extérieur devant une porte de grange, avec mange-debout et pyramide de macarons",
     "emplacement": null,
     "realisation": null,
     "legende": null,
-    "provisoire": false
-  },
-  {
-    "fichier": "table-maries-decoration-mariage-traiteur-maison-cherblanc-roanne.jpg",
-    "alt": "Table d’honneur des mariés avec nappe vichy rouge, chemin de table en toile de jute, bouquets et fanion Mr & Mrs",
-    "emplacement": "mariage-hero",
-    "realisation": "mariage",
-    "legende": "Table des mariés en vichy",
-    "provisoire": false
-  },
-  {
-    "fichier": "tour-macarons-dessert-reception-mariage-traiteur-roanne.jpg",
-    "alt": "Pyramide de macarons garnis dressée sur un présentoir noir à étages, en cuisine avant le service",
-    "emplacement": null,
-    "realisation": "cocktail",
-    "legende": "Pyramide de macarons garnis",
     "provisoire": false
   }
 ]
