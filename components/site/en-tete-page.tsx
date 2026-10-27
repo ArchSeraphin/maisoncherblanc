@@ -60,7 +60,7 @@ export function EnTetePage({
               largeurCible={960}
               prioriteSi="(min-width: 960px)"
             />
-            <span className={styles.filet} aria-hidden="true" />
+            <span className={`forme-arche ${styles.filet}`} aria-hidden="true" />
           </div>
         )}
       </div>

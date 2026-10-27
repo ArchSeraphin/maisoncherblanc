@@ -46,7 +46,13 @@
   --r-s: 8px;
   --r-m: 14px;
   --r-l: 22px;
-  --arche: 999px 999px var(--r-s) var(--r-s);
+  /* Arche des encadrés de texte (horaires, dates) : arc dont la flèche (hauteur de
+     la courbe) est bornée, quelle que soit la largeur. L'ancien « 999px » faisait
+     un demi-cercle de la moitié de la largeur (la courbe coupait le texte des
+     encadrés larges) et, par la règle de réduction proportionnelle des rayons,
+     écrasait les coins bas à 1-4 px au lieu de 8. Ici, aucune réduction. */
+  --fleche-arche: clamp(4.5rem, 11vw, 8rem);
+  --arche: 50% 50% var(--r-s) var(--r-s) / var(--fleche-arche) var(--fleche-arche) var(--r-s) var(--r-s);
 
   /* --- Rythme --- */
   --page: 1240px;
@@ -601,7 +607,9 @@ strong {
   color: var(--encre-tres-douce);
 }
 
-/* Arche (reprise des cartes de fêtes) : visuel fort ou bloc d'horaires. 1 à 2 par page. */
+/* Arche (reprise des cartes de fêtes) : visuel fort ou bloc d'horaires. 1 à 2 par page.
+   Le haut du contenu suit la courbe : marge haute proportionnelle à sa flèche, le
+   titre centré s'inscrit dans l'arc, les lignes pleine largeur passent dessous. */
 .arche {
   border-radius: var(--arche);
   overflow: hidden;
@@ -609,7 +617,9 @@ strong {
 .arche-contour {
   border-radius: var(--arche);
   border: 1px solid var(--cuivre);
-  padding: clamp(2.5rem, 6vw, 4rem) clamp(1.5rem, 4vw, 3rem) clamp(1.75rem, 4vw, 2.5rem);
+  padding: calc(var(--fleche-arche) * 0.5 + 0.75rem) clamp(1.5rem, 4vw, 3rem) clamp(1.75rem, 4vw, 2.5rem);
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 :is(.fond-olive, .fond-olive-profond) .arche-contour {
   border-color: var(--or);
@@ -631,8 +641,13 @@ strong {
   object-fit: cover;
   transition: transform 900ms var(--courbe);
 }
-.cadre-arche {
-  border-radius: var(--arche);
+/* Photo en arche : demi-cercle exact. Rayon horizontal 50 % de la largeur, rayon
+   vertical = demi-largeur exprimée en % de la hauteur (`--ratio` = largeur / hauteur,
+   posé par les classes de ratio ou par le parent). Les coins bas gardent 8 px.
+   `.forme-arche` donne la même forme à un décor qui double la photo (filet décalé). */
+.cadre-arche,
+.forme-arche {
+  border-radius: 50% 50% var(--r-s) var(--r-s) / calc(50% * var(--ratio, 0.8)) calc(50% * var(--ratio, 0.8)) var(--r-s) var(--r-s);
 }
 /* Survol : zoom 1.03 sur les visuels de cartes. */
 .cadre-zoom:hover img,
@@ -642,15 +657,19 @@ a:hover > .cadre-zoom img {
 
 .ratio-portrait {
   aspect-ratio: 4 / 5;
+  --ratio: 0.8;
 }
 .ratio-paysage {
   aspect-ratio: 4 / 3;
+  --ratio: 1.3333;
 }
 .ratio-large {
   aspect-ratio: 16 / 9;
+  --ratio: 1.7778;
 }
 .ratio-carre {
   aspect-ratio: 1 / 1;
+  --ratio: 1;
 }
 
 /* Voile dégradé olive sous un texte posé sur une photo. */

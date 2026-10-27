@@ -319,10 +319,3 @@
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
   }
 }
-
-/* Petits écrans : le titre descend sous la courbe de l'arche. */
-@media (max-width: 599px) {
-  .horaires {
-    padding-top: 5rem;
-  }
-}

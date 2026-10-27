@@ -36,19 +36,21 @@
   position: relative;
   justify-self: end;
   width: min(100%, 520px);
+  /* Proportions de l'arche, partagées par la photo et son filet (même forme). */
+  --ratio: 0.8;
 }
 
 .cadre {
-  aspect-ratio: 4 / 5;
+  aspect-ratio: var(--ratio);
   box-shadow: var(--ombre-l);
 }
 
-/* Arche tracée en filet cuivre, décalée derrière la photo (rappel des cartes de fêtes). */
+/* Arche tracée en filet cuivre, décalée derrière la photo (rappel des cartes de
+   fêtes). Même taille et même forme que la photo (`.forme-arche`, même `--ratio`). */
 .filet {
   position: absolute;
   inset: 1.1rem -1.1rem -1.1rem 1.1rem;
   border: 1px solid var(--cuivre);
-  border-radius: var(--arche);
   opacity: 0.55;
   z-index: -1;
   pointer-events: none;
@@ -82,8 +84,8 @@
     width: min(100% - 1.25rem, 440px);
   }
 
-  .cadre {
-    aspect-ratio: 5 / 6;
+  .visuel {
+    --ratio: 0.8333;
   }
 
   .filet {

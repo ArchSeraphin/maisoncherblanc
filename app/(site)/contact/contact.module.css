@@ -182,10 +182,3 @@
 .planLien {
   color: var(--or);
 }
-
-/* Petits écrans : le titre descend sous la courbe de l'arche. */
-@media (max-width: 599px) {
-  .horaires {
-    padding-top: 5rem;
-  }
-}
