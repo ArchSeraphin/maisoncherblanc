@@ -1,4 +1,5 @@
-import { attributsImage, type ImageMedia } from "@/lib/media-url";
+import { preload } from "react-dom";
+import { attributsImage, urlMedia, type ImageMedia } from "@/lib/media-url";
 
 /**
  * Image de la médiathèque : `srcset`/`sizes` (variantes WebP de la pipeline)
@@ -16,6 +17,8 @@ export function Visuel({
   priorite = false,
   ratio,
   largeurCible,
+  largeurMax,
+  prioriteSi,
 }: {
   image: ImageMedia | null | undefined;
   /** Attribut `sizes` (largeur affichée), obligatoire pour un `srcset` utile. */
@@ -29,11 +32,34 @@ export function Visuel({
   ratio?: string;
   /** Largeur de la variante utilisée en `src` (navigateurs sans srcset). */
   largeurCible?: number;
+  /**
+   * Variantes plus larges exclues du `srcset` (vignettes : inutile de servir
+   * 1600 px à un téléphone 3x pour une image de 170 px).
+   */
+  largeurMax?: number;
+  /**
+   * Priorité haute SEULEMENT quand cette requête média est vraie (ex.
+   * "(min-width: 960px)") : préchargement `fetchpriority=high` limité à ces
+   * écrans, qui part dès la lecture du <head> (l'attribut `loading="lazy"` de
+   * l'image ne le retarde donc pas). Ailleurs, chargement différé ordinaire.
+   * Pour une image qui n'est l'élément principal qu'en bureau (en mobile, elle
+   * est sous le titre, qui passe devant).
+   */
+  prioriteSi?: string;
 }) {
   if (!image) {
     return <div className={className} style={ratio ? { aspectRatio: ratio, background: "var(--sable)" } : { background: "var(--sable)" }} aria-hidden="true" />;
   }
   const a = attributsImage(image, { sizes, largeurCible });
+  if (largeurMax) {
+    const sources = image.variantes.sources.filter((v) => v.largeur <= largeurMax);
+    const retenues = sources.length ? sources : image.variantes.sources.slice(0, 1);
+    a.srcSet = retenues.map((v) => `${urlMedia(v.chemin)} ${v.largeur}w`).join(", ");
+    a.src = urlMedia(retenues[retenues.length - 1].chemin);
+  }
+  if (prioriteSi && !priorite) {
+    preload(a.src, { as: "image", imageSrcSet: a.srcSet, imageSizes: a.sizes, fetchPriority: "high", media: prioriteSi });
+  }
   return (
     // eslint-disable-next-line @next/next/no-img-element -- variantes déjà générées par la pipeline sharp, servies par /media
     <img

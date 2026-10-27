@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CadrePhoto } from "@/components/site/cadre-photo";
 import { FilAriane } from "@/components/site/fil-ariane";
+import { META_INTROUVABLE } from "@/components/site/introuvable";
 import { dateArticle, photoPartage } from "@/components/site/outils";
 import { JsonLd } from "@/components/ui/json-ld";
 import { Markdown } from "@/components/ui/markdown";
@@ -16,7 +17,8 @@ import styles from "./article.module.css";
 export async function generateMetadata({ params }: PageProps<"/actualites/[slug]">) {
   const { slug } = await params;
   const a = articlePublie(slug);
-  if (!a) return construireMetadata({ titre: "Article introuvable", chemin: `/actualites/${slug}`, noindex: true });
+  // Article inconnu : métadonnées de la 404 (Next pose lui-même le seul `noindex`).
+  if (!a) return META_INTROUVABLE;
   return construireMetadata({
     chemin: `/actualites/${a.slug}`,
     titreAbsolu: a.titre_seo || `${a.titre} | Maison Cherblanc`,
@@ -48,7 +50,7 @@ export default async function PageArticle({ params }: PageProps<"/actualites/[sl
             Actualités · <time dateTime={a.publie_le ?? undefined}>{dateArticle(a.publie_le)}</time>
             {minutes ? ` · ${minutes} min de lecture` : ""}
           </p>
-          <h1 className={`titre-l fondu-entree ${styles.titre}`}>{a.titre}</h1>
+          <h1 className={`titre-l glisse-entree ${styles.titre}`}>{a.titre}</h1>
           {a.chapo ? <p className={`chapo fondu-entree ${styles.chapo}`}>{a.chapo}</p> : null}
         </header>
 

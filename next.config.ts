@@ -25,12 +25,17 @@ const nextConfig: NextConfig = {
     proxyClientMaxBodySize: "26mb",
     // 404 des URL inconnues rendue par app/global-not-found.tsx, hors layouts.
     globalNotFound: true,
+    // `inlineCss` essayé le 26/10/2026 puis écarté : la CSS est dupliquée dans la
+    // charge RSC (document de 19 à 49 Kio compressés), LCP mobile non amélioré.
     serverActions: {
       bodySizeLimit: "2mb",
     },
   },
+  // Aucune image ne passe par next/image : les variantes WebP sont produites par la
+  // pipeline sharp (lib/media-pipeline.ts) et servies par /media. Optimiseur
+  // `/_next/image` désactivé (rien à servir, aucune surface exposée).
   images: {
-    formats: ["image/avif", "image/webp"],
+    unoptimized: true,
   },
   async headers() {
     // Fichiers de public/ : cache de 30 jours. Un visuel modifié doit changer de NOM.

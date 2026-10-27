@@ -80,7 +80,11 @@ export function Galerie({ photos }: { photos: PhotoGalerie[] }) {
               onClick={() => ouvrir(i)}
               aria-haspopup="dialog"
             >
-              <Visuel image={p.image} sizes="(min-width: 1100px) 340px, (min-width: 700px) 45vw, 92vw" />
+              <Visuel
+                image={p.image}
+                sizes="(min-width: 1440px) 440px, (min-width: 900px) calc((100vw - 7rem) / 3), calc((100vw - 3.25rem) / 2)"
+                largeurMax={960}
+              />
               <span className="invisible-accessible">Agrandir la photo : </span>
               {p.legende ? <span className={styles.legende}>{p.legende}</span> : <span className="invisible-accessible">{p.image.alt}</span>}
             </button>

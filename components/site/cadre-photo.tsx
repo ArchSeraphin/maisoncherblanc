@@ -14,6 +14,7 @@ export function CadrePhoto({
   className,
   alt,
   priorite = false,
+  prioriteSi,
   largeurCible,
 }: {
   image: ImageMedia | null | undefined;
@@ -21,12 +22,14 @@ export function CadrePhoto({
   className?: string;
   alt?: string;
   priorite?: boolean;
+  /** Priorité haute seulement sous cette requête média (voir `Visuel`). */
+  prioriteSi?: string;
   largeurCible?: number;
 }) {
   return (
     <div className={`cadre ${className ?? ""}`}>
       {image ? (
-        <Visuel image={image} sizes={sizes} alt={alt} priorite={priorite} largeurCible={largeurCible} />
+        <Visuel image={image} sizes={sizes} alt={alt} priorite={priorite} prioriteSi={prioriteSi} largeurCible={largeurCible} />
       ) : (
         <div className={styles.vide} aria-hidden="true">
           <Logo variante="monogramme" couleur="olive" taille={72} className={styles.monogramme} />

@@ -123,7 +123,7 @@ h4 {
   letter-spacing: -0.02em;
   margin: 0;
   color: var(--encre);
-  font-variation-settings: "SOFT" 30, "WONK" 0;
+  /* Axes SOFT 30 / WONK 0 figés dans le fichier de police (app/fonts.ts). */
   text-wrap: balance;
 }
 
@@ -135,7 +135,7 @@ h3 em,
 .titre-l em {
   font-style: italic;
   font-weight: 360;
-  font-variation-settings: "SOFT" 60, "WONK" 1;
+  /* Axes SOFT 60 / WONK 1 figés dans le fichier italique (app/fonts.ts). */
 }
 
 h1 {
@@ -503,6 +503,12 @@ strong {
 .lien-fleche:hover svg {
   transform: translateX(4px);
 }
+/* Écrans tactiles : zone cliquable d'au moins 44 px de haut, sans changer l'aspect. */
+@media (pointer: coarse), (max-width: 899px) {
+  .lien-fleche {
+    min-height: 44px;
+  }
+}
 :is(.fond-olive, .fond-olive-profond) .lien-fleche {
   color: var(--or);
 }
@@ -664,6 +670,20 @@ a:hover > .cadre-zoom img {
   .fondu-entree {
     animation: fondu-entree 900ms var(--courbe) 200ms both;
   }
+  /* Titre principal : glisse sans fondu. Un titre à opacité nulle au premier
+     affichage ne compte pas comme « plus grand élément affiché » (LCP) : il
+     reste visible dès la première image, seul le mouvement est animé. */
+  .glisse-entree {
+    animation: glisse-entree 900ms var(--courbe) 120ms both;
+  }
+}
+@keyframes glisse-entree {
+  from {
+    transform: translateY(10px);
+  }
+  to {
+    transform: none;
+  }
 }
 @keyframes zoom-lent {
   from {
@@ -682,6 +702,18 @@ a:hover > .cadre-zoom img {
     opacity: 1;
     transform: none;
   }
+}
+
+/* Rendu différé des sections qui suivent la première section de <main> (en-tête
+   de page ou premier écran de l'accueil) et du pied de page : le navigateur ne
+   les met en page qu'à l'approche (une section visible au chargement est rendue
+   aussitôt), et leurs images à chargement paresseux ne partent qu'à ce moment.
+   Moins de travail et d'octets avant le premier affichage sur mobile (LCP). La
+   taille réservée (`auto`) est mémorisée après le premier rendu : pas de saut. */
+main > section ~ section,
+body > footer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
 }
 
 /* =========================================================================
