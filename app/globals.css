@@ -709,9 +709,10 @@ a:hover > .cadre-zoom img {
    les met en page qu'à l'approche (une section visible au chargement est rendue
    aussitôt), et leurs images à chargement paresseux ne partent qu'à ce moment.
    Moins de travail et d'octets avant le premier affichage sur mobile (LCP). La
-   taille réservée (`auto`) est mémorisée après le premier rendu : pas de saut. */
-main > section ~ section,
-body > footer {
+   taille réservée (`auto`) est mémorisée après le premier rendu : pas de saut.
+   Pas sur le pied de page : son fond olive, non peint, faussait les contrôles
+   de contraste (axe/Lighthouse) de la ligne « © ». */
+main > section ~ section {
   content-visibility: auto;
   contain-intrinsic-size: auto 900px;
 }
