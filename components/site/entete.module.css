@@ -54,8 +54,10 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  flex: 0 1 auto;
-  min-width: 0;
+  /* Jamais rétréci : rétréci (ancien `flex: 0 1 auto` + `min-width: 0`), le bloc
+     gardait son texte insécable, qui débordait sur « La boucherie ». La place se
+     gagne par les seuils ci-dessous (baseline, téléphone, menu burger). */
+  flex: none;
 }
 
 .monogramme {
@@ -77,6 +79,7 @@
 }
 
 .nomPrincipal {
+  white-space: nowrap;
   font-family: var(--display);
   font-size: 1.3rem;
   font-weight: 420;
@@ -103,7 +106,8 @@
 .liste {
   display: flex;
   align-items: center;
-  gap: clamp(0.8rem, 1.3vw, 1.4rem);
+  /* Plafonné : au-delà, la barre (1440 px au plus) n'a plus la place du téléphone. */
+  gap: clamp(0.8rem, 1.3vw, 1.15rem);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -352,22 +356,35 @@
   margin-top: 2rem;
 }
 
-/* --- Points de rupture --- */
+/* --- Points de rupture ---
+   Largeurs mesurées (bloc logo 233 px sans baseline, 305 px avec ; navigation
+   710 px ; « Demander un devis » 170 px ; téléphone 122 px ; barre de 1440 px au
+   plus, gouttières comprises). Contrôle : écart d'au moins 16 px entre le logo
+   et l'élément suivant, de 360 à 1920 px, en-tête normal, compact et transparent.
+   - < 600 px : logo et burger seuls ;
+   - 600 à 699 px : + « Demander un devis » ;
+   - 700 à 1259 px : + baseline (place libre en mode burger) ;
+   - à partir de 1260 px : navigation complète, baseline masquée (elle ne tient
+     pas avec la navigation et le téléphone dans 1440 px) ;
+   - à partir de 1440 px : + téléphone. */
 
-/* Le téléphone de l'en-tête n'apparaît que s'il reste de la place (il est aussi dans le pied et le menu mobile). */
-@media (max-width: 1499px) {
+.signature {
+  display: none;
+}
+
+@media (min-width: 700px) and (max-width: 1259px) {
+  .signature {
+    display: block;
+  }
+}
+
+@media (max-width: 1439px) {
   .telephone {
     display: none;
   }
 }
 
-@media (min-width: 1261px) and (max-width: 1399px) {
-  .signature {
-    display: none;
-  }
-}
-
-@media (max-width: 1260px) {
+@media (max-width: 1259px) {
   .nav {
     display: none;
   }
@@ -381,7 +398,7 @@
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 599px) {
   .barre {
     gap: 0.75rem;
   }
@@ -391,16 +408,12 @@
     display: none;
   }
 
-  .signature {
-    display: none;
-  }
-
   .nomPrincipal {
     font-size: 1.15rem;
   }
 }
 
-@media (min-width: 1261px) {
+@media (min-width: 1260px) {
   .panneau {
     display: none !important;
   }
