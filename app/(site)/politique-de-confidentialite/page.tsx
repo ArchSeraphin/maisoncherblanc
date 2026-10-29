@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { BoutonCookies } from "@/components/site/consentement";
 import { EnTetePage } from "@/components/site/en-tete-page";
 import { JsonLd } from "@/components/ui/json-ld";
 import { siteConfig } from "@/config/site";
 import { compterVue } from "@/lib/compter-vue";
+import { idGoogleAnalytics } from "@/lib/env";
 import { notificationEmailActive } from "@/lib/lecture-site";
 import { coordonnees } from "@/lib/reglages";
 import { construireMetadata, elementsFilAriane, filArianeJsonLd } from "@/lib/seo";
@@ -11,7 +13,7 @@ import styles from "../legal.module.css";
 const CHEMIN = "/politique-de-confidentialite";
 const ARIANE = elementsFilAriane(CHEMIN);
 /** Date de rédaction de cette politique (à changer à chaque modification du texte). */
-const DERNIERE_MISE_A_JOUR = "26 octobre 2026";
+const DERNIERE_MISE_A_JOUR = "29 octobre 2026";
 
 export async function generateMetadata() {
   return construireMetadata({ chemin: CHEMIN });
@@ -24,6 +26,8 @@ export default async function PageConfidentialite() {
   const conf = siteConfig.confidentialite;
   const coord = coordonnees();
   const brevo = notificationEmailActive();
+  const ga = Boolean(idGoogleAnalytics());
+  const gm = conf.prestataireMesure;
   const hebergeur = [h.nom, h.adresse, h.telephone, h.pays].filter(Boolean).join(", ");
   const mail = <a href={`mailto:${coord.email}`}>{coord.email}</a>;
 
@@ -111,8 +115,34 @@ export default async function PageConfidentialite() {
           </p>
           <p>
             <strong>Base légale :</strong> notre intérêt légitime à mesurer la fréquentation du site pour l’améliorer (article 6.1.f). Aucune donnée permettant
-            de vous identifier n’étant collectée, aucun bandeau de consentement n’est nécessaire.
+            de vous identifier n’étant collectée, ce compteur ne demande pas votre consentement.
           </p>
+          {ga ? (
+            <>
+              <h3>Google Analytics, seulement avec votre accord</h3>
+              <p>
+                Si vous l’acceptez dans le bandeau affiché lors de votre première visite, le site utilise aussi {gm.nom} ({gm.societe}, {gm.adresse}) pour
+                mieux comprendre sa fréquentation : pages consultées, durée de visite, type d’appareil et de navigateur, ville approximative, site de
+                provenance. Sans votre accord, aucun script Google n’est chargé.
+              </p>
+              <p>
+                <strong>Traceurs déposés :</strong> les cookies <code>_ga</code> et <code>_ga_…</code>, valables 13 mois au plus. Les signaux publicitaires
+                et la personnalisation des annonces sont désactivés.
+              </p>
+              <p>
+                <strong>Base légale :</strong> votre consentement (article 6.1.a du RGPD et article 82 de la loi Informatique et Libertés), que vous pouvez
+                retirer à tout moment : <BoutonCookies />.
+              </p>
+              <p>
+                <strong>Durée de conservation :</strong> {conf.conservationAnalyticsMois} mois dans {gm.nom}, puis suppression automatique.
+              </p>
+              <p>
+                <strong>Transferts hors de l’Union européenne :</strong> Google LLC peut traiter ces données aux États-Unis. Ces transferts sont encadrés par
+                le Data Privacy Framework entre l’Union européenne et les États-Unis (décision d’adéquation de la Commission européenne du 10 juillet 2023)
+                et par les clauses contractuelles types de la Commission européenne.
+              </p>
+            </>
+          ) : null}
 
           <h3>Les comptes administrateurs</h3>
           <p>L’espace d’administration du site est réservé à l’équipe de Maison Cherblanc et à son prestataire technique.</p>
@@ -143,11 +173,27 @@ export default async function PageConfidentialite() {
           </p>
 
           <h2>Cookies et traceurs</h2>
-          <p>
-            Le site public de Maison Cherblanc ne dépose <strong>aucun cookie</strong> de mesure d’audience, de publicité ou de réseau social. Il ne charge{" "}
-            <strong>aucun traceur tiers</strong> et <strong>aucun contenu intégré</strong> : pas de carte Google Maps, pas de vidéo YouTube, pas de module
-            Facebook ou Instagram dans les pages. Les polices de caractères sont hébergées sur le serveur du site.
-          </p>
+          {ga ? (
+            <>
+              <p>
+                Le site public de Maison Cherblanc ne dépose <strong>aucun cookie</strong> de publicité ou de réseau social. Le seul traceur tiers est{" "}
+                {gm.nom}, chargé <strong>uniquement si vous l’acceptez</strong>. Le site ne charge <strong>aucun contenu intégré</strong> : pas de carte
+                Google Maps, pas de vidéo YouTube, pas de module Facebook ou Instagram dans les pages. Les polices de caractères sont hébergées sur le
+                serveur du site.
+              </p>
+              <p>
+                Votre choix (accepter ou refuser) est enregistré dans le stockage local de votre navigateur, sans cookie, pendant 6 mois ; le bandeau vous
+                est ensuite reproposé. Refuser est aussi simple qu’accepter et ne limite en rien l’accès au site. Pour changer d’avis à tout moment :{" "}
+                <BoutonCookies /> (lien également présent en bas de chaque page).
+              </p>
+            </>
+          ) : (
+            <p>
+              Le site public de Maison Cherblanc ne dépose <strong>aucun cookie</strong> de mesure d’audience, de publicité ou de réseau social. Il ne charge{" "}
+              <strong>aucun traceur tiers</strong> et <strong>aucun contenu intégré</strong> : pas de carte Google Maps, pas de vidéo YouTube, pas de module
+              Facebook ou Instagram dans les pages. Les polices de caractères sont hébergées sur le serveur du site.
+            </p>
+          )}
           <p>
             Les liens vers Google Maps, Facebook ou Instagram sont de simples liens : ces services ne reçoivent aucune donnée tant que vous ne cliquez pas. Une
             fois sur leur site, c’est leur propre politique qui s’applique.

@@ -59,6 +59,16 @@ export function estNoindex(): boolean {
   return process.env.NOINDEX === "1" || process.env.NOINDEX === "true";
 }
 
+/**
+ * Identifiant du flux GA4 (`GA_MEASUREMENT_ID=G-XXXXXXXXXX`), ou `null` si absent,
+ * invalide ou en préproduction (`NOINDEX`). Absent = ni bandeau ni Google Analytics.
+ */
+export function idGoogleAnalytics(): string | null {
+  const id = (process.env.GA_MEASUREMENT_ID || "").trim().toUpperCase();
+  if (estNoindex() || !/^G-[A-Z0-9]{4,20}$/.test(id)) return null;
+  return id;
+}
+
 /** `TRUST_PROXY=1` derrière Traefik (Coolify), nginx ou Plesk. */
 export function proxyDeConfiance(): boolean {
   return process.env.TRUST_PROXY === "1" || process.env.TRUST_PROXY === "true";

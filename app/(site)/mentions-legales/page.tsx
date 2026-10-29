@@ -3,6 +3,7 @@ import { EnTetePage } from "@/components/site/en-tete-page";
 import { JsonLd } from "@/components/ui/json-ld";
 import { siteConfig } from "@/config/site";
 import { compterVue } from "@/lib/compter-vue";
+import { idGoogleAnalytics } from "@/lib/env";
 import { visuelsProvisoiresPublies } from "@/lib/lecture-site";
 import { coordonnees } from "@/lib/reglages";
 import { construireMetadata, elementsFilAriane, filArianeJsonLd } from "@/lib/seo";
@@ -22,6 +23,7 @@ export default async function PageMentions() {
   const h = siteConfig.legal.hebergeur;
   const coord = coordonnees();
   const provisoires = visuelsProvisoiresPublies();
+  const ga = Boolean(idGoogleAnalytics());
   const lignesHebergeur = [h.nom, h.adresse, h.telephone ? `Téléphone : ${h.telephone}` : null, h.pays].filter(Boolean);
 
   return (
@@ -120,7 +122,7 @@ export default async function PageMentions() {
 
           <h2>Données personnelles et cookies</h2>
           <p>
-            Le traitement de vos données et l’absence de cookies de mesure d’audience sont décrits dans la{" "}
+            Le traitement de vos données et {ga ? "la mesure d’audience soumise à votre consentement" : "l’absence de cookies de mesure d’audience"} sont décrits dans la{" "}
             <Link href="/politique-de-confidentialite">politique de confidentialité</Link>.
           </p>
 

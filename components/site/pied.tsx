@@ -4,6 +4,7 @@ import { Logo } from "@/components/ui/logo";
 import { formaterJourCourt, jourDeSemaine } from "@/lib/dates";
 import type { HoraireExceptionnel } from "@/lib/horaires-exceptionnels";
 import { grouperHoraires } from "@/lib/horaires";
+import { BoutonCookies } from "./consentement";
 import { jourCourt } from "./outils";
 import styles from "./pied.module.css";
 
@@ -29,10 +30,13 @@ export function Pied({
   horaires,
   exceptionnels,
   coordonnees,
+  gererCookies = false,
 }: {
   horaires: HorairesSemaine;
   exceptionnels: HoraireExceptionnel[];
   coordonnees: Coordonnees;
+  /** Lien « Gérer les cookies » (seulement si Google Analytics est configuré). */
+  gererCookies?: boolean;
 }) {
   const groupes = grouperHoraires(horaires);
   const annee = new Date().getFullYear();
@@ -148,6 +152,11 @@ export function Pied({
               Politique de confidentialité
             </Link>
           </li>
+          {gererCookies ? (
+            <li>
+              <BoutonCookies />
+            </li>
+          ) : null}
           <li>
             <a href={siteConfig.reseaux.facebook} rel="noopener" target="_blank" className="lien-souligne">
               Facebook<span className="invisible-accessible"> (nouvel onglet)</span>

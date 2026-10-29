@@ -139,7 +139,8 @@
 }
 
 .liens a:hover,
-.legal a:hover {
+.legal a:hover,
+.legal button:hover {
   color: var(--sur-olive);
 }
 
@@ -180,6 +181,7 @@
 @media (pointer: coarse), (max-width: 899px) {
   .liens a,
   .legal a,
+  .legal button,
   .contacts a {
     display: inline-block;
     padding-block: 0.7rem;

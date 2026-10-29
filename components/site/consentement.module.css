@@ -1,0 +1,66 @@
+.bandeau {
+  position: fixed;
+  z-index: 60;
+  inset-inline: 1rem;
+  bottom: 1rem;
+  display: grid;
+  gap: 0.75rem;
+  max-width: 34rem;
+  padding: 1.25rem 1.4rem;
+  border-radius: var(--r-m);
+  box-shadow: var(--ombre-l);
+  animation: apparition 0.4s var(--courbe) both;
+}
+
+.titre {
+  font-family: var(--texte);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--or);
+}
+
+.texte {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.actions > * {
+  flex: 1 1 8rem;
+}
+
+.lienBouton {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+@media (min-width: 700px) {
+  .bandeau {
+    inset-inline: 1.5rem auto;
+    bottom: 1.5rem;
+  }
+}
+
+@keyframes apparition {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bandeau {
+    animation: none;
+  }
+}

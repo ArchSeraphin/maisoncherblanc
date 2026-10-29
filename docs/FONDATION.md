@@ -382,6 +382,8 @@ export default async function Page() {
   `siteConfig.confidentialite.conservationMessagesMois` mois). Aucune case pré-cochée.
 - Mentions légales : `siteConfig.legal.editeur` (n'afficher que les champs non `null`), hébergeur `null` = TODO.
 - Pas de bandeau cookies : la mesure est un compteur serveur sans cookie ni IP (à dire dans la politique de confidentialité).
+  Depuis le 29/10/2026 : GA4 optionnel (`GA_MEASUREMENT_ID`), chargé seulement après consentement (`components/site/consentement.tsx`,
+  choix en stockage local 6 mois, « Gérer les cookies » dans le pied) ; politique de confidentialité et mentions adaptées automatiquement.
 
 ### CSS : jetons (app/globals.css, `var(--…)` uniquement)
 Fonds `--creme` (page), `--lin`, `--sable`, `--olive`, `--olive-profond` · texte `--encre`, `--encre-douce` (5,6:1), `--encre-tres-douce` (4,8:1) ·

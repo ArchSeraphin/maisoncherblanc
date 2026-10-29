@@ -182,6 +182,10 @@ export const siteConfig = {
     conservationStatistiquesMois: 25,
     /** Sous-traitant des notifications e-mail (lib/mail.ts), seulement si BREVO_API_KEY est défini. */
     prestataireEmail: { nom: "Brevo", societe: "BREVO SAS", ville: "Paris" },
+    /** Mesure d'audience soumise au consentement, seulement si GA_MEASUREMENT_ID est défini. */
+    prestataireMesure: { nom: "Google Analytics", societe: "Google Ireland Limited", adresse: "Gordon House, Barrow Street, Dublin 4, Irlande" },
+    /** Durée de conservation réglée dans Google Analytics (Administration > Conservation des données). */
+    conservationAnalyticsMois: 14,
   },
 
   /** Navigation principale (en-tête). Le backoffice n'y figure jamais. */
