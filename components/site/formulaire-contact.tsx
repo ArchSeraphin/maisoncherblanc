@@ -145,6 +145,15 @@ export function FormulaireContact({
           </a>
           .
         </p>
+        {type === "devis-traiteur" ? (
+          <p>
+            Vous préparez un mariage ? Gagnez du temps :{" "}
+            <Link href="/traiteur-roanne/mariage/fiche" className="lien-souligne">
+              remplissez notre fiche mariage
+            </Link>{" "}
+            (date, lieu, menu, service), nous préparerons le devis à partir de vos réponses.
+          </p>
+        ) : null}
       </div>
     );
   }

@@ -51,9 +51,14 @@ export default async function PageMariage() {
           </p>
         }
         actions={
-          <Link href="/contact?type=devis-traiteur" className="bouton">
-            Parler de votre mariage
-          </Link>
+          <>
+            <Link href="/contact?type=devis-traiteur" className="bouton">
+              Parler de votre mariage
+            </Link>
+            <Link href="/traiteur-roanne/mariage/fiche" className="bouton bouton-contour">
+              Remplir la fiche mariage
+            </Link>
+          </>
         }
         image={img["mariage-hero"]}
       />
@@ -145,7 +150,11 @@ export default async function PageMariage() {
             <li className="apparait">
               <p>
                 <strong>Le premier échange.</strong> Date, lieu, nombre d’invités, déroulé de la journée, envies et contraintes (enfants, régimes particuliers).
-                Un appel ou un message suffit pour commencer.
+                Un appel ou un message suffit pour commencer. Pour aller plus vite, remplissez{" "}
+                <Link href="/traiteur-roanne/mariage/fiche" className="lien-souligne">
+                  notre fiche mariage
+                </Link>
+                .
               </p>
             </li>
             <li className="apparait">
@@ -202,11 +211,14 @@ export default async function PageMariage() {
 
       <AppelFinal
         titre="Votre date est fixée ?"
-        texte="Écrivez-nous dès maintenant : date, lieu, nombre d’invités. Nous revenons vers vous avec une première proposition."
+        texte="Remplissez la fiche mariage (date, lieu, menu, service) ou écrivez-nous simplement. Nous revenons vers vous avec une première proposition."
         actions={
           <>
-            <Link href="/contact?type=devis-traiteur" className="bouton">
-              Demander un devis mariage
+            <Link href="/traiteur-roanne/mariage/fiche" className="bouton">
+              Remplir la fiche mariage
+            </Link>
+            <Link href="/contact?type=devis-traiteur" className="bouton bouton-contour">
+              Écrire un message
             </Link>
             <a href={coord.mobile.href} className="bouton bouton-contour">
               Appeler le {coord.mobile.affichage}

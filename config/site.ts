@@ -273,6 +273,13 @@ export const siteConfig = {
           "Traiteur mariage à Roanne et dans le Roannais : vin d’honneur, buffet ou repas servi, fromages, pièce montée et macarons. Service à table, devis gratuit.",
         ariane: "Mariage",
       },
+      // Page non indexée (lien envoyé par la boutique après un premier contact), absente du sitemap.
+      "/traiteur-roanne/mariage/fiche": {
+        titre: "Fiche mariage, votre demande de devis | Maison Cherblanc",
+        description:
+          "Préparez votre devis mariage avec Maison Cherblanc, traiteur à Roanne : date, lieu, vin d’honneur, menu, service. Une fiche en quelques étapes.",
+        ariane: "Fiche mariage",
+      },
       "/traiteur-roanne/cocktail-dinatoire": {
         titre: "Cocktail dînatoire à Roanne, buffets | Maison Cherblanc",
         description:

@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { Etiquette } from "@/components/admin/champs";
 import { Icone } from "@/components/admin/icones";
-import { BoutonsMessage, MarquerLuALouverture } from "@/components/admin/messages/actions-message";
+import { BoutonImprimer, BoutonsMessage, MarquerLuALouverture } from "@/components/admin/messages/actions-message";
 import { EntetePage } from "@/components/admin/mise-en-page";
 import { siteConfig } from "@/config/site";
 import { requireUser } from "@/lib/auth";
 import { lienAdmin } from "@/lib/chemin-admin";
 import { formaterHorodatage, formaterJourLong } from "@/lib/dates";
-import { LIBELLES_TYPES_MESSAGE, lireMessage } from "@/lib/messages";
+import { lireDetailsFiche, sectionsFiche } from "@/lib/fiche-mariage";
+import { libelleMessage, lireMessage } from "@/lib/messages";
 
 export const metadata = { title: "Message" };
 
@@ -24,12 +25,17 @@ export default async function PageMessage({ params }: PageProps<"/bo/messages/[i
     );
   }
   const nom = `${m.prenom} ${m.nom}`.trim();
-  const sujet = `${LIBELLES_TYPES_MESSAGE[m.type]} : votre demande à ${siteConfig.nom}`;
+  const fiche = lireDetailsFiche(m.details);
+  const libelle = libelleMessage(m);
+  const sujet = fiche ? `Votre mariage : votre demande de devis à ${siteConfig.nom}` : `${libelle} : votre demande à ${siteConfig.nom}`;
   const citation = m.message
     .split("\n")
     .map((l) => `> ${l}`)
     .join("\n");
-  const corps = `Bonjour ${m.prenom},\n\n\n\n${siteConfig.nom}\n\n${"Votre message du " + formaterHorodatage(m.created_at)} :\n${citation}`;
+  // Fiche mariage : pas de citation (le récapitulatif entier rendrait le lien mailto trop long).
+  const corps = fiche
+    ? `Bonjour ${m.prenom},\n\nMerci pour votre fiche mariage du ${formaterHorodatage(m.created_at)}.\n\n\n\n${siteConfig.nom}`
+    : `Bonjour ${m.prenom},\n\n\n\n${siteConfig.nom}\n\n${"Votre message du " + formaterHorodatage(m.created_at)} :\n${citation}`;
   const mailto = `mailto:${m.email}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
   const tel = m.telephone.replace(/[^\d+]/g, "");
 
@@ -41,7 +47,7 @@ export default async function PageMessage({ params }: PageProps<"/bo/messages/[i
         titre={nom}
         etiquettes={
           <>
-            <Etiquette genre={m.type === "devis-traiteur" ? "succes" : "neutre"}>{LIBELLES_TYPES_MESSAGE[m.type]}</Etiquette>
+            <Etiquette genre={m.type === "devis-traiteur" ? "succes" : "neutre"}>{libelle}</Etiquette>
             <span className="bo-discret">Reçu le {formaterHorodatage(m.created_at)}</span>
           </>
         }
@@ -58,6 +64,7 @@ export default async function PageMessage({ params }: PageProps<"/bo/messages/[i
             Appeler {m.telephone}
           </a>
         ) : null}
+        {fiche ? <BoutonImprimer /> : null}
       </div>
 
       <section className="bo-carte bo-pile" aria-label="Coordonnées et détails">
@@ -85,12 +92,32 @@ export default async function PageMessage({ params }: PageProps<"/bo/messages/[i
         </dl>
       </section>
 
-      <section className="bo-carte bo-pile" aria-labelledby="titre-message">
-        <h2 id="titre-message" className="bo-sous-titre" style={{ margin: 0 }}>
-          Message
-        </h2>
-        <p className="bo-message-corps">{m.message}</p>
-      </section>
+      {fiche ? (
+        sectionsFiche(fiche)
+          .slice(1)
+          .map((s) => (
+            <section key={s.titre} className="bo-carte bo-pile bo-fiche-section" aria-labelledby={`fiche-${s.etape}`}>
+              <h2 id={`fiche-${s.etape}`} className="bo-sous-titre" style={{ margin: 0 }}>
+                {s.titre}
+              </h2>
+              <dl className="bo-definitions">
+                {s.lignes.map((l) => (
+                  <div key={l.libelle} style={{ display: "contents" }}>
+                    <dt>{l.libelle}</dt>
+                    <dd style={{ whiteSpace: "pre-line" }}>{l.valeur}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ))
+      ) : (
+        <section className="bo-carte bo-pile" aria-labelledby="titre-message">
+          <h2 id="titre-message" className="bo-sous-titre" style={{ margin: 0 }}>
+            Message
+          </h2>
+          <p className="bo-message-corps">{m.message}</p>
+        </section>
+      )}
 
       <div className="bo-rangee" style={{ margin: 0 }}>
         <BoutonsMessage id={m.id} nom={nom} />

@@ -11,7 +11,8 @@
 import "server-only";
 import { formaterHorodatage, formaterJourLong } from "./dates";
 import { emailContact, emailExpediteur } from "./env";
-import { estEmailValide, LIBELLES_TYPES_MESSAGE, type Message } from "./messages";
+import { lireDetailsFiche, sectionsFiche } from "./fiche-mariage";
+import { estEmailValide, libelleMessage, type Message } from "./messages";
 import { siteConfig } from "@/config/site";
 
 const URL_BREVO = "https://api.brevo.com/v3/smtp/email";
@@ -36,7 +37,8 @@ function destinataires(): { email: string }[] {
 /** Contenu de l'e-mail (pur, exporté pour les vérifications). */
 export function construireEmailMessage(m: Message): { sujet: string; texte: string; html: string } {
   const nom = uneLigne(`${m.prenom} ${m.nom}`, 170);
-  const type = LIBELLES_TYPES_MESSAGE[m.type];
+  const type = libelleMessage(m);
+  const fiche = lireDetailsFiche(m.details);
   const details = [
     `Type : ${type}`,
     m.telephone ? `Téléphone : ${m.telephone}` : null,
@@ -46,12 +48,26 @@ export function construireEmailMessage(m: Message): { sujet: string; texte: stri
   ].filter((x): x is string => !!x);
   const pied = `Pour répondre, utilisez « Répondre » : la réponse part directement à ${m.email}.\nLe message est aussi conservé ${siteConfig.confidentialite.conservationMessagesMois} mois dans le backoffice.`;
   const sujet = `Site ${siteConfig.nom} : ${type} (${nom})`;
-  const texte = ["Nouveau message reçu par le formulaire du site.", "", `De : ${nom} <${m.email}>`, ...details, "", m.message, "", "--", pied].join("\n");
+  const texte = [fiche ? "Nouvelle fiche mariage remplie sur le site." : "Nouveau message reçu par le formulaire du site.", "", `De : ${nom} <${m.email}>`, ...details, "", m.message, "", "--", pied].join("\n");
   const nl2br = (s: string) => echapper(s).replace(/\r?\n/g, "<br>");
+  // Fiche mariage : le récapitulatif en tableau, section par section (comme la fiche papier).
+  const corps = fiche
+    ? sectionsFiche(fiche)
+        .map(
+          (sec) => `<h3 style="margin:22px 0 6px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#8A5C1E">${echapper(sec.titre)}</h3>
+<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:#F8F3EA">${sec.lignes
+            .map(
+              (l) =>
+                `<tr><td style="padding:7px 12px;border-bottom:1px solid #E9DDC6;width:38%;vertical-align:top;color:#5C5D52">${echapper(l.libelle)}</td><td style="padding:7px 12px;border-bottom:1px solid #E9DDC6;vertical-align:top;font-weight:bold">${nl2br(l.valeur)}</td></tr>`,
+            )
+            .join("")}</table>`,
+        )
+        .join("\n")
+    : `<p style="padding:12px 16px;background:#F3EBDC;border-left:3px solid #A3702A">${nl2br(m.message)}</p>`;
   const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#2A2B24">
-<p>Nouveau message reçu par le formulaire du site.</p>
+<p>${fiche ? "Nouvelle fiche mariage remplie sur le site." : "Nouveau message reçu par le formulaire du site."}</p>
 <p><strong>De :</strong> ${echapper(nom)} &lt;${echapper(m.email)}&gt;<br>${details.map((d) => echapper(d)).join("<br>")}</p>
-<p style="padding:12px 16px;background:#F3EBDC;border-left:3px solid #A3702A">${nl2br(m.message)}</p>
+${corps}
 <p style="font-size:13px;color:#3F4530">${nl2br(pied)}</p>
 </div>`;
   return { sujet, texte, html };
@@ -79,7 +95,7 @@ export async function notifierNouveauMessage(m: Message): Promise<void> {
         subject: sujet,
         textContent: texte,
         htmlContent: html,
-        tags: ["contact", m.type],
+        tags: ["contact", lireDetailsFiche(m.details) ? "fiche-mariage" : m.type],
       }),
       signal: AbortSignal.timeout(DELAI_MS),
     });

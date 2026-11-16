@@ -11,7 +11,8 @@ import {
   compterMessages,
   compterMessagesNonLus,
   estEmailValide,
-  LIBELLES_TYPES_MESSAGE,
+  extraitMessage,
+  libelleMessage,
   listerMessages,
   listerMessagesParEmail,
 } from "@/lib/messages";
@@ -90,9 +91,9 @@ export default async function PageMessages({ searchParams }: PageProps<"/bo/mess
                 </span>
                 <span className="bo-pile" style={{ gap: "0.1rem", minWidth: 0 }}>
                   <span>
-                    <Etiquette genre={m.type === "devis-traiteur" ? "succes" : "neutre"}>{LIBELLES_TYPES_MESSAGE[m.type]}</Etiquette>
+                    <Etiquette genre={m.type === "devis-traiteur" ? "succes" : "neutre"}>{libelleMessage(m)}</Etiquette>
                   </span>
-                  <span className="bo-extrait">{m.message}</span>
+                  <span className="bo-extrait">{extraitMessage(m)}</span>
                 </span>
                 <span className="bo-discret" style={{ fontWeight: 400 }}>
                   {formaterHorodatage(m.created_at)}

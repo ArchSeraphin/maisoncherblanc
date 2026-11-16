@@ -11,7 +11,7 @@ import { chargerEmplacements, EMPLACEMENTS } from "@/lib/emplacements";
 import { horairesExceptionnelsAVenir } from "@/lib/horaires-exceptionnels";
 import { formaterJour } from "@/lib/horaires";
 import { listerMenus } from "@/lib/menus";
-import { compterMessagesNonLus, LIBELLES_TYPES_MESSAGE, listerMessages } from "@/lib/messages";
+import { compterMessagesNonLus, libelleMessage, listerMessages } from "@/lib/messages";
 import { annonceEnCours, lireAnnonce } from "@/lib/reglages";
 
 export const metadata = { title: "Tableau de bord" };
@@ -110,7 +110,7 @@ export default async function TableauDeBord() {
                     {m.prenom} {m.nom}
                   </Link>
                   <span className="bo-discret">
-                    {LIBELLES_TYPES_MESSAGE[m.type]}, {formaterHorodatage(m.created_at)}
+                    {libelleMessage(m)}, {formaterHorodatage(m.created_at)}
                   </span>
                 </li>
               ))}

@@ -10,6 +10,7 @@
 import { siteConfig } from "@/config/site";
 import { estJourIso } from "./dates";
 import { stmt } from "./db";
+import { extraitFiche, lireDetailsFiche } from "./fiche-mariage";
 
 export const TYPES_MESSAGE = ["devis-traiteur", "commande-boucherie", "autre"] as const;
 export type TypeMessage = (typeof TYPES_MESSAGE)[number];
@@ -30,11 +31,24 @@ export type Message = {
   date_evenement: string | null;
   nb_personnes: number | null;
   message: string;
+  /** Formulaire détaillé en JSON (fiche mariage, lib/fiche-mariage.ts), sinon null. */
+  details: string | null;
   created_at: string;
   lu_le: string | null;
 };
 
-export type EntreeMessage = Omit<Message, "id" | "created_at" | "lu_le">;
+export type EntreeMessage = Omit<Message, "id" | "created_at" | "lu_le" | "details">;
+
+/** Libellé d'un message : « Fiche mariage » pour une fiche, sinon celui de son type. */
+export function libelleMessage(m: Pick<Message, "type" | "details">): string {
+  return lireDetailsFiche(m.details) ? "Fiche mariage" : LIBELLES_TYPES_MESSAGE[m.type];
+}
+
+/** Extrait affiché dans la liste : résumé de la fiche, sinon le message. */
+export function extraitMessage(m: Pick<Message, "message" | "details">): string {
+  const f = lireDetailsFiche(m.details);
+  return f ? extraitFiche(f) : m.message;
+}
 
 export const LIMITES_MESSAGE = { prenom: 80, nom: 80, email: 254, telephone: 30, message: 5000, nb_personnes: 5000 } as const;
 
@@ -88,11 +102,11 @@ export function validerMessage(
   return Object.keys(erreurs).length ? { ok: false, erreurs } : { ok: true, donnees };
 }
 
-export function creerMessage(e: EntreeMessage): Message {
+export function creerMessage(e: EntreeMessage & { details?: string | null }): Message {
   const res = stmt(
-    `INSERT INTO messages (type, prenom, nom, email, telephone, date_evenement, nb_personnes, message)
-     VALUES (@type, @prenom, @nom, @email, @telephone, @date_evenement, @nb_personnes, @message)`,
-  ).run(e);
+    `INSERT INTO messages (type, prenom, nom, email, telephone, date_evenement, nb_personnes, message, details)
+     VALUES (@type, @prenom, @nom, @email, @telephone, @date_evenement, @nb_personnes, @message, @details)`,
+  ).run({ ...e, details: e.details ?? null });
   return lireMessage(Number(res.lastInsertRowid))!;
 }
 

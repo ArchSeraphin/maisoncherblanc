@@ -21,6 +21,15 @@ export function MarquerLuALouverture({ id, nonLu }: { id: number; nonLu: boolean
   return null;
 }
 
+/** Imprime la page (fiche mariage : le récapitulatif, comme la fiche papier). */
+export function BoutonImprimer() {
+  return (
+    <button type="button" className="bo-bouton bo-bouton-secondaire" onClick={() => window.print()}>
+      Imprimer la fiche
+    </button>
+  );
+}
+
 export function BoutonsMessage({ id, nom }: { id: number; nom: string }) {
   const [executer, enCours] = useExecuter();
   const confirmer = useConfirmer();

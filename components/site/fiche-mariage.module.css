@@ -1,0 +1,734 @@
+/* Fiche mariage en étapes (components/site/fiche-mariage.tsx). Jetons de app/globals.css uniquement. */
+
+.fiche {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .fiche {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+}
+
+/* --- Sommaire des étapes (bureau) --- */
+
+.sommaire {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  .sommaire {
+    display: block;
+    position: sticky;
+    top: calc(var(--hauteur-entete) + 1.5rem);
+  }
+}
+
+.sommaire ol {
+  display: grid;
+  gap: 0.15rem;
+  border-left: 1px solid var(--trait);
+}
+
+.etapeBouton {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin-left: -1px;
+  padding: 0.55rem 0.75rem 0.55rem 1rem;
+  border: 0;
+  border-left: 2px solid transparent;
+  background: none;
+  color: var(--encre-tres-douce);
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color var(--transition),
+    border-color var(--transition);
+}
+
+.etapeBouton:disabled {
+  cursor: default;
+}
+
+.etapeBouton[data-etat="faite"] {
+  color: var(--encre);
+}
+
+.etapeBouton[data-etat="faite"]:hover {
+  color: var(--cuivre-texte);
+}
+
+.etapeBouton[data-etat="courante"] {
+  color: var(--encre);
+  font-weight: 600;
+  border-left-color: var(--cuivre);
+}
+
+.etapeBouton:focus-visible {
+  outline: 2px solid var(--cuivre-fonce);
+  outline-offset: 2px;
+}
+
+.etapeNumero {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--trait-fort);
+  border-radius: 50%;
+  font-family: var(--display);
+  font-size: 0.85rem;
+  font-variant-numeric: lining-nums;
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    color var(--transition);
+}
+
+[data-etat="faite"] .etapeNumero {
+  border-color: var(--olive);
+  color: var(--olive);
+}
+
+[data-etat="courante"] .etapeNumero {
+  background: var(--olive);
+  border-color: var(--olive);
+  color: var(--sur-olive);
+}
+
+/* --- Cadre de l'étape --- */
+
+.cadre {
+  scroll-margin-top: calc(var(--hauteur-entete) + 1rem);
+  padding: clamp(1.25rem, 4vw, 2.75rem);
+  background: var(--lin);
+  border: 1px solid var(--trait);
+  border-radius: var(--r-m);
+  box-shadow: var(--ombre-s);
+  min-width: 0;
+}
+
+.progression {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--encre-tres-douce);
+}
+
+.barre {
+  display: block;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--trait);
+  overflow: hidden;
+}
+
+.barre span {
+  display: block;
+  height: 100%;
+  background: var(--cuivre);
+  border-radius: inherit;
+  transition: width 500ms var(--courbe);
+}
+
+.brouillon {
+  margin: 0 0 1.5rem;
+  padding: 0.75rem 1rem;
+  border-left: 2px solid var(--olive);
+  background: var(--creme);
+  font-size: 0.92rem;
+  color: var(--encre-douce);
+}
+
+.lienBouton {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--encre);
+  text-decoration: underline;
+  text-decoration-color: var(--cuivre);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.lienBouton:hover {
+  color: var(--cuivre-texte);
+}
+
+.formulaire {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.retour:focus {
+  outline: none;
+}
+
+.alerte {
+  margin: 0;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid #8f2f21;
+  border-left-width: 3px;
+  border-radius: var(--r-s);
+  background: rgb(143 47 33 / 0.05);
+  color: var(--encre);
+  font-size: 0.95rem;
+}
+
+.alerte a {
+  text-decoration: underline;
+}
+
+.entete {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.entete :global(.surtitre) {
+  margin: 0;
+}
+
+.titre {
+  margin: 0;
+}
+
+.titre:focus {
+  outline: none;
+}
+
+.intro {
+  margin: 0;
+  color: var(--encre-douce);
+  max-width: 56ch;
+}
+
+.obligatoires {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--encre-tres-douce);
+}
+
+.corps {
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .corps {
+    animation: arrivee 420ms var(--courbe) both;
+  }
+  .revele {
+    animation: arrivee 320ms var(--courbe) both;
+  }
+}
+
+@keyframes arrivee {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pile {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.rangee {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .rangee {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.aide {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--encre-tres-douce);
+}
+
+.dateLisible {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  color: var(--encre);
+}
+
+.dateLisible em {
+  color: var(--cuivre-texte);
+}
+
+.avertissement {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-left: 2px solid var(--cuivre);
+  background: rgb(163 112 42 / 0.08);
+  font-size: 0.88rem;
+}
+
+.avertissement a {
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+/* --- Compteur (− / +) --- */
+
+.compteur {
+  display: grid;
+  grid-template-columns: auto minmax(4.5rem, 7rem) auto;
+  justify-content: start;
+  gap: 0.5rem;
+}
+
+.nombre {
+  text-align: center;
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.pas {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0 0.75rem;
+  border: 1px solid var(--trait-fort);
+  border-radius: var(--r-s);
+  background: var(--creme);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--encre);
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    border-color var(--transition);
+}
+
+.pas:hover:not(:disabled) {
+  border-color: var(--encre);
+}
+
+.pas:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.pas:focus-visible {
+  outline: 2px solid var(--cuivre-fonce);
+  outline-offset: 2px;
+}
+
+/* --- Groupes de choix --- */
+
+.groupe {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.groupe legend {
+  padding: 0;
+  margin-bottom: 0.6rem;
+}
+
+/* Le radio ou la case natifs restent dans le label (clavier, lecteurs d'écran), invisibles. */
+.pastille,
+.carte,
+.segment {
+  position: relative;
+  display: flex;
+}
+
+.pastille input,
+.carte input,
+.segment input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.pastilles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pastille span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0.55rem 1.15rem;
+  border: 1px solid var(--trait-fort);
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  background: var(--creme);
+  transition:
+    background var(--transition),
+    color var(--transition),
+    border-color var(--transition);
+}
+
+.pastille:hover span {
+  border-color: var(--encre);
+}
+
+.pastille input:checked + span {
+  background: var(--olive);
+  border-color: var(--olive);
+  color: var(--sur-olive);
+}
+
+.coche {
+  display: none;
+}
+
+.case input:checked + span .coche {
+  display: block;
+}
+
+/* Cartes : choix illustrés d'une phrase (vin d'honneur, type de service). */
+.cartes {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .cartes {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  }
+}
+
+.carte span {
+  display: grid;
+  gap: 0.3rem;
+  width: 100%;
+  padding: 1rem 1.1rem 1.05rem;
+  border: 1px solid var(--trait-fort);
+  border-radius: var(--r-s);
+  background: var(--creme);
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.carte strong {
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-weight: 420;
+  line-height: 1.2;
+}
+
+.carte small {
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--encre-douce);
+}
+
+.carte:hover span {
+  border-color: var(--encre);
+}
+
+.carte input:checked + span {
+  border-color: var(--olive);
+  background: var(--lin);
+  box-shadow:
+    inset 0 0 0 1px var(--olive),
+    var(--ombre-s);
+}
+
+.carte input:checked + span strong::after {
+  content: "";
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-left: 0.55rem;
+  vertical-align: middle;
+  background: var(--cuivre);
+  transform: rotate(45deg);
+}
+
+.pastille input:focus-visible + span,
+.carte input:focus-visible + span,
+.segment input:focus-visible + span {
+  outline: 2px solid var(--cuivre-fonce);
+  outline-offset: 3px;
+}
+
+[data-invalide] .pastille span,
+[data-invalide] .carte span {
+  border-color: #9a3324;
+}
+
+/* --- Le repas : une ligne par moment, choix segmentés --- */
+
+.cours {
+  display: grid;
+  border-top: 1px solid var(--trait);
+}
+
+.coursLigne {
+  padding-block: 1.1rem;
+  border-bottom: 1px solid var(--trait);
+}
+
+.coursTitre {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-weight: 420;
+  color: var(--encre);
+}
+
+.coursPastille {
+  display: inline-grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1px solid var(--trait-fort);
+  border-radius: 50%;
+  color: var(--sur-olive);
+  transition:
+    background var(--transition),
+    border-color var(--transition);
+}
+
+[data-rempli] .coursPastille {
+  background: var(--olive);
+  border-color: var(--olive);
+}
+
+.segments {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 3px;
+  border: 1px solid var(--trait-fort);
+  border-radius: var(--r-s);
+  background: var(--creme);
+}
+
+.segment span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 42px;
+  padding: 0.4rem 0.5rem;
+  border-radius: calc(var(--r-s) - 3px);
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--encre-douce);
+  transition:
+    background var(--transition),
+    color var(--transition);
+}
+
+.segment:hover span {
+  color: var(--encre);
+}
+
+.segment input:checked + span {
+  background: var(--olive);
+  color: var(--sur-olive);
+}
+
+.coursDetail {
+  min-height: 0;
+}
+
+textarea.coursDetail {
+  min-height: 4.5rem;
+}
+
+/* --- Navigation --- */
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--trait);
+}
+
+.navigation button[disabled] {
+  opacity: 0.75;
+  cursor: progress;
+}
+
+.rgpd {
+  margin: -0.75rem 0 0;
+  font-size: 0.84rem;
+  color: var(--encre-tres-douce);
+}
+
+.piege {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* --- Récapitulatif --- */
+
+.recap {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.recapSection {
+  padding: 1.1rem 1.25rem 0.5rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--r-s);
+  background: var(--creme);
+}
+
+.recapTete {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.recapTitre {
+  margin: 0;
+  font-family: var(--texte);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: var(--interlettrage-surtitre);
+  text-transform: uppercase;
+  color: var(--cuivre-texte);
+}
+
+.recapTete .lienBouton {
+  font-size: 0.88rem;
+}
+
+.recapListe {
+  margin: 0;
+}
+
+.recapListe > div {
+  display: grid;
+  gap: 0.1rem;
+  padding-block: 0.6rem;
+  border-top: 1px solid var(--trait);
+}
+
+@media (min-width: 640px) {
+  .recapListe > div {
+    grid-template-columns: 13rem 1fr;
+    gap: 1rem;
+  }
+}
+
+.recapListe dt {
+  font-size: 0.88rem;
+  color: var(--encre-tres-douce);
+}
+
+.recapListe dd {
+  margin: 0;
+  font-weight: 500;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* --- Confirmation et impression --- */
+
+.fin {
+  display: grid;
+  gap: 2rem;
+  max-width: 820px;
+}
+
+.confirmation {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1.5rem, 3.5vw, 2.25rem);
+  border: 1px solid var(--cuivre);
+  border-radius: var(--r-s);
+  background: var(--creme);
+}
+
+.confirmation:focus {
+  outline: none;
+}
+
+.confirmation p {
+  margin: 0;
+  color: var(--encre-douce);
+}
+
+.confirmationTitre {
+  font-family: var(--display);
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+
+.confirmation .confirmationTitre {
+  color: var(--encre);
+}
+
+.impressionTitre {
+  display: none;
+}
+
+@media print {
+  :global(body) * {
+    visibility: hidden;
+  }
+  .imprimable,
+  .imprimable * {
+    visibility: visible;
+  }
+  .imprimable {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+  }
+  .impressionTitre {
+    display: block;
+    margin: 0 0 1rem;
+    font-family: var(--display);
+    font-size: 1.4rem;
+  }
+  .recapSection {
+    break-inside: avoid;
+    background: none;
+  }
+}

@@ -201,6 +201,8 @@ function migrer(db: DB): void {
   ensureColumn(db, "media", "poids", "INTEGER NOT NULL DEFAULT 0");
   ensureColumn(db, "media", "source", "TEXT NULL");
   db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_media_source ON media(source) WHERE source IS NOT NULL");
+  // messages : formulaire détaillé en JSON (fiche mariage, lib/fiche-mariage.ts).
+  ensureColumn(db, "messages", "details", "TEXT NULL");
 }
 
 function ouvrir(chemin: string): DB {

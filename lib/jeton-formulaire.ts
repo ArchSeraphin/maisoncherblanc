@@ -19,6 +19,8 @@ import { secretSession } from "./env";
 
 /** Usage du jeton du formulaire de contact. */
 export const USAGE_CONTACT = "contact";
+/** Usage du jeton de la fiche mariage (lib/actions/fiche-mariage.ts). */
+export const USAGE_FICHE_MARIAGE = "fiche-mariage";
 
 export const AGE_MIN_JETON_MS = 3000;
 export const AGE_MAX_JETON_MS = 24 * 60 * 60 * 1000;

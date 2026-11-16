@@ -17,7 +17,7 @@
     "import-medias": "tsx scripts/import-medias.ts",
     "purge-messages": "tsx scripts/purge-messages.ts",
     "logos": "tsx scripts/generer-logos.ts",
-    "verifier-lib": "tsx scripts/verifier-lib.ts"
+    "verifier-lib": "tsx --conditions=react-server scripts/verifier-lib.ts"
   },
   "dependencies": {
     "better-sqlite3": "13.0.3",

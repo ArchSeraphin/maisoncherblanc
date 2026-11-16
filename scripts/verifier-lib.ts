@@ -41,6 +41,8 @@ async function principal() {
   const { groupesComposition } = await import("../lib/composition");
   const { grouperHoraires } = await import("../lib/horaires");
   const J = await import("../lib/jeton-formulaire");
+  const F = await import("../lib/fiche-mariage");
+  const { construireEmailMessage } = await import("../lib/mail");
   const sharp = (await import("sharp")).default;
 
   // Prix, dates, composition, markdown
@@ -135,6 +137,43 @@ async function principal() {
   ok(Msg.validerMessage({ prenom: "A", nom: "B", email: "a@b.fr?bcc=x", message: "Bonjour" }).ok === false, "e-mail piégé refusé");
   ok(Msg.compterMessagesNonLus() === 1 && Msg.listerMessages({ email: "b.fr" }).length === 1, "recherche par e-mail");
   ok(Msg.supprimerMessagesParEmail("A@B.FR").length === 1, "droit à l'effacement");
+
+  // Fiche mariage
+  const brute = {
+    ...F.ficheVide(),
+    prenom: " Camille ",
+    nom: "Martin",
+    email: "Camille@Exemple.fr",
+    telephone: "06 12 34 56 78",
+    date: "2027-06-12",
+    lieu: "Domaine des Tilleuls, Riorges",
+    convives: "120",
+    vin_honneur: "oui",
+    vh_convives: "150",
+    cours: { ...F.ficheVide().cours, plat: { choix: "envies", detail: "Filet de bœuf" }, fromage: { choix: "sans", detail: "" } },
+    plat_type: "viande",
+    materiel: ["verres_vin", "inconnu", "nappes"],
+    service_type: "assiette",
+    cafe: true,
+  };
+  const vf = F.validerFiche(brute, "2026-11-16");
+  ok(vf.ok && vf.fiche.prenom === "Camille" && vf.fiche.email === "camille@exemple.fr", "fiche mariage valide et nettoyée");
+  ok(vf.ok && vf.fiche.materiel.join() === "nappes,verres_vin", "fiche : matériel filtré et ordonné");
+  const vfKo = F.validerFiche({ ...brute, date: "2026-01-01", convives: "beaucoup", vin_honneur: "peut-etre", remarques: "voir www.spam.fr" }, "2026-11-16");
+  ok(!vfKo.ok && !!vfKo.erreurs.date && !!vfKo.erreurs.convives && !!vfKo.erreurs.vin_honneur && !!vfKo.erreurs.remarques, "fiche : date passée, convives, choix et liens refusés");
+  ok(!vfKo.ok && F.premiereEtapeEnErreur(vfKo.erreurs) === 1, "fiche : retour à la première étape en erreur");
+  ok(F.validerFiche({}, "2026-11-16").ok === false, "fiche vide refusée");
+  if (vf.ok) {
+    const txt = F.texteFiche(vf.fiche);
+    ok(txt.includes("Plat : Viande. Filet de bœuf") && txt.includes("Fromage : Pas de fromage") && txt.includes("samedi 12 juin 2027"), "fiche : récapitulatif texte");
+    const mf = Msg.creerMessage({ type: "devis-traiteur", prenom: "Camille", nom: "Martin", email: vf.fiche.email, telephone: vf.fiche.telephone, date_evenement: vf.fiche.date, nb_personnes: 120, message: txt, details: F.detailsFiche(vf.fiche) });
+    ok(Msg.libelleMessage(mf) === "Fiche mariage" && F.lireDetailsFiche(mf.details)?.lieu === "Domaine des Tilleuls, Riorges", "fiche enregistrée et relue");
+    ok(Msg.extraitMessage(mf).startsWith("Mariage le samedi 12 juin 2027, 120 convives"), "fiche : extrait de liste");
+    const mail = construireEmailMessage(mf);
+    ok(mail.sujet.includes("Fiche mariage") && mail.html.includes("Service à l’assiette") && !mail.html.includes("<script"), "fiche : e-mail de notification");
+    ok(Msg.libelleMessage({ type: "autre", details: null }) === "Autre question" && F.lireDetailsFiche("{pas du json") === null, "message ordinaire inchangé");
+    Msg.supprimerMessagesParEmail(vf.fiche.email);
+  }
 
   // Admins
   const ad = await Ad.creerAdmin({ email: "test@exemple.fr", motDePasse: "motdepasse-solide" });

@@ -2498,3 +2498,11 @@ input[type="datetime-local"].bo-saisie {
     margin-block: -0.25rem;
   }
 }
+
+/* Fiche mariage : impression du récapitulatif (page d'un message). */
+@media print {
+  .bo-fiche-section {
+    break-inside: avoid;
+    box-shadow: none;
+  }
+}
