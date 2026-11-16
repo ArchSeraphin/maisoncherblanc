@@ -23,8 +23,29 @@ export type ChoixPlat = "" | "viande" | "poisson" | "les-deux";
 export const COURS = ["entree", "plat", "legumes", "feculents", "fromage", "dessert", "piece_montee"] as const;
 export type CleCours = (typeof COURS)[number];
 
-export const MATERIEL = ["nappes", "serviettes", "verres_vin", "verres_champagne"] as const;
+// Clés stables (stockées dans les fiches déjà envoyées) : on ajoute, on ne renomme pas.
+export const MATERIEL = [
+  "nappes",
+  "serviettes",
+  "verres_vin",
+  "verres_eau",
+  "verres_champagne",
+  "assiettes_repas",
+  "assiettes_gateau",
+  "fourchettes",
+  "cuilleres",
+  "couteaux",
+  "tasses_cafe",
+] as const;
 export type CleMateriel = (typeof MATERIEL)[number];
+
+/** Regroupement à l'affichage du formulaire (même ordre que MATERIEL). */
+export const GROUPES_MATERIEL: { titre: string; cles: CleMateriel[] }[] = [
+  { titre: "Linge", cles: ["nappes", "serviettes"] },
+  { titre: "Verres", cles: ["verres_vin", "verres_eau", "verres_champagne"] },
+  { titre: "Assiettes", cles: ["assiettes_repas", "assiettes_gateau"] },
+  { titre: "Couverts et café", cles: ["fourchettes", "cuilleres", "couteaux", "tasses_cafe"] },
+];
 
 export type Fiche = {
   prenom: string;
@@ -108,7 +129,14 @@ export const LIBELLES_MATERIEL: Record<CleMateriel, string> = {
   nappes: "Nappes",
   serviettes: "Serviettes",
   verres_vin: "Verres à vin",
+  verres_eau: "Verres à eau",
   verres_champagne: "Verres à champagne",
+  assiettes_repas: "Assiettes repas",
+  assiettes_gateau: "Assiettes à gâteau",
+  fourchettes: "Fourchettes",
+  cuilleres: "Cuillères",
+  couteaux: "Couteaux",
+  tasses_cafe: "Tasses et cuillères à café",
 };
 
 /** Étapes du formulaire, dans l'ordre. La dernière est le récapitulatif. */

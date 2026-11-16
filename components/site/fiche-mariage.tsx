@@ -12,6 +12,7 @@ import {
   ficheVide,
   LIBELLES_CHOIX_COURS,
   LIBELLES_COURS,
+  GROUPES_MATERIEL,
   LIBELLES_MATERIEL,
   LIBELLES_PLAT,
   LIBELLES_SERVICE,
@@ -371,17 +372,22 @@ export function FicheMariage({
             />
             <fieldset className={styles.groupe} aria-describedby="fiche-materiel-aide">
               <legend className="etiquette">Vaisselle et linge</legend>
-              <div className={styles.pastilles}>
-                {MATERIEL.map((m) => (
-                  <Case
-                    key={m}
-                    nom="materiel"
-                    libelle={LIBELLES_MATERIEL[m]}
-                    coche={fiche.materiel.includes(m)}
-                    onBascule={(v) => maj("materiel", v ? MATERIEL.filter((x) => x === m || fiche.materiel.includes(x)) : fiche.materiel.filter((x) => x !== m))}
-                  />
-                ))}
-              </div>
+              {GROUPES_MATERIEL.map((g) => (
+                <div key={g.titre} className={styles.sousGroupe}>
+                  <p className={styles.sousTitre}>{g.titre}</p>
+                  <div className={styles.pastilles}>
+                    {g.cles.map((m) => (
+                      <Case
+                        key={m}
+                        nom="materiel"
+                        libelle={LIBELLES_MATERIEL[m]}
+                        coche={fiche.materiel.includes(m)}
+                        onBascule={(v) => maj("materiel", v ? MATERIEL.filter((x) => x === m || fiche.materiel.includes(x)) : fiche.materiel.filter((x) => x !== m))}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
               <p id="fiche-materiel-aide" className={styles.aide}>
                 Cochez ce que vous souhaitez que nous prévoyions.
               </p>
